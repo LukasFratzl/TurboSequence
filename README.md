@@ -67,17 +67,17 @@ Summary
 3. Open the Feature Demo Map and press Play
 4. Navigate the the Wiki to get started with the API
 
-### Clone the Repo:
+#### Download a Release:
 
 Navigate to the [Releases](https://github.com/LukasFratzl/Turbo-Sequence/releases) and download the source of your Unreal Engine Version
 
-### Install Turbo Sequence:
+#### Install Turbo Sequence:
 
 - Extract the TS Release on your Computer
 - Copy the extracted Root folder in your Plugin folder of your UE Project
 - Compile the your Project and open it in Unreal Engine
 
-### Demo and and Docs
+#### Demo and and Docs
 
 Inside Unreal Engine, navigate to `..\Plugins\TurboSequence\Content\Demo` and Play through the demos, there is no additional setup required.
 
