@@ -5,10 +5,8 @@
 [![stars - Turbo-Sequence](https://img.shields.io/github/stars/LukasFratzl/Turbo-Sequence?style=social)](https://github.com/LukasFratzl/Turbo-Sequence)
 [![forks - Turbo-Sequence](https://img.shields.io/github/forks/LukasFratzl/Turbo-Sequence?style=social)](https://github.com/LukasFratzl/Turbo-Sequence)
 
-Turbo Sequence is a modern way to render Skeletal Meshes.
-
+Turbo Sequence is build to support a modern way to render Skeletal Meshes.
 It's using GPU Instancing with Niagara to bypass draw calls, which are mostly the bottleneck of traditional rendering systems.
-
 Turbo Sequence is using bones to animate the meshes, which allow IK and Sockets and Layer Mask Blending per Bone.
 
 ![A Crowd](Docs/TurbosequenceOverview.gif)
@@ -16,11 +14,8 @@ Turbo Sequence is using bones to animate the meshes, which allow IK and Sockets 
 ## What is Turbo Sequence
 
 Turbo Sequence is a Plugin for Unreal Engine 5 which is Open Source with the MIT License.
-
 The advantage point from using VATs is the fact that Turbo Sequence is using bone joint bending instead of pre-computed animations, which allows runtime bone joint bending.
-
 Turbo Sequence is trying to bypass draw calls to one draw call per archetype, which has an advantage point compared to traditional Skeletal Meshes.
-
 TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, Turbo Sequence is build for combining Animation Quality with Modern Rendering which mean it is just as fast as the Quality of Bone joint bending allows it.
 
 ## Features
