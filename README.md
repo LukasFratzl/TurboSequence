@@ -9,7 +9,7 @@ Turbo Sequence is build to support a modern way to render Skeletal Meshes.
 It's using GPU Instancing with Niagara to manage Draw-Calls efficiently, which are mostly the bottleneck of traditional rendering systems.
 Turbo Sequence is using bones to animate the meshes, which allow IK and Sockets and Layer Mask Blending per Bone.
 
-![A Crowd](TS_WikiResources/TurbosequenceOverview.gif)
+![A Crowd](https://github.com/LukasFratzl/Turbo-Sequence/blob/main/TS_WikiResources/TurbosequenceOverview.gif)
 
 ## What is Turbo Sequence
 
