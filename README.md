@@ -5,17 +5,17 @@
 [![stars - Turbo-Sequence](https://img.shields.io/github/stars/LukasFratzl/Turbo-Sequence?style=social)](https://github.com/LukasFratzl/Turbo-Sequence)
 [![forks - Turbo-Sequence](https://img.shields.io/github/forks/LukasFratzl/Turbo-Sequence?style=social)](https://github.com/LukasFratzl/Turbo-Sequence)
 
-Turbo Sequence is build to support a modern way to render Skeletal Meshes.
-It's using GPU Instancing with Niagara to manage Draw-Calls efficiently, which are mostly the bottleneck of traditional rendering systems.
-Turbo Sequence is using bones to animate the meshes, which allow IK and Sockets and Layer Mask Blending per Bone.
+Turbo Sequence is built to support a modern way to render Skeletal Meshes.
+It's using GPU Instancing with Niagara to manage draw calls efficiently, which is mostly the bottleneck of traditional rendering systems.
+Turbo Sequence is using bones to animate the meshes, which allow IK and layer mask blending per Bone.
 
 ![A Crowd](https://github.com/LukasFratzl/Turbo-Sequence/blob/main/TS_WikiResources/TurbosequenceOverview.gif)
 
 ## What is Turbo Sequence
 
-Turbo Sequence is a Plugin for Unreal Engine 5 which is Open Source with the MIT Licence.
-The advantage point from using VATs is the fact that Turbo Sequence is using bone joint bending instead of pre-computed animations, which allows runtime bone joint bending like IK or Sockets.
-Turbo Sequence is trying to use Draw-Calls per archetype efficiently and not per instance, which has an advantage point compared to traditional Skeletal Meshes.
+Turbo Sequence is a Plugin for Unreal Engine 5 which is Open Source with an MIT License.
+The advantage of using VATs is that Turbo Sequence uses bone joint bending instead of pre-computed animations, which allows runtime bone joint bending like IK or Sockets.
+Turbo Sequence is trying to use Draw-Calls per archetype efficiently and not per instance, which has an advantage compared to traditional Skeletal Meshes.
 
 _*Traditional Rendering:*_
 ```
@@ -42,7 +42,7 @@ Base mesh data -> Draw call
                   Rendered instances
 ```
 
-TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, Turbo Sequence is build for combining Animation Quality with Modern Rendering which mean it is just as fast as the Quality of Bone joint bending allows it.
+TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, Turbo Sequence is built to combine Animation Quality with Modern Rendering which means it is just as fast as the Quality of Bone joint bending allows it.
 
 ## Features
 
@@ -70,22 +70,22 @@ TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, T
 * Level Of Details
 * Multi-Mesh-Character Animations
 * Blueprint Support
-* Hybrid Animation Mode between UE System and TS System
+* Hybrid Animation Mode between the UE System and the TS System
 * Add Instances
 * Remove instances
 * Per Instance Custom Data
 
 ## Limits
- * Blueprint only projects are not supported.
+ * Blueprint-only projects are not supported.
  * A Blueprint API Exists, but I highly recommend using the C++ API because it's so much faster.
- * Only Windows and Linux is supported, Not IOS and Android and Mac.
+ * Only Windows and Linux are supported, Not IOS and Android or Mac.
 
 ## Quick Start Guide
 
 1. Download Turbo Sequence
 2. Install Turbo Sequence in your UE project in the Plugin Folder
 3. Open the Feature Demo Map and press Play
-4. Navigate the Wiki to get started with the API
+4. Navigate to the Wiki to get started with the API
 
 #### Download Turbo Sequence:
 
@@ -94,12 +94,12 @@ Navigate to the [Releases](https://github.com/LukasFratzl/Turbo-Sequence/release
 #### Install Turbo Sequence:
 
 - Extract the TS Release on your Computer
-- Copy the extracted Root folder to your Plugin folder of your UE Project
+- Copy the extracted Root folder to the Plugin folder of your UE project.
 - Compile the Project and open it in Unreal Engine
 
 #### Demo
 
-Inside Unreal Engine, navigate to `..\Plugins\TurboSequence\Content\Demo` and play through the demos, there is no additional setup required.
+Inside Unreal Engine, navigate to `..\Plugins\TurboSequence\Content\Demo` and play through the demos; there is no additional setup required.
 
 ## Docs
 
@@ -112,13 +112,13 @@ The official documentation and API can be found here:
 
 ## Support and Responsibility
 
-Turbo Sequence is a Hobby Project, nothing commercial behind the Repo, the Contributors are not responsible for solving bugs to users of Turbo Sequence, features may or may not come, if you really need a specific feature please fork the Repo and build your own system on top of it and optional create a pull request if you really think it should be part of the original Turbo Sequence Repo.
+Turbo Sequence is a Hobby Project, nothing commercial behind the Repo, the Contributors are not responsible for solving bugs for users of Turbo Sequence, features may or may not come; if you really need a specific feature, please fork the Repo and build your own system on top of it; and optional create a pull request if you really think it should be part of the original Turbo Sequence Repo.
 
-If you encounter a bug, create an issue and when I have the time I try to respond to it.
+If you encounter a bug, create an issue and when I have the time, I try to respond to it.
 
 ## Contribution
 
-Contributions are welcome, if you want to contribute; Fork the Repo, create an Exp Branch, create a Pull Request from the Exp Branch.
-Pull requests need to be reviewed to keep the quality standards of this Repo in therms of runtime performance and the UE Coding Standards.
+Contributions are welcome; if you want to contribute, Fork the Repo, create an Exp Branch, and create a Pull Request from the Exp Branch.
+Pull requests need to be reviewed to maintain the quality standards of this Repo in terms of runtime performance and the UE Coding Standards.
 
 [![forks - Turbo-Sequence](https://img.shields.io/github/forks/LukasFratzl/Turbo-Sequence?style=social)](https://github.com/LukasFratzl/Turbo-Sequence)
