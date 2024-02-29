@@ -495,7 +495,7 @@ public:
 					//Reference_RenderThread.SkinWeightTextureOffsetPerLevelOfDetail.Add(FUintVector2(GPUSkinWeightOffset, GET0_NUMBER));
 				}
 			}
-			if ((!bIsMeshVisible || !bIsIncluded) && FromAsset->MeshData.Num())
+			if ((!bIsMeshVisible || !bIsIncluded) && FromAsset->MeshData.IsValidIndex(LodElement.CollectionIndex))
 			{
 				SkinWightOffsetIndex += FromAsset->MeshData[LodElement.CollectionIndex].NumVertices *
 					FTurboSequence_Helper_Lf::NumSkinWeightPixels;
