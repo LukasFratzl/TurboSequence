@@ -1,0 +1,531 @@
+// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "EditorUtilityWidget.h"
+
+#include "TurboSequence_MeshAsset_Lf.h"
+
+#include "LODUtilities.h"
+#include "MeshDescription.h"
+#include "PackageTools.h"
+#include "RawMesh.h"
+#include "StaticMeshOperations.h"
+#include "TurboSequence_Helper_Lf.h"
+#include "Components/Button.h"
+#include "Components/CheckBox.h"
+#include "Components/Image.h"
+#include "Components/PanelWidget.h"
+#include "Components/ScrollBox.h"
+#include "Components/SinglePropertyView.h"
+#include "Components/TextBlock.h"
+#include "Components/Viewport.h"
+
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Blueprint/WidgetTree.h"
+#include "UObject/SavePackage.h"
+
+#include "Components/PoseableMeshComponent.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "Rendering/SkeletalMeshModel.h"
+#include "Widgets/Notifications/SNotificationList.h"
+
+#include "BoneContainer.h"
+#include "SkeletalMeshTypes.h"
+#include "TurboSequence_Utility_Lf.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/SkinnedAssetAsyncCompileUtils.h"
+#include "Engine/SkinnedAssetCommon.h"
+#include "Engine/TextureRenderTarget2DArray.h"
+#include "Rendering/SkeletalMeshRenderData.h"
+
+#include "TurboSequence_ControlWidget_Lf.generated.h"
+
+
+UENUM(BlueprintType)
+enum class EShow_ControlPanel_Section_Lf : uint8
+{
+	None,
+	Welcome,
+	Reference,
+	Generate,
+	Tweaks
+};
+
+UENUM(BlueprintType)
+enum class EShow_ControlPanel_Buttons_Lf : uint8
+{
+	None,
+	Welcome,
+	Reference,
+	Generate,
+	Tweaks,
+	NextSection,
+	PreviousSection,
+	Docs,
+	Discord,
+	CreateLod,
+	TweakGlobalTexture
+};
+
+UENUM(BlueprintType)
+enum class EShow_ControlPanel_Objects_Lf : uint8
+{
+	None,
+	Asset_Object,
+	Asset_SkeletalMesh,
+	Asset_SkeletalMesh_Reference
+};
+
+UENUM(BlueprintType)
+enum class EShow_ControlPanel_Properties_Lf : uint8
+{
+	None,
+	Main_Asset,
+	Skeletal_Mesh,
+	Skeletal_Mesh_Reference,
+	MaxInstancedLevelOfDetails,
+	TweakGlobalTextureSection
+};
+
+/**
+ * 
+ */
+UCLASS(BlueprintType)
+class TURBOSEQUENCE_EDITOR_LF_API UTurboSequence_ControlWidget_Lf : public UEditorUtilityWidget
+{
+	GENERATED_BODY()
+
+	/*	=======================================================================================================
+												STATIC VALUES
+	===========================================================================================================	*/
+
+	inline static const FLinearColor NonSelectionColor = FLinearColor::Yellow;
+	inline static const FLinearColor SelectionColor = FLinearColor::Blue;
+
+	inline static const FName ColorName = FName("Color");
+	inline static const FName AlphaName = FName("Alpha");
+
+	inline static const FName DebugColorName = FName("DebugColor");
+
+	inline static bool bNeedSaveMainAsset = false;
+	inline static float SaveTimerMainAsset = GET1_NUMBER;
+
+	/*	=======================================================================================================
+												UI FUNCTIONALITY
+	===========================================================================================================	*/
+public:
+	UTurboSequence_ControlWidget_Lf();
+	virtual ~UTurboSequence_ControlWidget_Lf() override;
+
+	TMap<EShow_ControlPanel_Objects_Lf, TObjectPtr<UObject>> EditorObjects;
+	//TMap<EShow_ControlPanel_Parents_Lf, TObjectPtr<UPanelWidget>> Parents;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
+	//TSubclassOf<UUserWidget> BoneTreeItem;
+
+	//UFUNCTION(BlueprintCallable)
+	//void CacheObjects(UStaticMesh* ViewportSkybox, UStaticMesh* ViewportGround, UStaticMesh* ViewportCharacterBoneSelectMesh, UMaterial* CharacterAdditiveMaterial, UMaterial* SelectionMaterial);
+
+	//UFUNCTION(BlueprintCallable)
+	//void CacheParents(UPanelWidget* AutoRigBoneTreeParent, UPanelWidget* AutoRigLodListParent);
+
+	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object, const EShow_ControlPanel_Objects_Lf& Category, const bool& SuppressInfo = false)
+	{
+		if (!Object && !SuppressInfo)
+		{
+			UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Missing Object in the Editor Control Panel UI, this should not happen ...., Category -> %s"), *UEnum::GetValueAsString(Category));
+		}
+		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Object, Category);
+	}
+
+	// FORCEINLINE_DEBUGGABLE void AddParent(const TObjectPtr<UPanelWidget> Parent, const EShow_ControlPanel_Parents_Lf& Category)
+	// {
+	// 	if (Parent && !Parents.Contains(Category))
+	// 	{
+	// 		Parents.Add(Category, Parent);
+	// 	}
+	// }
+
+	UFUNCTION(BlueprintCallable)
+	void OnTick(const float& DeltaTime);
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UTurboSequence_MeshAsset_Lf> Main_Asset_To_Edit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference_NoEdit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = "1", ClampMax = "32"))
+	int32 MaxNumberOfLODs = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference;
+
+	UPROPERTY(EditAnywhere, Category="Lod")
+	TArray<FMeshItem_Lf> LevelOfDetails;
+
+	UFUNCTION(BlueprintCallable)
+	void OnAssignMainAsset();
+
+	UFUNCTION(BlueprintCallable)
+	void OnAssignLodZeroMeshAsset();
+
+	static FORCEINLINE_DEBUGGABLE void PrintMainAssetMissingWarning(const FName& ItemName, const FName& ItemType)
+	{
+		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Trying to set %s without having the Main Asset Assigned ( This one in the Reference Section ), the progress won't save, please assign the Main Asset and set the %s again..."), *ItemName.ToString(), *ItemType.ToString());
+	}
+
+	static FORCEINLINE_DEBUGGABLE void SaveAssetByTimer(const float& TimeInSeconds)
+	{
+		bNeedSaveMainAsset = true;
+		SaveTimerMainAsset = TimeInSeconds;
+	}
+
+public:
+	TMap<EShow_ControlPanel_Section_Lf, TObjectPtr<UScrollBox>> Sections;
+	TMap<EShow_ControlPanel_Buttons_Lf, TArray<TObjectPtr<UButton>>> Buttons;
+	TMap<EShow_ControlPanel_Properties_Lf, TArray<TObjectPtr<UPropertyViewBase>>> Properties;
+
+	EShow_ControlPanel_Section_Lf CurrentSectionWhichIsShowing = EShow_ControlPanel_Section_Lf::Reference;
+
+	UFUNCTION(BlueprintCallable)
+	void CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox, UScrollBox* GenerateScrollBox, UScrollBox* TweaksScrollBox);
+
+	UFUNCTION(BlueprintCallable)
+	void CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton, UButton* GenerateButton, UButton* TweaksButton, UButton* DocsButton, UButton* DiscordButton, TArray<UButton*> PreviousSectionButtons, TArray<UButton*> NextSectionButtons, UButton* CreateLodButton, UButton* CreateGlobalTextureButton);
+
+	UFUNCTION(BlueprintCallable)
+	void CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh,
+	                     UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* TweakGlobalTextures);
+
+	UFUNCTION(BlueprintCallable)
+	void CreateProperties();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowSection(EShow_ControlPanel_Section_Lf SectionToShow);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowHomeSection();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowNextSection();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPreviousSection();
+
+	UFUNCTION(BlueprintCallable)
+	void OnGenerateButtonPressed();
+
+	//UFUNCTION(BlueprintCallable)
+	//void OnLodValueChanged(FName PropertyName, EShow_ControlPanel_Viewports_Lf InViewport);
+
+	//UFUNCTION(BlueprintCallable)
+	//void AddBonesToLodSection(EShow_ControlPanel_Viewports_Lf InViewport);
+
+
+	FORCEINLINE_DEBUGGABLE void AddSection(const TObjectPtr<UScrollBox> Section, const EShow_ControlPanel_Section_Lf& Category)
+	{
+		if (Section && !Sections.Contains(Category))
+		{
+			Sections.Add(Category, Section);
+		}
+	}
+
+	FORCEINLINE_DEBUGGABLE void AddButton(const TObjectPtr<UButton> Button, const EShow_ControlPanel_Buttons_Lf& Category)
+	{
+		if (Button)
+		{
+			const bool Contains = Buttons.Contains(Category);
+			if (!Contains)
+			{
+				TArray<TObjectPtr<UButton>> ButtonArray;
+				ButtonArray.Add(Button);
+				Buttons.Add(Category, ButtonArray);
+			}
+
+			if (Contains && !Buttons[Category].Contains(Button))
+			{
+				Buttons[Category].Add(Button);
+			}
+		}
+	}
+
+	FORCEINLINE_DEBUGGABLE void AddPropertyToArray(const TObjectPtr<UPropertyViewBase> Property, const EShow_ControlPanel_Properties_Lf& Category)
+	{
+		if (Property)
+		{
+			const bool Contains = Properties.Contains(Category);
+			if (!Contains)
+			{
+				TArray<TObjectPtr<UPropertyViewBase>> PropertyViewsArray;
+				PropertyViewsArray.Add(Property);
+				Properties.Add(Category, PropertyViewsArray);
+			}
+
+			if (Contains && !Properties[Category].Contains(Property))
+			{
+				Properties[Category].Add(Property);
+			}
+		}
+	}
+
+	FORCEINLINE_DEBUGGABLE void DisableSections()
+	{
+		for (const TTuple<EShow_ControlPanel_Section_Lf, TObjectPtr<UScrollBox>>& Section : Sections)
+		{
+			if (Section.Value)
+			{
+				Section.Value->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	}
+
+	FORCEINLINE_DEBUGGABLE void EnableButtons()
+	{
+		for (const TTuple<EShow_ControlPanel_Buttons_Lf, TArray<TObjectPtr<UButton>>>& ButtonArray : Buttons)
+		{
+			for (const TObjectPtr<UButton> Button : ButtonArray.Value)
+			{
+				if (Button)
+				{
+					Button->SetIsEnabled(true);
+				}
+			}
+		}
+	}
+
+	static FORCEINLINE_DEBUGGABLE EShow_ControlPanel_Buttons_Lf GetCommonButtonEnum(const EShow_ControlPanel_Section_Lf& RequestEnum)
+	{
+		switch (RequestEnum)
+		{
+		case EShow_ControlPanel_Section_Lf::None:
+			// Handle None value (common with Buttons enum)
+			return EShow_ControlPanel_Buttons_Lf::None;
+		case EShow_ControlPanel_Section_Lf::Welcome:
+			// Handle Welcome value (common with Buttons enum)
+			return EShow_ControlPanel_Buttons_Lf::Welcome;
+		case EShow_ControlPanel_Section_Lf::Reference:
+			// Handle Reference value (common with Buttons enum)
+			return EShow_ControlPanel_Buttons_Lf::Reference;
+		case EShow_ControlPanel_Section_Lf::Generate:
+			// Handle Generate value (common with Buttons enum)
+			return EShow_ControlPanel_Buttons_Lf::Generate;
+		case EShow_ControlPanel_Section_Lf::Tweaks:
+			// Handle Tweaks value (common with Buttons enum)
+			return EShow_ControlPanel_Buttons_Lf::Tweaks;
+		}
+
+		return EShow_ControlPanel_Buttons_Lf::None;
+	}
+
+	/*	==============================================================================================================
+												TWEAKING BEHAVIOUR
+	==============================================================================================================	*/
+
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Instances ( Including Customization Parts )", ClampMin = "100", ClampMax = "200000"), Category="Texture Tweaking")
+	uint32 MaxNumMeshes = 20000;
+
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Bones In all Skeletons", ClampMin = "5", ClampMax = "200"), Category="Texture Tweaking")
+	uint32 MaxNumBones = 75;
+
+	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Unique Meshes", ClampMin = "5", ClampMax = "900"), Category="Texture Tweaking")
+	//uint32 MaxNumUniqueMeshes = 30;
+
+	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Average Vertex Count Of the Lod 0 Unique Meshes", ClampMin = "5000", ClampMax = "200000"), Category="Texture Tweaking")
+	//uint32 AverageVertexCount = 40000;
+
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Use high precision 32 bit Textures for Animations"), Category="Texture Tweaking")
+	bool bUseHighPrecisionAnimationMode = true;
+
+	UPROPERTY(VisibleAnywhere, Config, meta = (DisplayName = "Allocated GPU Memory in MB"), Category="Texture Tweaking")
+	uint32 AverageAllocatedMemory = 0;
+
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Manually Adjust the Textures"), Category="Texture Tweaking")
+	bool bManuallyAdjustTextureSize = false;
+
+
+	UFUNCTION(BlueprintCallable)
+	void OnTweakingGlobalTextures();
+
+
+	/*	=======================================================================================================
+												GENERATOR FUNCTIONALITY
+	===========================================================================================================	*/
+
+	// TODO: move in helpers
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> DuplicateSkeletalMesh(const TObjectPtr<USkeletalMesh> FromMesh, const FName& AssetName, const bool& bRemoveLODs)
+	{
+		const TObjectPtr<USkeletalMesh> DuplicatedMesh = DuplicateObject(FromMesh, FromMesh->GetOuter(), AssetName);
+
+		if (bRemoveLODs)
+		{
+			GenerateSkeletalMeshLevelOfDetails(DuplicatedMesh, GET1_NUMBER);
+		}
+
+		return DuplicatedMesh;
+	}
+
+	// TODO: move in helpers
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> GenerateSkeletalMeshLevelOfDetails(const TObjectPtr<USkeletalMesh> FromMesh, const int32& NewLODCount)
+	{
+		UE_LOG(LogTurboSequence_Lf, Display, TEXT("Reducing Mesh for Platform -> %s"), *GetTargetPlatformManagerRef().GetRunningTargetPlatform()->DisplayName().ToString());
+
+		FLODUtilities::RegenerateLOD(FromMesh, GetTargetPlatformManagerRef().GetRunningTargetPlatform(), NewLODCount, true, false);
+
+		return FromMesh;
+	}
+
+
+	// TODO: move in helpers
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName)
+	{
+		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
+		{
+			// Then find/create it.
+			UPackage* Package = CreatePackage(*PackageName);
+			check(Package);
+
+			// Create StaticMesh object
+			TObjectPtr<UStaticMesh> StaticMesh = NewObject<UStaticMesh>(Package, *InAssetName, RF_Public | RF_Standalone);
+			StaticMesh->InitResources();
+
+			StaticMesh->SetLightingGuid();
+
+			//constexpr int32 MaxNumLODs = 1; //SkeletalMesh->GetLODNum(); // Since we only have 1 LOD per mesh
+			//TArray<FRawMesh> RawMeshes;
+			uint32 MaxNumTextureCoordinate = GET0_NUMBER;
+			const FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetResourceForRendering();
+
+
+			const FSkeletalMeshLODModel& LodModel = SkeletalMesh->GetImportedModel()->LODModels[LodIndex];
+			const uint32& SkinnedMeshVertices = LodModel.NumVertices;
+			//UE_LOG(LogTemp, Warning, TEXT("%d"), LodModel.NumVertices);
+			// 	const FSkeletalMeshLODRenderData& LODRenderData = RenderData->LODRenderData[i];
+			FMeshDescription MeshDescription;
+			LodModel.GetMeshDescription(MeshDescription, SkeletalMesh);
+
+			//UE_LOG(LogTemp, Warning, TEXT("%d"), MeshDescription.Vertices().Num());
+
+			//FStaticMeshOperations::ConvertToRawMesh(*MeshDescription, RawMesh, TMap<FName, int32>());
+			FRawMesh RawMesh;
+			FStaticMeshOperations::ConvertToRawMesh(MeshDescription, RawMesh, TMap<FName, int32>());
+
+			//UE_LOG(LogTemp, Warning, TEXT("%d"), RawMesh.VertexPositions.Num());
+
+			const FSkeletalMeshLODRenderData& LodResource = RenderData->LODRenderData[LodIndex];
+			uint32 MaxNumTextCoord = LodResource.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
+
+			MaxNumTextureCoordinate = FMath::Max(MaxNumTextCoord + GET1_NUMBER, MaxNumTextureCoordinate);
+
+			const int32 MaxNumIndices = RawMesh.WedgeIndices.Num();
+			RawMesh.WedgeTexCoords[MaxNumTextCoord].AddDefaulted(MaxNumIndices);
+			// for (int32 VertexIndex = GET0_NUMBER; VertexIndex < MaxNumVertices; ++VertexIndex)
+			// {
+			// 	//RawMesh.WedgeColors[VertexIndex] = FTurboSequence_Helper_Lf::DecodeUInt32ToColor(VertexIndex);//FVector2f(VertexIndex, GET0_NUMBER);
+			// 	RawMesh.WedgeTexCoords[MaxNumTextCoord][VertexIndex] = FVector2f(RawMesh.WedgeIndices[VertexIndex], GET0_NUMBER);
+			// }
+
+			// Convert sections to polygon groups, each with their own material.
+			for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); ++SectionIndex)
+			{
+				for (uint32 TriangleID = GET0_NUMBER; TriangleID < static_cast<uint32>(LodModel.Sections[SectionIndex].NumTriangles); ++TriangleID)
+				{
+					const uint32 VertexIndexBase = TriangleID * GET3_NUMBER + LodModel.Sections[SectionIndex].BaseIndex;
+
+					for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
+					{
+						const uint32 TriangleIndex = VertexIndexBase + Corner;
+						const uint32 SourceVertexIndex = RawMesh.WedgeIndices[TriangleIndex];
+
+						const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
+
+						RawMesh.WedgeTexCoords[MaxNumTextCoord][TriangleIndex] = FVector2f(BitValues.X, BitValues.Y);
+					}
+				}
+			}
+
+			//RawMeshes.Add(RawMesh);
+
+
+			// Determine which texture coordinate map should be used for storing/generating the lightmap UVs
+			const uint32 LightMapIndex = FMath::Min(MaxNumTextureCoordinate + GET1_NUMBER, static_cast<uint32>(MAX_MESH_TEXTURE_COORDS) - GET1_NUMBER);
+
+			// Add source to new StaticMesh
+			if (RawMesh.IsValidOrFixable())
+			{
+				FStaticMeshSourceModel& SrcModel = StaticMesh->AddSourceModel();
+				SrcModel.BuildSettings.bRecomputeNormals = false;
+				SrcModel.BuildSettings.bRecomputeTangents = false;
+				SrcModel.BuildSettings.bRemoveDegenerates = false;
+				SrcModel.BuildSettings.bUseHighPrecisionTangentBasis = false;
+				SrcModel.BuildSettings.bUseFullPrecisionUVs = true;
+				SrcModel.BuildSettings.bGenerateLightmapUVs = false;
+				SrcModel.BuildSettings.SrcLightmapIndex = GET0_NUMBER;
+				SrcModel.BuildSettings.DstLightmapIndex = LightMapIndex;
+				SrcModel.SaveRawMesh(RawMesh);
+			}
+
+			// Copy materials to new mesh
+			for (const FSkeletalMaterial& Material : SkeletalMesh->GetMaterials())
+			{
+				StaticMesh->GetStaticMaterials().Add(FStaticMaterial(Material.MaterialInterface));
+			}
+
+			//Set the Imported version before calling the build
+			StaticMesh->ImportVersion = LastVersion;
+
+			// Set light map coordinate index to match DstLightmapIndex
+			StaticMesh->SetLightMapCoordinateIndex(LightMapIndex);
+
+			// setup section info map
+			TArray<int32> UniqueMaterialIndices;
+			for (int32 MaterialIndex : RawMesh.FaceMaterialIndices)
+			{
+				UniqueMaterialIndices.AddUnique(MaterialIndex);
+			}
+
+			int32 SectionIndex = GET0_NUMBER;
+			for (int32 UniqueMaterialIndex : UniqueMaterialIndices)
+			{
+				StaticMesh->GetSectionInfoMap().Set(GET0_NUMBER, SectionIndex, FMeshSectionInfo(UniqueMaterialIndex));
+				SectionIndex++;
+			}
+			StaticMesh->GetOriginalSectionInfoMap().CopyFrom(StaticMesh->GetSectionInfoMap());
+
+			// Build mesh from source
+			StaticMesh->Build(false);
+			StaticMesh->PostEditChange();
+
+			FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
+			const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
+			const float& WantedZ = MinMax.Z;
+			Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
+
+			StaticMesh->GetRenderData()->Bounds = Bounds;
+			StaticMesh->SetExtendedBounds(Bounds);
+
+			if (SkinnedMeshVertices != StaticMesh->GetNumVertices(GET0_NUMBER))
+			{
+				UE_LOG(LogTurboSequence_Lf, Error, TEXT("It seems the created mesh has different amounts of vertices, it's not possible to skin weight the mesh without the same amount of vertices, the mesh would deform at runtime not great, -> Source Vertices %d, Converted Vertices -> %d"), SkinnedMeshVertices, StaticMesh->GetNumVertices(GET0_NUMBER));
+				return nullptr;
+			}
+
+			//StaticMesh->MarkPackageDirty();
+
+			// Notify asset registry of new asset
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+
+			FTurboSequence_Helper_Lf::SaveNewAsset(StaticMesh);
+
+
+			return StaticMesh;
+		}
+		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("The Directory is not an valid Project Directory..."));
+
+		return nullptr;
+	}
+};

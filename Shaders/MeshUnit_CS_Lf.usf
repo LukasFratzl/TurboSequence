@@ -1,0 +1,866 @@
+// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+
+#include "/Engine/Public/Platform.ush"
+
+uint NumMeshesPerThread;
+uint NumFirstGPUBones;
+
+uint NumCPUBones;
+uint NumMeshesPerFrame;
+
+//uint SkinWeightTextureSizeX;
+//uint SkinWeightTextureSizeY;
+
+//uint DataTextureSizeX;
+//uint DataTextureSizeY;
+
+uint OutputTextureSizeX;
+uint OutputTextureSizeY;
+
+uint NumLevelOfDetails;
+uint NumDebugBuffer;
+
+uint NumPixelBuffer;
+uint NumCustomStates;
+
+//uint NumCustomDataPixels;
+
+StructuredBuffer<float4> ReferencePose_StructuredBuffer;
+// StructuredBuffer<float> ReferencePoseParentIndices_StructuredBuffer; // Small Amount so use the full int size
+// StructuredBuffer<float> ReferencePoseCPUIndices_StructuredBuffer; // Small Amount so use the full int size
+// StructuredBuffer<float> ReferencePoseGPUIndices_StructuredBuffer; // Small Amount so use the full int size
+StructuredBuffer<float4> ReferencePoseIndices_StructuredBuffer;
+
+StructuredBuffer<float4> BoneSpaceAnimationInput_StructuredBuffer;
+StructuredBuffer<min16int> BoneSpaceAnimationDataInput_StructuredBuffer;
+StructuredBuffer<int> BoneSpaceAnimationDataStartIndex_StructuredBuffer;
+StructuredBuffer<int> BoneSpaceAnimationDataEndIndex_StructuredBuffer;
+StructuredBuffer<int> PerMeshCustomDataIndices_StructuredBuffer;
+StructuredBuffer<min16int> PerMeshCustomDataLod_StructuredBuffer;
+StructuredBuffer<min16uint> PerMeshCustomDataCollectionIndex_StructuredBuffer;
+StructuredBuffer<min16uint> ReferenceNumCPUBones_StructuredBuffer;
+//StructuredBuffer<float4> PerMeshCustomData_StructuredBuffer;
+//StructuredBuffer<min16uint> SkinWeightVertexLod_StructuredBuffer;
+//StructuredBuffer<int> SkinWeightOffsetLod_StructuredBuffer;
+
+StructuredBuffer<int> AnimationStartIndex_StructuredBuffer;
+StructuredBuffer<int> AnimationEndIndex_StructuredBuffer;
+//StructuredBuffer<int> AnimationFrameOffset_StructuredBuffer;
+//StructuredBuffer<min16int> AnimationFrameAlpha_StructuredBuffer;
+StructuredBuffer<min16int> AnimationWeight_StructuredBuffer;
+//StructuredBuffer<min16int> PerBoneAnimationWeight_StructuredBuffer;
+//StructuredBuffer<int> PerBoneAnimationWeightIndex_StructuredBuffer;
+//StructuredBuffer<min16int> AnimationLocationWeight_StructuredBuffer;
+//StructuredBuffer<min16int> AnimationRotationWeight_StructuredBuffer;
+//StructuredBuffer<min16int> AnimationScaleWeight_StructuredBuffer;
+StructuredBuffer<int> AnimationFramePose0_StructuredBuffer;
+//StructuredBuffer<int> AnimationFramePose1_StructuredBuffer;
+//StructuredBuffer<int> AnimationMaxFrames_StructuredBuffer;
+//StructuredBuffer<min16uint> AnimationID_StructuredBuffer;
+StructuredBuffer<min16uint> AnimationLayerIndex_StructuredBuffer;
+
+StructuredBuffer<float4> AnimationLibrary_StructuredBuffer;
+StructuredBuffer<min16uint> AnimationLayerLibrary_StructuredBuffer;
+
+RWTexture2DArray<float4> RW_BoneTransform_OutputTexture;
+//RWTexture2DArray<float4> RW_CustomData_OutputTexture;
+
+RWStructuredBuffer<float> DebugValue;
+
+
+// https://github.com/juj/MathGeoLib/blob/master/src/Math/float3x4.cpp
+float3x4 MatrixMultiply_3x4(in float3x4 Lhs, in float3x4 Rhs)
+{
+	float3x4 Result;
+
+	Result[0][0] = Lhs[0][0] * Rhs[0][0] + Lhs[0][1] * Rhs[1][0] + Lhs[0][2] * Rhs[2][0];
+	Result[0][1] = Lhs[0][0] * Rhs[0][1] + Lhs[0][1] * Rhs[1][1] + Lhs[0][2] * Rhs[2][1];
+	Result[0][2] = Lhs[0][0] * Rhs[0][2] + Lhs[0][1] * Rhs[1][2] + Lhs[0][2] * Rhs[2][2];
+	Result[0][3] = Lhs[0][0] * Rhs[0][3] + Lhs[0][1] * Rhs[1][3] + Lhs[0][2] * Rhs[2][3] + Lhs[0][3];
+
+	Result[1][0] = Lhs[1][0] * Rhs[0][0] + Lhs[1][1] * Rhs[1][0] + Lhs[1][2] * Rhs[2][0];
+	Result[1][1] = Lhs[1][0] * Rhs[0][1] + Lhs[1][1] * Rhs[1][1] + Lhs[1][2] * Rhs[2][1];
+	Result[1][2] = Lhs[1][0] * Rhs[0][2] + Lhs[1][1] * Rhs[1][2] + Lhs[1][2] * Rhs[2][2];
+	Result[1][3] = Lhs[1][0] * Rhs[0][3] + Lhs[1][1] * Rhs[1][3] + Lhs[1][2] * Rhs[2][3] + Lhs[1][3];
+
+	Result[2][0] = Lhs[2][0] * Rhs[0][0] + Lhs[2][1] * Rhs[1][0] + Lhs[2][2] * Rhs[2][0];
+	Result[2][1] = Lhs[2][0] * Rhs[0][1] + Lhs[2][1] * Rhs[1][1] + Lhs[2][2] * Rhs[2][1];
+	Result[2][2] = Lhs[2][0] * Rhs[0][2] + Lhs[2][1] * Rhs[1][2] + Lhs[2][2] * Rhs[2][2];
+	Result[2][3] = Lhs[2][0] * Rhs[0][3] + Lhs[2][1] * Rhs[1][3] + Lhs[2][2] * Rhs[2][3] + Lhs[2][3];
+
+	return Result;
+}
+
+float3x4 MatrixLerp(in float3x4 A, in float3x4 B, in float T)
+{
+	for (uint i = 0; i < 3; ++i)
+	{
+		A[i] = lerp(A[i], B[i], T);
+	}
+	return A;
+}
+
+void MatrixNormalize(inout float3x4 M)
+{
+	M[0] = float4(normalize(M[0].xyz), M[0].w);
+	M[1] = float4(normalize(M[1].xyz), M[1].w);
+	M[2] = float4(normalize(M[2].xyz), M[2].w);
+}
+
+float4 Normalize_Quaternion(in float4 Q)
+{
+	float SquareSum = Q.x * Q.x + Q.y * Q.y + Q.z * Q.z + Q.w * Q.w;
+
+	// float tolerance = 0.001f
+	if (SquareSum >= 0.001f)
+	{
+		float scale = 1.0f / sqrt(SquareSum);
+
+		Q.x *= scale;
+		Q.y *= scale;
+		Q.z *= scale;
+		Q.w *= scale;
+	}
+	else
+	{
+		Q = float4(0.0f, 0.0f, 0.0f, 1.0f); // Set to identity Q
+	}
+
+	return Q;
+}
+
+void GetRotation_3x4(inout float4 Q, in float3x4 m)
+{
+	//float4 q;
+	// The rotation matrix is of form: (Eric Lengyel's Mathematics for 3D Game Programming and Computer Graphics 2nd ed., p. 92)
+	// 1 - 2y^2 - 2z^2        2xy - 2wz            2xz + 2wy
+	//    2xy + 2wz        1 - 2x^2 - 2z^2         2yz - 2wx
+	//    2xz - 2wy           2yz + 2wx         1 - 2x^2 - 2y^2
+
+	float r = m[0][0] + m[1][1] + m[2][2]; // The element w is easiest picked up as a sum of the diagonals.
+	// Above, r == 3 - 4(x^2+y^2+z^2) == 4(1-x^2-y^2-z^2) - 1 == 4*w^2 - 1.
+	if (r > 0) // In this case, |w| > 1/2.
+	{
+		Q.w = sqrt(r + 1.f) * 0.5f; // We have two choices for the sign of w, arbitrarily pick the positive.
+		float inv4w = 1.f / (4.f * Q.w);
+		Q.x = (m[2][1] - m[1][2]) * inv4w;
+		Q.y = (m[0][2] - m[2][0]) * inv4w;
+		Q.z = (m[1][0] - m[0][1]) * inv4w;
+	}
+	else if (m[0][0] > m[1][1] && m[0][0] > m[2][2])
+	// If |q.x| is larger than |q.y| and |q.z|, extract it first. This gives
+	{
+		// best stability, and we know below x can't be zero.
+		Q.x = sqrt(1.f + m[0][0] - m[1][1] - m[2][2]) * 0.5f;
+		// We have two choices for the sign of x, arbitrarily pick the positive.
+		float x4 = 1.f / (4.f * Q.x);
+		Q.y = (m[0][1] + m[1][0]) * x4;
+		Q.z = (m[0][2] + m[2][0]) * x4;
+		Q.w = (m[2][1] - m[1][2]) * x4;
+	}
+	else if (m[1][1] > m[2][2]) // |q.y| is larger than |q.x| and |q.z|
+	{
+		Q.y = sqrt(1.f + m[1][1] - m[0][0] - m[2][2]) * 0.5f;
+		// We have two choices for the sign of y, arbitrarily pick the positive.
+		float y4 = 1.f / (4.f * Q.y);
+		Q.x = (m[0][1] + m[1][0]) * y4;
+		Q.z = (m[1][2] + m[2][1]) * y4;
+		Q.w = (m[0][2] - m[2][0]) * y4;
+	}
+	else // |q.z| is larger than |q.x| or |q.y|
+	{
+		Q.z = sqrt(1.f + m[2][2] - m[0][0] - m[1][1]) * 0.5f;
+		// We have two choices for the sign of z, arbitrarily pick the positive.
+		float z4 = 1.f / (4.f * Q.z);
+		Q.x = (m[0][2] + m[2][0]) * z4;
+		Q.y = (m[1][2] + m[2][1]) * z4;
+		Q.w = (m[1][0] - m[0][1]) * z4;
+	}
+
+	Q = Normalize_Quaternion(Q);
+
+	//return q;
+}
+
+void GetScale_3x4(inout float3 Scale, in float3x4 M)
+{
+	//float3 scale;
+	Scale.x = length(M[0].xyz);
+	Scale.y = length(M[1].xyz);
+	Scale.z = length(M[2].xyz);
+	//return scale;
+}
+
+void GetTranslation_3x4(inout float3 Translation, in float3x4 M)
+{
+	Translation = float3(M[0][3], M[1][3], M[2][3]);
+}
+
+struct FMatrix_Lf
+{
+	float3 Translation;
+	float3 Scale;
+	float4 Rotation;
+	float3x4 M;
+
+	void SetTranslation(in float3 T)
+	{
+		Translation = T;
+
+		M[0][3] = T.x;
+		M[1][3] = T.y;
+		M[2][3] = T.z;
+	}
+
+	void SetScale(in float3 S)
+	{
+		Scale = S;
+
+		M[0][0] = S.x;
+		M[1][1] = S.y;
+		M[2][2] = S.z;
+	}
+
+	void SetRotation(in float4 Q)
+	{
+		Rotation = Q;
+
+		// See e.g. http://www.geometrictools.com/Documentation/LinearAlgebraicQuaternions.pdf .
+
+		float x = Q.x;
+		float y = Q.y;
+		float z = Q.z;
+		float w = Q.w;
+
+		M[0][0] = 1.0f - 2.0f * (y * y + z * z);
+		M[0][1] = 2.0f * (x * y - z * w);
+		M[0][2] = 2.0f * (x * z + y * w);
+
+		M[1][0] = 2.0f * (x * y + z * w);
+		M[1][1] = 1.0f - 2.0f * (x * x + z * z);
+		M[1][2] = 2.0f * (y * z - x * w);
+
+		M[2][0] = 2.0f * (x * z - y * w);
+		M[2][1] = 2.0f * (y * z + x * w);
+		M[2][2] = 1.0f - 2.0f * (x * x + y * y);
+	}
+
+	void SetRotationMatrix(in float3x4 Other)
+	{
+		M[0][0] = Other[0][0];
+		M[0][1] = Other[0][1];
+		M[0][2] = Other[0][2];
+
+		M[1][0] = Other[1][0];
+		M[1][1] = Other[1][1];
+		M[1][2] = Other[1][2];
+
+		M[2][0] = Other[2][0];
+		M[2][1] = Other[2][1];
+		M[2][2] = Other[2][2];
+	}
+
+	void CopyMatrix(in FMatrix_Lf FromMatrix)
+	{
+		Rotation = FromMatrix.Rotation;
+		Translation = FromMatrix.Translation;
+		Scale = FromMatrix.Scale;
+		M = FromMatrix.M;
+	}
+
+	void SetMatrix(in float3x4 FromMatrix)
+	{
+		GetScale_3x4(Scale, FromMatrix);
+		SetScale(Scale);
+
+		GetTranslation_3x4(Translation, FromMatrix);
+		SetTranslation(Translation);
+
+		GetRotation_3x4(Rotation, FromMatrix);
+		SetRotationMatrix(FromMatrix);
+		//SetRotation(Rotation);
+	}
+};
+
+float3x4 GetIdentity_Matrix_3x4()
+{
+	return float3x4(1, 0, 0, 0,
+	                0, 1, 0, 0,
+	                0, 0, 1, 0);
+}
+
+FMatrix_Lf GetIdentity_Matrix()
+{
+	FMatrix_Lf M;
+	M.Translation = float3(0, 0, 0);
+	M.Scale = float3(1, 1, 1);
+	M.Rotation = float4(0, 0, 0, 1);
+
+	M.M = GetIdentity_Matrix_3x4();
+
+	return M;
+}
+
+float3 Scale3_Float(in float3 Value, in float T)
+{
+	return float3(Value.x * T, Value.y * T, Value.z * T);
+}
+
+float4 MultiplyQuaternion_Quat(in float4 Q1, in float4 Q2)
+{
+	float4 Result;
+
+	Result.w = Q1.w * Q2.w - Q1.x * Q2.x - Q1.y * Q2.y - Q1.z * Q2.z;
+	Result.x = Q1.w * Q2.x + Q1.x * Q2.w + Q1.y * Q2.z - Q1.z * Q2.y;
+	Result.y = Q1.w * Q2.y - Q1.x * Q2.z + Q1.y * Q2.w + Q1.z * Q2.x;
+	Result.z = Q1.w * Q2.z + Q1.x * Q2.y - Q1.y * Q2.x + Q1.z * Q2.w;
+
+	return Result;
+}
+
+// float4 VectorAccumulateQuaternionShortestPath(in float4 Q1, in float4 Q2)
+// {
+// 	float4 Zero = float4(0.0, 0.0, 0.0, 0.0);
+// 	float dotProduct = dot(Q1, Q2);
+// 	float4 rotationDirMask = step(dotProduct, Zero); // 1 if dotProduct >= 0, 0 otherwise
+// 	float4 biasTimesB = lerp(Q2, -Q2, rotationDirMask); // B if dotProduct >= 0, -B otherwise
+// 	return Q1 + biasTimesB;
+// }
+
+float4 VectorAccumulateQuaternionShortestPath(float4 A, float4 B)
+{
+	// Ensure both quaternions are normalized
+	// A = normalize(A);
+	// B = normalize(B);
+
+	// Calculate the dot product
+	float dotProduct = dot(A, B);
+
+	// Determine the sign of the dot product
+	float sign = (dotProduct >= 0.0) ? 1.0 : -1.0;
+
+	// Blend rotation
+	return A + sign * B;
+}
+
+float4 Scale_Quaternion(in float4 Q1, in float4 Q2, in float T)
+{
+	float4 QScaled = Q2 * T;
+
+	return VectorAccumulateQuaternionShortestPath(Q1, QScaled);
+}
+
+
+float4 Slerp_NotNormalized(in float4 Q1, in float4 Q2, in float T)
+{
+	// Get cosine of angle between quats.
+	float rawCosom = Q1.x * Q2.x + Q1.y * Q2.y + Q1.z * Q2.z + Q1.w * Q2.w;
+	// Unaligned quats - compensate, results in taking a shorter route.
+	float cosom = (rawCosom > 0) ? rawCosom : -rawCosom;
+
+	float scale0, scale1;
+
+	if (cosom < 0.9999)
+	{
+		float omega = acos(cosom);
+		float invSin = 1.0 / sin(omega);
+		scale0 = sin((1.0 - T) * omega) * invSin;
+		scale1 = sin(T * omega) * invSin;
+	}
+	else
+	{
+		// Use linear interpolation.
+		scale0 = 1.0 - T;
+		scale1 = T;
+	}
+
+	// In keeping with our flipped cosom:
+	scale1 = (rawCosom > 0) ? scale1 : -scale1;
+
+	float4 result;
+
+	result.x = scale0 * Q1.x + scale1 * Q2.x;
+	result.y = scale0 * Q1.y + scale1 * Q2.y;
+	result.z = scale0 * Q1.z + scale1 * Q2.z;
+	result.w = scale0 * Q1.w + scale1 * Q2.w;
+
+	return result;
+}
+
+uint3 GetDimensionsFromIndex3D(in uint Index, in uint TextureSizeX, in uint TextureSizeY)
+{
+	uint TexPow = TextureSizeX * TextureSizeY;
+	uint SliceBase = Index % TexPow;
+	return uint3(SliceBase % TextureSizeX, SliceBase / TextureSizeY, Index / TexPow);
+}
+
+int2 DecodeUInt32ToUInt16(in uint PackedValue)
+{
+	// X, Y
+	return int2(PackedValue % 0xFFFF,
+	            PackedValue / 0xFFFF);
+}
+
+uint EncodeUInt16ToUInt32_Int(in uint XValue, in uint YValue)
+{
+	return YValue * 0xFFFF + XValue;
+}
+
+int4 DecodeUInt32ToColor(in uint PackedValue)
+{
+	// X, Y
+	int4 Color;
+
+	Color.r = (PackedValue >> 24) & 0xFF;
+	Color.g = (PackedValue >> 16) & 0xFF;
+	Color.b = (PackedValue >> 8) & 0xFF;
+	Color.a = PackedValue & 0xFF;
+
+	return Color;
+}
+
+
+uint GetValidIndex(in uint Index, in uint Lenght, in uint ErrorIndex)
+{
+	bool bIsValid = Index >= 0 && Index < Lenght;
+	if (bIsValid)
+	{
+		return Index;
+	}
+
+	DebugValue[ErrorIndex] = Index;
+	return 0;
+}
+
+// -> Licence Start
+// Copyright Epic Games, Inc. All Rights Reserved.
+float AnimationCodecTimeToIndex(
+	in float RelativePos,
+	uint NumKeys,
+	out uint PosIndex0Out,
+	out uint PosIndex1Out)
+{
+	float Alpha;
+
+	if (NumKeys < 2)
+	{
+		PosIndex0Out = 0;
+		PosIndex1Out = 0;
+		return 0.0f;
+	}
+
+	// Check for before-first-frame case.
+	if (RelativePos <= 0.0f)
+	{
+		PosIndex0Out = 0;
+		PosIndex1Out = 0;
+		Alpha = 0.0f;
+	}
+	else
+	{
+		NumKeys -= 1; // never used without the minus one in this case
+
+		// Check for after-last-frame case.
+		if (RelativePos >= 1.0f)
+		{
+			// If we're not looping, key n-1 is the final key.
+			PosIndex0Out = NumKeys;
+			PosIndex1Out = NumKeys;
+			Alpha = 0.0f;
+		}
+		else
+		{
+			// For non-looping animation, the last frame is the ending frame, and has no duration.
+			float KeyPos = RelativePos * float(NumKeys);
+			float KeyPosFloor = floor(KeyPos);
+			PosIndex0Out = min(trunc(KeyPosFloor), NumKeys);
+			Alpha = KeyPos - KeyPosFloor;
+			PosIndex1Out = min(PosIndex0Out + 1, NumKeys);
+		}
+	}
+	return Alpha;
+}
+
+// -> Licence End
+
+
+// void WriteCustomData(in uint CPUMeshIndex, in uint TransformTextureIndex, in min16int LodIdx, in uint ReferenceIdx)
+// {
+// 	int SWDataIndex = ReferenceIdx * NumLevelOfDetails + LodIdx;
+// 	uint SkinWeightOffset = SkinWeightOffsetLod_StructuredBuffer[SWDataIndex];
+//
+// 	// DebugValue[0] = 1;
+// 	// DebugValue[1] = SkinWeightOffset;
+//
+// 	float4 Data_0 = (float4)DecodeUInt32ToColor(SkinWeightOffset);
+// 	float4 Data_1 = (float4)DecodeUInt32ToColor(TransformTextureIndex);
+//
+// 	// int2 SkinWeightOffsetBits = DecodeUInt32ToUInt16(SkinWeightOffset);
+// 	// Data_0.x = SkinWeightOffsetBits.x;
+// 	// Data_0.y = SkinWeightOffsetBits.y;
+// 	//
+// 	// int2 TransformTextureBits = DecodeUInt32ToUInt16(TransformTextureIndex);
+// 	// Data_0.z = TransformTextureBits.x;
+// 	// Data_0.w = TransformTextureBits.y;
+//
+// 	RW_CustomData_OutputTexture[GetDimensionsFromIndex3D(CPUMeshIndex * NumCustomDataPixels, DataTextureSizeX,
+// 	                                                     DataTextureSizeY)] = Data_0;
+//
+// 	RW_CustomData_OutputTexture[GetDimensionsFromIndex3D(CPUMeshIndex * NumCustomDataPixels + 1, DataTextureSizeX,
+// 														 DataTextureSizeY)] = Data_1;
+//
+// 	// min16uint SkinWeightMaxVertex = SkinWeightVertexLod_StructuredBuffer[SWDataIndex];
+// 	//
+// 	// float4 Data_1;
+// 	//
+// 	// Data_1.x = SkinWeightMaxVertex;
+// 	// Data_1.y = 0.0f;
+// 	// Data_1.z = 0.0f;
+// 	// Data_1.w = 0.0f;
+// 	//
+// 	// RW_CustomData_OutputTexture[GetDimensionsFromIndex3D(CPUMeshIndex * NumCustomDataPixels + 1, DataTextureSizeX, DataTextureSizeY)] = Data_1;
+// }
+
+// float3x4 BendBoneFromAnimations(in int AnimIdx, in uint BoneIndexCPU)
+// {
+// 	uint AnimationOffset0 = AnimationFramePose0_StructuredBuffer[AnimIdx];
+//
+// 	uint LibraryIndexCurrent = AnimationOffset0 + BoneIndexCPU * 3;
+//
+// 	float3x4 RuntimeBoneMatrixCurrent = float3x4(
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexCurrent],
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 1],
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 2]);
+//
+// 	uint AnimationOffset1 = AnimationFramePose1_StructuredBuffer[AnimIdx];
+//
+// 	uint LibraryIndexNext = AnimationOffset1 + BoneIndexCPU * 3;
+//
+// 	float3x4 RuntimeBoneMatrixNext = float3x4(
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexNext],
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexNext + 1],
+// 		AnimationLibrary_StructuredBuffer[LibraryIndexNext + 2]);
+//
+// 	return MatrixLerp(RuntimeBoneMatrixCurrent, RuntimeBoneMatrixNext,
+// 	                  (float)AnimationFrameAlpha_StructuredBuffer[AnimIdx] / (float)0x7FFF);
+// }
+
+float3x4 BendBoneFromAnimations_Full(in uint BoneIndexCPU, in int AnimStartIndex, in int AnimEndIndex)
+{
+	FMatrix_Lf OutAtom = GetIdentity_Matrix();
+	bool bFoundFirstAnimation = false;
+	//float FullRotationWeight = 0;
+	float FullScalarWeight = 0;
+	for (int DataIdx = AnimStartIndex; DataIdx < AnimEndIndex; ++DataIdx)
+	{
+		uint LayerLibraryBaseIndex = AnimationLayerIndex_StructuredBuffer[DataIdx];
+		uint LayerLibraryIndex = LayerLibraryBaseIndex * NumCPUBones + BoneIndexCPU;
+
+		float LayerWeight = (float)AnimationLayerLibrary_StructuredBuffer[LayerLibraryIndex] / (float)0x7FFF;
+
+		float Weight = (float)AnimationWeight_StructuredBuffer[DataIdx] / (float)0x7FFF;
+
+		float Scalar = clamp(Weight * LayerWeight, 0.0f, 1.0f);
+		FullScalarWeight += Scalar;
+		if (FullScalarWeight > 1)
+		{
+			Scalar -= abs(1.0f - FullScalarWeight);
+		}
+
+		// float LocationWeight = clamp(
+		// 	(float)AnimationLocationWeight_StructuredBuffer[DataIdx] / (float)0x7FFF * Scalar,
+		// 	0.0f, 1.0f);
+		// float RotationWeight = clamp(
+		// 	(float)AnimationRotationWeight_StructuredBuffer[DataIdx] / (float)0x7FFF * Scalar,
+		// 	0.0f, 1.0f);
+		// float ScaleWeight = clamp(
+		// 	(float)AnimationScaleWeight_StructuredBuffer[DataIdx] / (float)0x7FFF * Scalar, 0.0f,
+		// 	1.0f);
+
+		if (!Scalar)
+		{
+			continue;
+		}
+
+
+		uint AnimationOffset0 = AnimationFramePose0_StructuredBuffer[DataIdx];
+
+		uint LibraryIndexCurrent = AnimationOffset0 + BoneIndexCPU * 3;
+
+		float3x4 RuntimeBoneMatrixCurrent = float3x4(
+			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent],
+			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 1],
+			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 2]);
+
+		// uint AnimationOffset1 = AnimationFramePose1_StructuredBuffer[DataIdx];
+		//
+		// uint LibraryIndexNext = AnimationOffset1 + BoneIndexCPU * 3;
+		//
+		// float3x4 RuntimeBoneMatrixNext = float3x4(
+		// 	AnimationLibrary_StructuredBuffer[LibraryIndexNext],
+		// 	AnimationLibrary_StructuredBuffer[LibraryIndexNext + 1],
+		// 	AnimationLibrary_StructuredBuffer[LibraryIndexNext + 2]);
+		//
+		// FMatrix_Lf Atom = GetIdentity_Matrix();
+		// Atom.SetMatrix(MatrixLerp(RuntimeBoneMatrixCurrent, RuntimeBoneMatrixNext,
+		//                           (float)AnimationFrameAlpha_StructuredBuffer[DataIdx] / (float)0x7FFF));
+
+		FMatrix_Lf Atom = GetIdentity_Matrix();
+		Atom.SetMatrix(RuntimeBoneMatrixCurrent);
+
+		if (!bFoundFirstAnimation)
+		{
+			bFoundFirstAnimation = true;
+			OutAtom.SetScale(Scale3_Float(Atom.Scale, Scalar));
+			OutAtom.SetTranslation(Scale3_Float(Atom.Translation, Scalar));
+			// float RotationW = Scalar;
+			// FullRotationWeight += RotationW;
+			// if (FullRotationWeight > 1)
+			// {
+			// 	RotationW -= abs(1.0f - FullRotationWeight);
+			// }
+			OutAtom.SetRotation(Atom.Rotation * clamp(Scalar, 0.0f, 1.0f));
+		}
+		else
+		{
+			OutAtom.SetScale(OutAtom.Scale + Scale3_Float(Atom.Scale, Scalar));
+			OutAtom.SetTranslation(OutAtom.Translation + Scale3_Float(Atom.Translation, Scalar));
+			// float RotationW = Scalar;
+			// FullRotationWeight += RotationW;
+			// if (FullRotationWeight > 1)
+			// {
+			// 	RotationW -= abs(1.0f - FullRotationWeight);
+			// }
+			OutAtom.SetRotation(
+				Normalize_Quaternion(
+					Scale_Quaternion(OutAtom.Rotation, Atom.Rotation, clamp(Scalar, 0.0f, 1.0f))));
+		}
+
+
+		// FullLayerWeight += LayerWeight;
+		// if (FullLayerWeight >= 0.995f)
+		// {
+		// 	return OutAtom.M;
+		// }
+	}
+	OutAtom.SetRotation(Normalize_Quaternion(OutAtom.Rotation));
+
+	return OutAtom.M;
+}
+
+
+[numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
+void Main(
+	uint GroupIndex : SV_GroupIndex
+)
+{
+	uint ThreadIndex = GroupIndex * NumMeshesPerThread;
+	if (ThreadIndex >= NumMeshesPerFrame)
+	{
+		return;
+	}
+
+
+	RW_BoneTransform_OutputTexture[uint3(0, 0, 0)] = float4(0,
+	                                                        0,
+	                                                        NumCustomStates,
+	                                                        NumPixelBuffer);
+	RW_BoneTransform_OutputTexture[uint3(1, 0, 0)] = float4(0,
+	                                                        0,
+	                                                        OutputTextureSizeX,
+	                                                        OutputTextureSizeY);
+
+	//FAnimData_TurboSequence_Lf AnimData = (FAnimData_TurboSequence_Lf)0;
+	//FAnimLayer_TurboSequence_Lf AnimLayer = (FAnimLayer_TurboSequence_Lf)0;
+	for (uint MeshIndex = 0; MeshIndex < NumMeshesPerThread; ++MeshIndex)
+	{
+		uint LocalMeshIndex = ThreadIndex + MeshIndex;
+
+		if (LocalMeshIndex >= NumMeshesPerFrame)
+		{
+			return;
+		}
+		uint LocalMeshData = LocalMeshIndex; // Change here to global if you ever need it again
+		min16int LodIndex = PerMeshCustomDataLod_StructuredBuffer[LocalMeshData];
+		//int2 MeshCustomData = int2(GlobalMeshData, PerMeshCustomDataLod_StructuredBuffer[LocalMeshData]);
+		if (LodIndex < 0)
+		{
+			continue;
+		}
+
+		uint CPUMeshIndex = PerMeshCustomDataIndices_StructuredBuffer[LocalMeshData];
+
+		uint CurrentTextureIndex = CPUMeshIndex * NumFirstGPUBones * NumPixelBuffer + 2;
+
+		uint IKDataIndexStart = BoneSpaceAnimationDataStartIndex_StructuredBuffer[LocalMeshData];
+		uint IKDataIndexEnd = BoneSpaceAnimationDataEndIndex_StructuredBuffer[LocalMeshData];
+
+		int AnimStartIndex = AnimationStartIndex_StructuredBuffer[LocalMeshData];
+		int AnimEndIndex = AnimationEndIndex_StructuredBuffer[LocalMeshData];
+
+
+		uint ReferenceIndex = PerMeshCustomDataCollectionIndex_StructuredBuffer[LocalMeshData];
+
+		//WriteCustomData(CPUMeshIndex, CurrentTextureIndex, LodIndex, ReferenceIndex);
+
+		//uint NumRealCPUBones = ReferenceNumCPUBones_StructuredBuffer[ReferenceIndex];
+
+		//DebugValue[LocalMeshIndex] = ReferenceIndex;
+
+		uint ReferencePoseStartIndex = ReferenceIndex * NumLevelOfDetails * NumCPUBones + (uint)LodIndex * NumCPUBones;
+		uint ReferencePoseEndIndex = ReferencePoseStartIndex + NumCPUBones;
+
+		uint InvRestPoseStartIndex = ReferenceIndex * NumCPUBones * 3;
+
+
+		//AnimatePoses(CurrentAnimationTimesBase, NumRealCPUBones, AnimData);
+
+		//CreateLayers(ReferencePoseStartIndex, ReferencePoseEndIndex, AnimStartIndex, AnimEndIndex, AnimLayer, NumRealCPUBones);
+
+		// bool bNeedComplexSolve = false;
+		// int FallbackIndex = NumCPUBones + 1;
+		// for (uint B = ReferencePoseStartIndex; B < ReferencePoseEndIndex; ++B)
+		// {
+		// 	FallbackIndex--;
+		// 	if (FallbackIndex < 0)
+		// 	{
+		// 		break;
+		// 	}
+		//
+		//
+		// 	// x -> CPU
+		// 	// y -> GPU
+		// 	// z -> Parent
+		// 	// w -> Reserved
+		// 	float4 ReferenceIndices = ReferencePoseIndices_StructuredBuffer[B];
+		//
+		// 	// Is not part of this Rig and the last bone pass already
+		// 	if (ReferenceIndices.x < -0.5f)
+		// 	{
+		// 		break;
+		// 	}
+		//
+		// 	uint CPUBoneIndex = (uint)ReferenceIndices.x;
+		//
+		// 	for (int DataIdx = AnimStartIndex; DataIdx < AnimEndIndex; ++DataIdx)
+		// 	{
+		// 		uint LayerLibraryBaseIndex = AnimationLayerIndex_StructuredBuffer[DataIdx];
+		// 		uint LayerLibraryIndex = LayerLibraryBaseIndex * NumCPUBones + CPUBoneIndex;
+		//
+		// 		float LayerWeight = (float)AnimationLayerLibrary_StructuredBuffer[LayerLibraryIndex] / (float)0xFF;
+		//
+		// 		if (LayerWeight < 0.995f)
+		// 		{
+		// 			bNeedComplexSolve = true;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if (bNeedComplexSolve)
+		// 	{
+		// 		break;
+		// 	}
+		// }
+
+		int FallbackIndex = NumCPUBones + 1;
+		for (uint B = ReferencePoseStartIndex; B < ReferencePoseEndIndex; ++B)
+		{
+			FallbackIndex--;
+			if (FallbackIndex < 0)
+			{
+				break;
+			}
+
+
+			// x -> CPU
+			// y -> GPU
+			// z -> Parent
+			// w -> Reserved
+			float4 ReferenceIndices = ReferencePoseIndices_StructuredBuffer[B];
+
+			// Is not part of this Rig and the last bone pass already
+			if (ReferenceIndices.x < -0.5f)
+			{
+				break;
+			}
+
+			// Is not part of the Mesh
+			if (ReferenceIndices.y < -0.5f)
+			{
+				continue;
+			}
+			uint CPUBoneIndex = (uint)ReferenceIndices.x;
+
+			float3x4 BoneMatrix = GetIdentity_Matrix_3x4();
+
+			//float3x4 PoseMatrix = GetIdentity_Matrix_3x4();
+
+			int FallbackAnimationIndex = 2 * NumCPUBones + 1;
+			int RuntimeIndexCPU = CPUBoneIndex;
+			while (RuntimeIndexCPU > -1 && FallbackAnimationIndex > 0)
+			{
+				uint BonePoseIndex = ReferencePoseStartIndex + RuntimeIndexCPU;
+				int RuntimeIndexGPU = (int)ReferencePoseIndices_StructuredBuffer[BonePoseIndex].y;
+
+				// Handle IK
+				if (RuntimeIndexGPU > -1)
+				{
+					bool bIsBoneSolvedByIK = false;
+					for (uint IKIdx = IKDataIndexStart; IKIdx < IKDataIndexEnd; ++IKIdx)
+					{
+						if (BoneSpaceAnimationDataInput_StructuredBuffer[IKIdx] == RuntimeIndexGPU)
+						{
+							uint IKBoneIndex = IKIdx * 3;
+							float3x4 IKBoneMatrix = float3x4(
+								BoneSpaceAnimationInput_StructuredBuffer[IKBoneIndex],
+								BoneSpaceAnimationInput_StructuredBuffer[IKBoneIndex + 1],
+								BoneSpaceAnimationInput_StructuredBuffer[IKBoneIndex + 2]
+							);
+
+							BoneMatrix = MatrixMultiply_3x4(IKBoneMatrix, BoneMatrix);
+
+							bIsBoneSolvedByIK = true;
+							break;
+						}
+					}
+					if (bIsBoneSolvedByIK)
+					{
+						break;
+					}
+				}
+
+				BoneMatrix = MatrixMultiply_3x4(
+					BendBoneFromAnimations_Full(RuntimeIndexCPU, AnimStartIndex, AnimEndIndex),
+					BoneMatrix);
+
+				RuntimeIndexCPU = (int)ReferencePoseIndices_StructuredBuffer[BonePoseIndex].z;
+
+				// When ReferencePoseParentIndices_StructuredBuffer is uninitialized we may never exit the loop.
+				// That's why we count down to the max amount of data as fallback.
+				FallbackAnimationIndex--;
+			}
+
+			uint CPUBoneIndexBase = InvRestPoseStartIndex + CPUBoneIndex * 3;
+			float3x4 InvRestPoseMatrix = float3x4(ReferencePose_StructuredBuffer[CPUBoneIndexBase],
+			                                      ReferencePose_StructuredBuffer[CPUBoneIndexBase + 1],
+			                                      ReferencePose_StructuredBuffer[CPUBoneIndexBase + 2]);
+
+			BoneMatrix = MatrixMultiply_3x4(BoneMatrix, InvRestPoseMatrix);
+
+
+			uint GPUBoneIndexBase = CurrentTextureIndex + (uint)ReferenceIndices.y * NumPixelBuffer;
+
+			RW_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase, OutputTextureSizeX,
+			                                                        OutputTextureSizeY)] = BoneMatrix[0];
+			RW_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 1, OutputTextureSizeX,
+			                                                        OutputTextureSizeY)] = BoneMatrix[1];
+			RW_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 2, OutputTextureSizeX,
+			                                                        OutputTextureSizeY)] = BoneMatrix[2];
+
+			// DebugValue[0] = 1;
+			// DebugValue[1] = BoneMatrix[0].x;
+			// DebugValue[2] = BoneMatrix[0].y;
+			// DebugValue[3] = BoneMatrix[0].z;
+			// DebugValue[4] = BoneMatrix[0].w;
+		}
+	}
+}

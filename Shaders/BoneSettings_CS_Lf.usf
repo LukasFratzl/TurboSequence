@@ -1,0 +1,60 @@
+// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+
+#include "/Engine/Public/Platform.ush"
+
+// DEBUG VALUES TO DEBUG THE SHADER
+//RWStructuredBuffer<float> DebugValue;
+
+StructuredBuffer<float4> BoneWeights_StructuredBuffer;
+
+// THE OUTPUT TEXTURE WHICH IS THE ATLAS OF THE SYSTEM WHICH IS CALLED AnimationLibrary 
+RWTexture2DArray<float4> RW_Settings_OutputTexture;
+
+uint TextureDimensionX;
+uint TextureDimensionY;
+uint NumPixelPerThread;
+
+
+// int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY)
+// {
+// 	int TexPow = TextureSizeX * TextureSizeY;
+// 	int SliceBase = Index % TexPow;
+// 	return int3(SliceBase % TextureSizeX, SliceBase / TextureSizeY, Index / TexPow);
+// }
+
+// int GetModulus(in int A, in int B)
+// {
+// 	return A - B * (int)(A / B);
+// }
+
+
+[numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
+void Main(
+	uint GroupIndex : SV_GroupIndex)
+{
+	uint OffsetX = GroupIndex * NumPixelPerThread;
+	uint OffsetY = OffsetX + NumPixelPerThread;
+
+	// if (GroupIndex)
+	// {
+	// 	return;
+	// }
+
+	for (uint Index = OffsetX; Index < OffsetY; ++Index)
+	{
+		uint TexPow = TextureDimensionX * TextureDimensionY;
+		uint SliceBase = Index % TexPow;
+
+		RW_Settings_OutputTexture[uint3(SliceBase % TextureDimensionX, SliceBase / TextureDimensionY, Index / TexPow)] = BoneWeights_StructuredBuffer[Index];
+	}
+
+	// for (uint Index = 0; Index < NumPixelPerThread; ++Index)
+	// {
+	// 		//uint Index = 
+	// 		
+	// 		uint TexPow = TextureDimensionX * TextureDimensionY;
+	// 		uint SliceBase = Index % TexPow;
+	//
+	// 		RW_Settings_OutputTexture[uint3(SliceBase % TextureDimensionX, SliceBase / TextureDimensionY, Index / TexPow)] = BoneWeights_StructuredBuffer[Index];
+	// 	}
+}

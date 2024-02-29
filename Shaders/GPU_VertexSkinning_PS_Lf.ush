@@ -1,0 +1,80 @@
+﻿// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+
+struct TurboSequencePSFunctions_Lf
+{
+	// http://stackoverflow.com/questions/349050/calculating-a-lookat-matrix
+	float3x3 LookAt(in float3 Forward, in float3 UP)
+	{
+		float3 XAxis = normalize(cross(Forward, UP));
+		float3 YAxis = UP;
+		float3 ZAxis = Forward;
+		return float3x3(
+			XAxis.x, YAxis.x, ZAxis.x,
+			XAxis.y, YAxis.y, ZAxis.y,
+			XAxis.z, YAxis.z, ZAxis.z
+		);
+	}
+
+	void Inverse(inout float3x3 M)
+	{
+		//float3x3 Result;
+		float C00 = M[1][1] * M[2][2] - M[1][2] * M[2][1];
+		float C10 = M[1][2] * M[2][0] - M[1][0] * M[2][2];
+		float C20 = M[1][0] * M[2][1] - M[1][1] * M[2][0];
+		float Det = M[0][0] * C00 + M[0][1] * C10 + M[0][2] * C20;
+
+		if (Det)
+		{
+			float InvDet = 1.0f / Det;
+			M = float3x3(
+				C00 * InvDet,
+				(M[0][2] * M[2][1] - M[0][1] * M[2][2]) * InvDet,
+				(M[0][1] * M[1][2] - M[0][2] * M[1][1]) * InvDet,
+				C10 * InvDet,
+				(M[0][0] * M[2][2] - M[0][2] * M[2][0]) * InvDet,
+				(M[0][2] * M[1][0] - M[0][0] * M[1][2]) * InvDet,
+				C20 * InvDet,
+				(M[0][1] * M[2][0] - M[0][0] * M[2][1]) * InvDet,
+				(M[0][0] * M[1][1] - M[0][1] * M[1][0]) * InvDet
+			);
+		}
+		else
+		{
+			M = float3x3(1, 0, 0,
+			             0, 1, 0,
+			             0, 0, 1);
+		}
+	}
+
+	float3 SolveNormal(in float3 PreLocation, in float3 PostLocation, in float3 NormalInput)
+	{
+		float3x3 PostMatrix = LookAt(ddx(PostLocation), ddy(PostLocation));
+		float3x3 PreMatrix = LookAt(ddx(PreLocation), ddy(PreLocation));
+
+		Inverse(PreMatrix);
+
+		float3x3 NormalMatrix = mul(PostMatrix, PreMatrix);
+
+		return mul(NormalMatrix, NormalInput);
+	}
+};
+
+
+if
+(SmoothDistance<SmoothThreshold)
+                {
+	TurboSequencePSFunctions_Lf f;
+
+	                //return f.SolveNormal(PreLocation, PostLocation, NormalInput);
+
+	float3x3 PostMatrix = f.LookAt(ddx(PostLocation), ddy(PostLocation));
+	float3x3 PreMatrix = f.LookAt(ddx(PreLocation), ddy(PreLocation));
+		
+	                f.Inverse(PreMatrix);
+		
+	float3x3 NormalMatrix = mul(PostMatrix, PreMatrix);
+
+	return mul(NormalMatrix, NormalInput);
+                }
+	
+return TransformLocalVectorToWorld(Parameters, cross(ddx(PostLocation), ddy(PostLocation)));
