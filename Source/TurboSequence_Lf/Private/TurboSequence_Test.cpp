@@ -18,7 +18,7 @@ ATurboSequence_Test::ATurboSequence_Test()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Renderer = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>("Renderer");
+	//Renderer = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>("Renderer");
 }
 
 // Called when the game starts or when spawned
@@ -483,28 +483,28 @@ void ATurboSequence_Test::Tick(float DeltaTime)
 	//Renderer->SetCustomData(0, Renderer->PerInstanceSMCustomData, true);
 }
 
-void ATurboSequence_Test::SpawnCharactersDelayed()
-{
-	if (CurrentCharacterCount_Internal > 0)
-	{
-		LastSpawnLocation_Internal += FVector(-DistanceBetweenCharacters, 0, 0);
-
-		int32 AmountCharactersSqrt = FMath::RoundToInt(FMath::Sqrt(static_cast<float>(AmountOfCharactersToSpawn)));
-		if (AmountOfCharactersToSpawn == 1)
-		{
-			AmountCharactersSqrt = 1;
-		}
-
-		for (int32 Y = 0; Y < AmountCharactersSqrt; ++Y)
-		{
-			FVector Location = FVector(LastSpawnLocation_Internal.X, Y * -DistanceBetweenCharacters + LastSpawnLocation_Internal.Y, 0);
-			CurrentCharacterCount_Internal--;
-
-			FTransform Transform = FTransform(Location);
-
-			Renderer->AddInstance(Transform, true);
-		}
-
-		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ATurboSequence_Test::SpawnCharactersDelayed);
-	}
-}
+// void ATurboSequence_Test::SpawnCharactersDelayed()
+// {
+// 	if (CurrentCharacterCount_Internal > 0)
+// 	{
+// 		LastSpawnLocation_Internal += FVector(-DistanceBetweenCharacters, 0, 0);
+//
+// 		int32 AmountCharactersSqrt = FMath::RoundToInt(FMath::Sqrt(static_cast<float>(AmountOfCharactersToSpawn)));
+// 		if (AmountOfCharactersToSpawn == 1)
+// 		{
+// 			AmountCharactersSqrt = 1;
+// 		}
+//
+// 		for (int32 Y = 0; Y < AmountCharactersSqrt; ++Y)
+// 		{
+// 			FVector Location = FVector(LastSpawnLocation_Internal.X, Y * -DistanceBetweenCharacters + LastSpawnLocation_Internal.Y, 0);
+// 			CurrentCharacterCount_Internal--;
+//
+// 			FTransform Transform = FTransform(Location);
+//
+// 			Renderer->AddInstance(Transform, true);
+// 		}
+//
+// 		GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ATurboSequence_Test::SpawnCharactersDelayed);
+// 	}
+// }

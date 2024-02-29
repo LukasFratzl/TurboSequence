@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/Optional.h"
 #include "NiagaraComponent.h"
 #include "TurboSequence_ComputeShaders_Lf.h"
 #include "TurboSequence_Helper_Lf.h"
@@ -23,7 +24,9 @@ struct TURBOSEQUENCE_LF_API FCameraView_Lf
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category="Aspect")
-	float AspectRatio = GET1_NUMBER;
+	FVector2f ViewportSize = FVector2f::ZeroVector;
+	
+	TOptional<EAspectRatioAxisConstraint> AspectRatioAxisConstraint;
 
 	UPROPERTY(EditAnywhere, Category="Aspect")
 	float Fov = GET60_NUMBER;

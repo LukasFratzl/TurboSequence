@@ -373,26 +373,11 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FAnimPose_Lf
 			//GenerateWorldSpaceTransforms();
 
 			const FBlendedCurve& Curve = PoseData.GetCurve();
-			for (TConstSetBitIterator It(Curve.ValidCurveWeights); It; ++It)
+			Curve.ForEachElement([&CurveNames = CurveNames, &CurveValues = CurveValues](const UE::Anim::FCurveElement& InElement)
 			{
-				const int32 EntryIndex = It.GetIndex();
-				const uint16 CurveNameUID = Curve.UIDToArrayIndexLUT->IsValidIndex(EntryIndex)
-					                            ? (*Curve.UIDToArrayIndexLUT)[EntryIndex]
-					                            : INDEX_NONE;
-
-				FSmartName CurveSmartName;
-				const USkeleton* Skeleton = ContextBoneContainer.GetSkeletonAsset();
-				if (Skeleton->GetSmartNameByUID(USkeleton::AnimCurveMappingName, CurveNameUID, CurveSmartName))
-				{
-					CurveNames.Add(CurveSmartName.DisplayName);
-					CurveValues.Add(Curve.CurveWeights[EntryIndex]);
-				}
-				else
-				{
-					ensureMsgf(false, TEXT("Unable to find SmartName for Curve with UID %i from Skeleton %s"),
-					           CurveNameUID, *Skeleton->GetPathName());
-				}
-			}
+				CurveNames.Add(InElement.Name);
+				CurveValues.Add(InElement.Value);
+			});
 		}
 		else
 		{
@@ -545,8 +530,7 @@ public:
 			}
 
 			FBoneContainer RequiredBones;
-			RequiredBones.InitializeTo(RequiredBoneIndexArray,
-			                           FCurveEvaluationOption(EvaluationOptions.bEvaluateCurves), *AssetToUse);
+			RequiredBones.InitializeTo(RequiredBoneIndexArray, UE::Anim::FCurveFilterSettings(EvaluationOptions.bEvaluateCurves ? UE::Anim::ECurveFilterMode::None : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
 
 			RequiredBones.SetUseRAWData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Raw);
 			RequiredBones.SetUseSourceData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Source);
@@ -677,8 +661,7 @@ public:
 		}
 
 		FBoneContainer RequiredBones;
-		RequiredBones.InitializeTo(RequiredBoneIndexArray, FCurveEvaluationOption(EvaluationOptions.bEvaluateCurves),
-		                           *AssetToUse);
+		RequiredBones.InitializeTo(RequiredBoneIndexArray, UE::Anim::FCurveFilterSettings(EvaluationOptions.bEvaluateCurves ? UE::Anim::ECurveFilterMode::None : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
 
 		RequiredBones.SetUseRAWData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Raw);
 		RequiredBones.SetUseSourceData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Source);
@@ -846,10 +829,11 @@ public:
 
 
 	static FORCEINLINE_DEBUGGABLE void GetCameraFrustumPlanes_ObjectSpace(FPlane (&Out_ObjectSpace_Planes)[GET6_NUMBER],
-	                                                                      const float& Fov, const float& AspectRatio,
+	                                                                      const float& Fov, const FVector2f ViewportSize,
+	                                                                      const TOptional<EAspectRatioAxisConstraint> InAspectRatioAxisConstraint,
 	                                                                      const float& NearClippingPlane,
 	                                                                      const float& FarClippingPlane,
-	                                                                      const bool& OrthographicModeEnabled,
+	                                                                      const bool& bOrthographicModeEnabled,
 	                                                                      const float& OrthographicWidth)
 	{
 		// Object space is better so we can hardcode a lot more
@@ -860,19 +844,40 @@ public:
 
 		const float HozHalfAngleInRadians = FMath::DegreesToRadians(Fov * 0.5f);
 
-		// Get the height and width in object space
+		// Determine FOV multipliers to match render target's aspect ratio
 		float HozLength;
 		float VertLength;
+		float AspectRatio;
+		if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+		{
+			//if the viewport is wider than it is tall
+			AspectRatio = ViewportSize.X / (float)ViewportSize.Y;
+		}
+		else
+		{
+			//if the viewport is taller than it is wide
+			AspectRatio = ViewportSize.Y / (float)ViewportSize.X;
+		}
 
-		if (OrthographicModeEnabled)
+		if (bOrthographicModeEnabled)
 		{
 			HozLength = OrthographicWidth * 0.5f;
 			VertLength = HozLength / AspectRatio;
 		}
 		else
 		{
-			HozLength = FarClippingPlane * FMath::Tan(HozHalfAngleInRadians);
-			VertLength = HozLength / AspectRatio;
+			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+			{
+				// Calculate lengths based on the chosen FOV
+				HozLength = NearClippingPlane * FMath::Tan(HozHalfAngleInRadians);
+				VertLength = HozLength / AspectRatio;
+			}
+			else
+			{
+				// Calculate lengths based on the chosen FOV
+				VertLength = NearClippingPlane * FMath::Tan(HozHalfAngleInRadians);
+				HozLength = VertLength / AspectRatio;
+			}
 		}
 
 		// near plane verts
@@ -881,13 +886,29 @@ public:
 		const FVector NearLBottomEdge = Direction * NearClippingPlane - UpVector * VertLength - LeftVector * HozLength;
 		const FVector NearRBottomEdge = Direction * NearClippingPlane - UpVector * VertLength + LeftVector * HozLength;
 
+		if (!bOrthographicModeEnabled)
+		{
+			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+			{
+				// Calculate lengths based on the chosen FOV
+				HozLength = FarClippingPlane * FMath::Tan(HozHalfAngleInRadians);
+				VertLength = HozLength / AspectRatio;
+			}
+			else
+			{
+				// Calculate lengths based on the chosen FOV
+				VertLength = FarClippingPlane * FMath::Tan(HozHalfAngleInRadians);
+				HozLength = VertLength / AspectRatio;
+			}
+		}
+
 		// far plane verts
 		const FVector RTopEdge = Direction * FarClippingPlane + UpVector * VertLength + LeftVector * HozLength;
 		const FVector LTopEdge = Direction * FarClippingPlane + UpVector * VertLength - LeftVector * HozLength;
 		const FVector LBottomEdge = Direction * FarClippingPlane - UpVector * VertLength - LeftVector * HozLength;
 		const FVector RBottomEdge = Direction * FarClippingPlane - UpVector * VertLength + LeftVector * HozLength;
 
-		if (OrthographicModeEnabled)
+		if (bOrthographicModeEnabled)
 		{
 			Out_ObjectSpace_Planes[GET0_NUMBER] = FPlane(NearRTopEdge, RTopEdge, LTopEdge); // Top plane
 			Out_ObjectSpace_Planes[GET1_NUMBER] = FPlane(NearLBottomEdge, LBottomEdge, RBottomEdge); // Bottom plane

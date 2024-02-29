@@ -391,7 +391,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			for (FCameraView_Lf& View : GlobalLibrary.CameraViews)
 			{
 				FTurboSequence_Helper_Lf::GetCameraFrustumPlanes_ObjectSpace(
-					View.Planes_Internal, View.Fov, View.AspectRatio, View.NearClipPlane, View.FarClipPlane,
+					View.Planes_Internal, View.Fov, View.ViewportSize, View.AspectRatioAxisConstraint, View.NearClipPlane, View.FarClipPlane,
 					!View.bIsPerspective, View.OrthoWidth);
 
 				View.InterpolatedCameraTransform_Internal = View.CameraTransform;

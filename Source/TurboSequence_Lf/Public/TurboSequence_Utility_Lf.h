@@ -173,23 +173,41 @@ public:
 
 			const FMinimalViewInfo& PlayerMinimalViewInfo = PlayerController->PlayerCameraManager->ViewTarget.POV;
 
+			//TOptional<EAspectRatioAxisConstraint> Axis = PlayerController->PlayerCameraManager->ViewTarget.POV.AspectRatioAxisConstraint 
+
 			FVector2D ViewportSize;
 			LocalPlayer->ViewportClient->GetViewportSize(ViewportSize);
 			const FVector2D SplitScreenPlayerViewSize(LocalPlayer->Size.X * ViewportSize.X,
 			                                          LocalPlayer->Size.Y * ViewportSize.Y);
-			const float AspectRatio = bIsSinglePlayer
-				                          ? ViewportSize.X / ViewportSize.Y
-				                          : SplitScreenPlayerViewSize.X / SplitScreenPlayerViewSize.Y;
 
-			const float Fov = bIsSinglePlayer
-				                  ? PlayerMinimalViewInfo.FOV
-				                  : FMath::RadiansToDegrees(GET2_NUMBER * FMath::Atan(
-					                  FMath::Tan(FMath::DegreesToRadians(PlayerMinimalViewInfo.FOV) * 0.5f) *
-					                  AspectRatio));
+			FVector2f ViewportDimensions = FVector2f(ViewportSize.X, ViewportSize.Y);
+			
+			float Fov = PlayerController->PlayerCameraManager->GetFOVAngle();
+			if (!bIsSinglePlayer)
+			{
+				ViewportDimensions = FVector2f(SplitScreenPlayerViewSize.X / SplitScreenPlayerViewSize.Y);
+
+
+				float AspectRatio;
+				if (((ViewportSize.X > ViewportSize.Y) && (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+				{
+					//if the viewport is wider than it is tall
+					AspectRatio = ViewportDimensions.X / (float)ViewportDimensions.Y;
+				}
+				else
+				{
+					//if the viewport is taller than it is wide
+					AspectRatio = ViewportDimensions.Y / (float)ViewportDimensions.X;
+				}
+				
+				Fov = FMath::RadiansToDegrees(GET2_NUMBER * FMath::Atan(
+									  FMath::Tan(FMath::DegreesToRadians(Fov) * 0.5f) * AspectRatio));
+			}
 
 			FCameraView_Lf View;
 			View.Fov = Fov; // * 1.1f;
-			View.AspectRatio = AspectRatio;
+			View.ViewportSize = ViewportDimensions;
+			View.AspectRatioAxisConstraint = LocalPlayer->AspectRatioAxisConstraint;
 			View.bIsPerspective = PlayerMinimalViewInfo.ProjectionMode == ECameraProjectionMode::Perspective;
 			View.OrthoWidth = PlayerMinimalViewInfo.OrthoWidth;
 			View.FarClipPlane = PlayerMinimalViewInfo.OrthoFarClipPlane;
@@ -216,9 +234,8 @@ public:
 			FCameraView_Lf& View = OutViews[i];
 
 			const float& InterpolatedFov = View.Fov; // + GET5_NUMBER * DeltaTime;
-			const float& InterpolatedAspect = View.AspectRatio; // * 0.8f; // - GET5_NUMBER * DeltaTime;
 			FTurboSequence_Helper_Lf::GetCameraFrustumPlanes_ObjectSpace(
-				View.Planes_Internal, InterpolatedFov, InterpolatedAspect, View.NearClipPlane, View.FarClipPlane,
+				View.Planes_Internal, InterpolatedFov, View.ViewportSize, View.AspectRatioAxisConstraint, View.NearClipPlane, View.FarClipPlane,
 				!View.bIsPerspective, View.OrthoWidth);
 
 			if (LastFrameCameraTransforms.Contains(i))

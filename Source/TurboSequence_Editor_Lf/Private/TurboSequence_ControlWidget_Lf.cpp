@@ -370,7 +370,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 				// Create a confirmation dialog with "OK" and "Cancel" buttons
 				const FText MessageText = FText::FromString(TEXT("Mesh Already Exists, do you want override it?"));
 				const FText TitleText = FText::FromString(TEXT("Confirmation"));
-				const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(EAppMsgType::OkCancel, MessageText, &TitleText);
+				const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(EAppMsgType::OkCancel, MessageText, TitleText);
 
 				if (ButtonClicked == EAppReturnType::Ok)
 				{
