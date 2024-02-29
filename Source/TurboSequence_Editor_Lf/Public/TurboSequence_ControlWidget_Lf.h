@@ -381,10 +381,18 @@ public:
 
 
 	// TODO: move in helpers
-	static FORCEINLINE_DEBUGGABLE TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName)
+	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName)
 	{
+		
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
+
+			if (!IsValid(SkeletalMesh))
+			{
+				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s"), *PackageName);
+				return nullptr;
+			}
+			
 			// Then find/create it.
 			UPackage* Package = CreatePackage(*PackageName);
 			check(Package);
@@ -468,6 +476,10 @@ public:
 				SrcModel.BuildSettings.DstLightmapIndex = LightMapIndex;
 				SrcModel.SaveRawMesh(RawMesh);
 			}
+			else
+			{
+				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Mesh seems not valid...."))
+			}
 
 			// Copy materials to new mesh
 			for (const FSkeletalMaterial& Material : SkeletalMesh->GetMaterials())
@@ -496,17 +508,32 @@ public:
 			}
 			StaticMesh->GetOriginalSectionInfoMap().CopyFrom(StaticMesh->GetSectionInfoMap());
 
-			// Build mesh from source
-			StaticMesh->Build(false);
-			StaticMesh->PostEditChange();
+			TArray<FText> OutErrors;
+			StaticMesh->Build(false, &OutErrors);
+			for (const FText& Error : OutErrors)
+			{
+				UE_LOG(LogTurboSequence_Lf, Error, TEXT("%s"), *Error.ToString());
+			}
+			if (OutErrors.Num())
+			{
+				return nullptr;
+			}
+			if (!StaticMesh->GetRenderData())
+			{
+				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s, please delete this asset manually and try again"), *PackageName);
+				return nullptr;
+			}
+			//StaticMesh->PostEditChange();
 
-			FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
-			const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
-			const float& WantedZ = MinMax.Z;
-			Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
-
-			StaticMesh->GetRenderData()->Bounds = Bounds;
-			StaticMesh->SetExtendedBounds(Bounds);
+			//StaticMesh->MarkPackageDirty();
+			//
+			// FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
+			// const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
+			// const float& WantedZ = MinMax.Z;
+			// Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
+			//
+			// StaticMesh->GetRenderData()->Bounds = Bounds;
+			// StaticMesh->SetExtendedBounds(Bounds);
 
 			if (SkinnedMeshVertices != StaticMesh->GetNumVertices(GET0_NUMBER))
 			{

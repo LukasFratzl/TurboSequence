@@ -94,14 +94,14 @@ public:
 
 	static FORCEINLINE_DEBUGGABLE void GetBoneTransformFromAnimationSafe(FTransform& OutAtom, const TObjectPtr<UAnimSequence> Animation, const uint16& SkeletonBoneIndex, const TMap<int32, int32>& SkeletonBoneMap, const float& AnimationTime, const FReferenceSkeleton& ReferenceSkeleton)
 	{
-		if (const int32& TrackIndex = SkeletonBoneMap.Contains(SkeletonBoneIndex) ? SkeletonBoneMap[SkeletonBoneIndex] : INDEX_NONE; TrackIndex != INDEX_NONE)
-		{
-			Animation->GetBoneTransform(OutAtom, TrackIndex, AnimationTime, !Animation->IsCompressedDataValid());
-		}
-		else
-		{
-			OutAtom = ReferenceSkeleton.GetRefBonePose()[SkeletonBoneIndex];
-		}
+		// if (const int32& TrackIndex = SkeletonBoneMap.Contains(SkeletonBoneIndex) ? SkeletonBoneMap[SkeletonBoneIndex] : INDEX_NONE; TrackIndex != INDEX_NONE)
+		// {
+		// 	Animation->GetBoneTransform(OutAtom, TrackIndex, AnimationTime, !Animation->IsCompressedDataValid());
+		// }
+		// else
+		// {
+		// 	OutAtom = ReferenceSkeleton.GetRefBonePose()[SkeletonBoneIndex];
+		// }
 	}
 
 

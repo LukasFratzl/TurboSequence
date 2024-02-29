@@ -558,7 +558,7 @@ public:
 			UE::Anim::FStackAttributeContainer Attributes;
 
 			FAnimationPoseData PoseData(CompactPose, Curve, Attributes);
-			FAnimExtractContext Context(0.f, EvaluationOptions.bExtractRootMotion);
+			FAnimExtractContext Context(0.0, EvaluationOptions.bExtractRootMotion);
 
 			FCompactPose BasePose;
 			BasePose.SetBoneContainer(&RequiredBones);
@@ -690,7 +690,7 @@ public:
 		UE::Anim::FStackAttributeContainer Attributes;
 
 		FAnimationPoseData PoseData(CompactPose, Curve, Attributes);
-		FAnimExtractContext Context(0.f, EvaluationOptions.bExtractRootMotion);
+		FAnimExtractContext Context(0.0, EvaluationOptions.bExtractRootMotion);
 
 		FCompactPose BasePose;
 		BasePose.SetBoneContainer(&RequiredBones);
@@ -1910,11 +1910,11 @@ public:
 			// Save the package and all its contents
 			if (!PlatformFile.IsReadOnly(*PackagePath) && UPackage::SavePackage(Package, Asset, *PackagePath, Args))
 			{
-				// FAssetData AssetData(Asset);
-				// TArray<FAssetData> Data;
-				// Data.Add(AssetData);
-				// FAssetRegistryModule::AssetsSaved(MoveTemp(Data));
-				FAssetRegistryModule::AssetSaved(*Asset);
+				FAssetData AssetData(Asset);
+				TArray<FAssetData> Data;
+				Data.Add(AssetData);
+				FAssetRegistryModule::AssetsSaved(MoveTemp(Data));
+				//FAssetRegistryModule::AssetSaved(*Asset);
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Saved Asset -> %s"), *Package->GetName());
 			}
 		}
@@ -1963,11 +1963,11 @@ public:
 		// Save the package and all its contents
 		if (UPackage::SavePackage(Package, Asset, *PackagePath, Args))
 		{
-			// FAssetData AssetData(Asset);
-			// TArray<FAssetData> Data;
-			// Data.Add(AssetData);
-			// FAssetRegistryModule::AssetsSaved(MoveTemp(Data));
-			FAssetRegistryModule::AssetSaved(*Asset);
+			FAssetData AssetData(Asset);
+			TArray<FAssetData> Data;
+			Data.Add(AssetData);
+			FAssetRegistryModule::AssetsSaved(MoveTemp(Data));
+			//FAssetRegistryModule::AssetSaved(*Asset);
 			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Saved Asset -> %s"), *Package->GetName());
 		}
 	}
