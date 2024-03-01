@@ -10,7 +10,9 @@ public class TurboSequence_Shader_Lf : ModuleRules
             new string[]
             {
                 "Core", "TurboSequence_HelperModule_Lf",
-                // "RenderCore"
+                "Renderer",
+                "RHI",
+                "RenderCore",
             }
         );
 

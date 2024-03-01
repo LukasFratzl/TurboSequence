@@ -10,6 +10,7 @@
 #include "RenderGraphUtils.h"
 #include "RenderTargetPool.h"
 #include "RHIGPUReadback.h"
+#include "RHIDefinitions.h"
 #include "TextureRenderTarget2DArrayResource.h"
 #include "Animation/AnimationPoseData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -17,7 +18,6 @@
 #include "Engine/Texture2DArray.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/TextureRenderTarget2DArray.h"
-#include "Engine/Private/Rendering/Texture2DArrayResource.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/ITargetPlatform.h"
 #include "Interfaces/ITargetPlatformManagerModule.h"
@@ -1329,11 +1329,7 @@ public:
 	                                                                              const EPixelFormat& Format, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
-
-		if (!IsVulkanPlatform(ShaderPlatform))
-		{
-			TexCreateFlags |= TexCreate_ReduceMemoryWithTilingMode;
-		}
+		
 
 		// Create the texture description
 		// here we straight define PF_FloatRGBA to have a float4 value in the shader
@@ -1507,11 +1503,6 @@ public:
 
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
 
-		if (!IsVulkanPlatform(ShaderPlatform))
-		{
-			TexCreateFlags |= TexCreate_ReduceMemoryWithTilingMode;
-		}
-
 
 		const FPooledRenderTargetDesc RenderTargetDescription = FPooledRenderTargetDesc::Create2DDesc(
 			RenderTargetResource->GetSizeXY(),
@@ -1559,11 +1550,6 @@ public:
 
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
 
-		if (!IsVulkanPlatform(ShaderPlatform))
-		{
-			TexCreateFlags |= TexCreate_ReduceMemoryWithTilingMode;
-		}
-
 
 		const FPooledRenderTargetDesc RenderTargetDescription = FPooledRenderTargetDesc::Create2DArrayDesc(
 			RenderTargetResource->GetSizeXY(),
@@ -1599,11 +1585,6 @@ public:
 
 
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
-
-		if (!IsVulkanPlatform(ShaderPlatform))
-		{
-			TexCreateFlags |= TexCreate_ReduceMemoryWithTilingMode;
-		}
 
 
 		const FPooledRenderTargetDesc Desc = FPooledRenderTargetDesc::Create2DArrayDesc(

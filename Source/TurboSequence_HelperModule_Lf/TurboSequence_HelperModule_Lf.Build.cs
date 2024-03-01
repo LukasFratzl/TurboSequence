@@ -21,7 +21,10 @@ public class TurboSequence_HelperModule_Lf : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject"
+                "CoreUObject",
+                "RenderCore",
+                "Renderer",
+                "RHI",
             }
         );
     }
