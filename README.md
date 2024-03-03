@@ -14,7 +14,7 @@ Turbo Sequence is using bones to animate the meshes, which allow IK and layer ma
 ## What is Turbo Sequence
 
 Turbo Sequence is a Plugin for Unreal Engine 5 which is Open Source with an MIT License.
-The advantage of using VATs is that Turbo Sequence uses bone joint bending instead of pre-computed animations, which allows runtime bone joint bending like IK or Sockets.
+The advantage of using Turbo Sequence over VATs is that Turbo Sequence uses bone joint bending instead of pre-computed animations, which allows runtime bone joint bending like IK or Sockets.
 Turbo Sequence is trying to use Draw-Calls per archetype efficiently and not per instance, which has an advantage compared to traditional Skeletal Meshes.
 
 _*Traditional Rendering:*_
