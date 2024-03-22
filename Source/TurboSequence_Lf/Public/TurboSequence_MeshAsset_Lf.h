@@ -28,6 +28,21 @@ struct TURBOSEQUENCE_LF_API FMeshData_Lf
 };
 
 USTRUCT()
+struct TURBOSEQUENCE_LF_API FMeshDataOrderView_Lf
+{
+	GENERATED_BODY()
+
+	FMeshDataOrderView_Lf()
+	{
+	}
+	
+	UPROPERTY(SaveGame)
+	TArray<int32> StaticMeshIndices;
+	
+};
+
+
+USTRUCT()
 struct TURBOSEQUENCE_LF_API FMeshItem_Lf
 {
 	GENERATED_BODY()
@@ -124,6 +139,9 @@ public:
 	TArray<FMeshData_Lf> MeshData;
 
 	int32 MeshDataCustomData = GET0_NUMBER;
+
+	UPROPERTY(SaveGame)
+	TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
 
 
 	// Right now dose nothing

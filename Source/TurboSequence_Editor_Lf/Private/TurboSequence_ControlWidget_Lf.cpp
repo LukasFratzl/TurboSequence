@@ -414,9 +414,11 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 			Current_SkeletalMesh_Reference = Main_Asset_To_Edit->ReferenceMeshEdited = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, NewMesh, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
 
 			LevelOfDetails.Empty();
+			TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
 			for (int32 i = GET0_NUMBER; i < MaxNumberOfLODs; ++i)
 			{
-				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(NewMesh, i, WantedMeshPath, FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)}))))
+				TArray<int32> StaticMeshIndices;
+				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(NewMesh, i, WantedMeshPath, FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})), StaticMeshIndices))
 				{
 					FMeshItem_Lf Item = FMeshItem_Lf();
 					if (i > GET9_NUMBER)
@@ -430,11 +432,18 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 					Item.StaticMesh = StaticMesh;
 					//CreateVertexMaps(Main_Asset_To_Edit, i, Item.VertexData, Item.BoneIndices);
 					LevelOfDetails.Add(Item);
+
+
+					FMeshDataOrderView_Lf Order = FMeshDataOrderView_Lf();
+					Order.StaticMeshIndices = StaticMeshIndices;
+					
+					MeshDataOrderView.Add(Order);
 				}
 			}
 			if (LevelOfDetails.Num())
 			{
 				Main_Asset_To_Edit->InstancedMeshes = LevelOfDetails;
+				Main_Asset_To_Edit->MeshDataOrderView = MeshDataOrderView;
 
 				if (GIsEditor)
 				{

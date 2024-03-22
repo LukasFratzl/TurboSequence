@@ -76,13 +76,22 @@ public:
 		//Component->bCastDynamicShadow = true;
 		//Component->SetCastInsetShadow(true);
 		//Component->bCastStaticShadow = false;
+		
+		TArray<FRenderingMaterialKeyValue_Lf> ConvertedMaterial;
+		for (const TObjectPtr<UMaterialInterface> Material : Materials)
+		{
+			FRenderingMaterialKeyValue_Lf Mat = FRenderingMaterialKeyValue_Lf();
+			Mat.MaterialKey = Material;
+
+			ConvertedMaterial.Add(Mat);
+		}
 
 		if (!RenderComponents.Contains(FromAsset))
 		{
 			FRenderingMaterialMap_Lf Map = FRenderingMaterialMap_Lf();
 			FRenderingMaterialItem_Lf Item = FRenderingMaterialItem_Lf();
 			Item.NiagaraRenderer = Component;
-			Item.Materials = Materials;
+			Item.Materials = ConvertedMaterial;
 			Map.NiagaraRenderer.Add(MaterialsHash, Item);
 			RenderComponents.Add(FromAsset, Map);
 		}
@@ -90,7 +99,7 @@ public:
 		{
 			FRenderingMaterialItem_Lf Item = FRenderingMaterialItem_Lf();
 			Item.NiagaraRenderer = Component;
-			Item.Materials = Materials;
+			Item.Materials = ConvertedMaterial;
 			RenderComponents[FromAsset].NiagaraRenderer.Add(MaterialsHash, Item);
 		}
 
@@ -138,6 +147,9 @@ public:
 
 			RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableMaterial(
 				WantedMaterialName, MaterialInstance);
+
+			// For Debugging nice...
+			RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].Materials[MaterialIdx].MaterialValue = MaterialInstance;
 		}
 
 		// Set Bounds

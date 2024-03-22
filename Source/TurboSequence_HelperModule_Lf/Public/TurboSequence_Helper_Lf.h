@@ -47,17 +47,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTurboSequence_Lf, Log, All);
 
 inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 
-//			checks if the Unreal Engine Source is 5.1
-#define IS_ENGINE_VERSION_5_1_LF ( ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 1 && ENGINE_PATCH_VERSION == 0 )
-
-//			checks if the Unreal Engine Source is 5.1.1
-#define IS_ENGINE_VERSION_5_1_1_LF ( ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 1 && ENGINE_PATCH_VERSION == 1 )
-
-//			checks if the Unreal Engine Source is 5.2
-#define IS_ENGINE_VERSION_5_2_LF ( ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 2 && ENGINE_PATCH_VERSION == 0 )
-
-//			checks if the Unreal Engine Source is 5.3
-#define IS_ENGINE_VERSION_5_3_LF ( ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 3 && ENGINE_PATCH_VERSION == 0 )
 
 //         creates INFINITY AS 4 Byte value
 #define GET_INFINITY ( TNumericLimits<float>::Max() )

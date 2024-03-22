@@ -16,6 +16,8 @@ public class TurboSequence_Editor_Lf : ModuleRules
                 "Niagara",
                 "TurboSequence_HelperModule_Lf",
                 "DeveloperSettings",
+                "MeshDescription",
+                "SkeletalMeshDescription"
             }
         );
 

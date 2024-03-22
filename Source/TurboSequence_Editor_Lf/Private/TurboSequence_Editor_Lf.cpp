@@ -139,6 +139,8 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Detected Engine or Platform change ...."));
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Prepering Meshes ...."));
 
+				TurboSequence_Asset->MeshDataOrderView.Empty();
+
 				FString WantedMeshName = FString(FString::Format(
 					TEXT("{0}_TurboSequence_Instance"), {*TurboSequence_Asset->ReferenceMeshNative->GetName()}));
 
@@ -152,11 +154,14 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 						const FString PackagePath = FPackageName::LongPackageNameToFilename(
 							Package->GetName(), FPackageName::GetAssetPackageExtension());
 						UPackageTools::LoadPackage(*PackagePath);
+
+						TArray<int32> StaticMeshOrderIndices;
+						
 						if (TObjectPtr<UStaticMesh> StaticMesh =
 							UTurboSequence_ControlWidget_Lf::GenerateStaticMeshFromSkeletalMesh(
 								TurboSequence_Asset->ReferenceMeshEdited, MeshIdx, PackagePath,
 								FString(FString::Format(
-									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)}))))
+									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)})), StaticMeshOrderIndices))
 						{
 							//FMeshItem_Lf Item = FMeshItem_Lf();
 							if (MeshIdx > GET9_NUMBER)
@@ -167,6 +172,13 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 							//CreateVertexMaps(Main_Asset_To_Edit, i, Item.VertexData, Item.BoneIndices);
 							//LevelOfDetails.Add(Item);
 							//bAssetEdited = true;
+
+							FMeshDataOrderView_Lf Order = FMeshDataOrderView_Lf();
+							Order.StaticMeshIndices = StaticMeshOrderIndices;
+
+							TurboSequence_Asset->MeshDataOrderView.Add(Order);
+
+							
 							bSkinWeightEdited = true;
 						}
 					}

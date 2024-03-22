@@ -2,7 +2,10 @@
 
 #include "TurboSequence_Utility_Lf.h"
 
+#include "BoneWeights.h"
+#include "MeshDescription.h"
 #include "TurboSequence_ComputeShaders_Lf.h"
+#include "Rendering/SkeletalMeshModel.h"
 
 
 void FTurboSequence_Utility_Lf::CreateAsyncChunkedMeshData(const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
@@ -359,6 +362,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 	const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset, const TFunction<void(bool bSuccess)>& PostCall,
 	const TObjectPtr<UWorld> World)
 {
+#if WITH_EDITOR
 	if (!IsValid(FromAsset->GlobalData))
 	{
 		UE_LOG(LogTurboSequence_Lf, Display, TEXT("it Seems the Global data is Missing...."));
@@ -434,23 +438,30 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			return;
 		}
 
+		if (!FromAsset->MeshDataOrderView.IsValidIndex(LodElement.MeshIndex))
+		{
+			return;
+		}
+
 		CreateGPUBones(LodElement, CriticalSection, FromAsset, true);
 
-		const FSkeletalMeshLODRenderData& RenderData = FromAsset->ReferenceMeshEdited->GetResourceForRendering()->
-		                                                          LODRenderData[LodElement.MeshIndex];
+		const FSkeletalMeshLODRenderData& RenderData = FromAsset->ReferenceMeshEdited->GetResourceForRendering()->LODRenderData[LodElement.MeshIndex];
 		const FSkinWeightVertexBuffer* SkinWeightBuffer = RenderData.GetSkinWeightVertexBuffer();
-		const uint32& NumVertices = RenderData.GetNumVertices();
 
-		int32 NumDataIterator = GET0_NUMBER;
-		for (uint32 i = GET0_NUMBER; i < NumVertices; ++i)
+
+		const TArray<int32>& VertexIndices = FromAsset->MeshDataOrderView[LodElement.MeshIndex].StaticMeshIndices;
+
+		const int32& NumVertices = VertexIndices.Num();
+		for (int32 VertIdx = GET0_NUMBER; VertIdx < NumVertices; ++VertIdx)
 		{
+			const int32& RealVertexIndex = VertexIndices[VertIdx];
+
 			int32 VertexIndexSection;
 			int32 SectionIndex;
-			RenderData.GetSectionFromVertexIndex(i, SectionIndex, VertexIndexSection);
+			RenderData.GetSectionFromVertexIndex(RealVertexIndex, SectionIndex, VertexIndexSection);
 
 
 			const FSkelMeshRenderSection& Section = RenderData.RenderSections[SectionIndex];
-			const uint32& VertIdx = Section.BaseVertexIndex + VertexIndexSection;
 
 			uint8 MaxSkinWeightVertex = GET0_NUMBER;
 			for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
@@ -461,41 +472,192 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 				FVector4f Indices;
 				for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
 				{
-					const uint8& RawWeight = SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx);
+					const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(RealVertexIndex, ChunkIndex + WeightIdx);
 
-					Weights[WeightIdx] = RawWeight;
+					const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
 
-					const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(VertIdx, ChunkIndex + WeightIdx);
+					const uint8& Weight = WeightFloat * 0xFF;
+
+					//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
+
+					Weights[WeightIdx] = Weight;
+
+					const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(RealVertexIndex, ChunkIndex + WeightIdx);
 
 					const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
-					                                                    Section.BoneMap, RawBoneIndex, RawWeight);
+					                                                    Section.BoneMap, RawBoneIndex, Weight);
 
 					//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
 
+					//if (IndexedBoneIndex)
+					//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
+
 					Indices[WeightIdx] = IndexedBoneIndex;
 
-					if (RawWeight)
+					if (Weight)
 					{
 						MaxSkinWeightVertex = ChunkIndex + WeightIdx;
 					}
 				}
 
 
-				Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Indices;
-				NumDataIterator++;
-				Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Weights;
-				NumDataIterator++;
+				Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER] = Indices;
+				Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER + GET1_NUMBER] = Weights;
 			}
 
 			FVector4f PerVertexCustomData_0;
-			PerVertexCustomData_0.X = MaxSkinWeightVertex;
+			//PerVertexCustomData_0.X = MaxSkinWeightVertex;
+			PerVertexCustomData_0.X = GET12_NUMBER;
 			PerVertexCustomData_0.Y = GET0_NUMBER;
 			PerVertexCustomData_0.Z = GET0_NUMBER;
 			PerVertexCustomData_0.W = GET0_NUMBER;
 
-			Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = PerVertexCustomData_0;
-			NumDataIterator++;
+			Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
 		}
+
+
+		// const uint32& NumVertices = RenderData.GetNumVertices();
+		//
+		// const FSkeletalMeshLODModel& LodModel = FromAsset->ReferenceMeshEdited->GetImportedModel()->LODModels[LodElement.MeshIndex];
+		// const uint32& SkinnedMeshVertices = LodModel.NumVertices;
+		//
+		// FMeshDescription MeshDescription;
+		// LodModel.GetMeshDescription(FromAsset->ReferenceMeshEdited, LodElement.MeshIndex, MeshDescription);
+		//
+		// int32 NumDataIterator = GET0_NUMBER;
+		// for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); SectionIndex++)
+		// {
+		// 	const FSkelMeshSection& Section = LodModel.Sections[SectionIndex];
+		//
+		// 	// Convert positions and bone weights
+		// 	const TArray<FSoftSkinVertex>& SourceVertices = Section.SoftVertices;
+		// 	for (int32 VertexIndex = GET0_NUMBER; VertexIndex < SourceVertices.Num(); VertexIndex++)
+		// 	{
+		// 		const int32 SourceVertexIndex = VertexIndex + Section.BaseVertexIndex;
+		// 		const int32 TargetVertexIndex = SourceToTargetVertexMap[SourceVertexIndex];
+		//
+		//
+		// 		uint8 MaxSkinWeightVertex = GET0_NUMBER;
+		// 		for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
+		// 		{
+		// 			const uint8& ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
+		//
+		// 			FVector4f Weights;
+		// 			FVector4f Indices;
+		// 			for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
+		// 			{
+		// 				const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(SourceVertexIndex, ChunkIndex + WeightIdx);
+		//
+		// 				const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
+		//
+		// 				const uint8& Weight = WeightFloat * 0xFF;
+		//
+		// 				//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
+		//
+		// 				Weights[WeightIdx] = Weight;
+		//
+		// 				const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(SourceVertexIndex, ChunkIndex + WeightIdx);
+		//
+		// 				const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
+		// 				                                                    Section.BoneMap, RawBoneIndex, Weight);
+		//
+		// 				//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
+		//
+		// 				//if (IndexedBoneIndex)
+		// 				//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
+		//
+		// 				Indices[WeightIdx] = IndexedBoneIndex;
+		//
+		// 				if (Weight)
+		// 				{
+		// 					MaxSkinWeightVertex = ChunkIndex + WeightIdx;
+		// 				}
+		// 			}
+		//
+		//
+		// 			Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Indices;
+		// 			NumDataIterator++;
+		// 			Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Weights;
+		// 			NumDataIterator++;
+		// 		}
+		//
+		// 		FVector4f PerVertexCustomData_0;
+		// 		//PerVertexCustomData_0.X = MaxSkinWeightVertex;
+		// 		PerVertexCustomData_0.X = GET12_NUMBER;
+		// 		PerVertexCustomData_0.Y = GET0_NUMBER;
+		// 		PerVertexCustomData_0.Z = GET0_NUMBER;
+		// 		PerVertexCustomData_0.W = GET0_NUMBER;
+		//
+		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = PerVertexCustomData_0;
+		// 		NumDataIterator++;
+		// 	}
+		// }
+
+
+		// for (uint32 i = GET0_NUMBER; i < NumVertices; ++i)
+		// {
+		// 	int32 VertexIndexSection;
+		// 	int32 SectionIndex;
+		// 	RenderData.GetSectionFromVertexIndex(i, SectionIndex, VertexIndexSection);
+		//
+		//
+		// 	const FSkelMeshRenderSection& Section = RenderData.RenderSections[SectionIndex];
+		// 	const uint32& VertIdx = Section.BaseVertexIndex + VertexIndexSection;
+		//
+		// 	uint8 MaxSkinWeightVertex = GET0_NUMBER;
+		// 	for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
+		// 	{
+		// 		const uint8& ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
+		//
+		// 		FVector4f Weights;
+		// 		FVector4f Indices;
+		// 		for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
+		// 		{
+		// 			const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx);
+		//
+		// 			const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
+		//
+		// 			const uint8& Weight = WeightFloat * 0xFF;
+		//
+		// 			//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
+		//
+		// 			Weights[WeightIdx] = Weight;
+		//
+		// 			const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(VertIdx, ChunkIndex + WeightIdx);
+		//
+		// 			const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
+		// 			                                                    Section.BoneMap, RawBoneIndex, Weight);
+		//
+		// 			//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
+		//
+		// 			//if (IndexedBoneIndex)
+		// 			//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
+		//
+		// 			Indices[WeightIdx] = IndexedBoneIndex;
+		//
+		// 			if (Weight)
+		// 			{
+		// 				MaxSkinWeightVertex = ChunkIndex + WeightIdx;
+		// 			}
+		// 		}
+		//
+		//
+		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Indices;
+		// 		NumDataIterator++;
+		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Weights;
+		// 		NumDataIterator++;
+		// 	}
+		//
+		// 	FVector4f PerVertexCustomData_0;
+		// 	//PerVertexCustomData_0.X = MaxSkinWeightVertex;
+		// 	PerVertexCustomData_0.X = GET12_NUMBER;
+		// 	PerVertexCustomData_0.Y = GET0_NUMBER;
+		// 	PerVertexCustomData_0.Z = GET0_NUMBER;
+		// 	PerVertexCustomData_0.W = GET0_NUMBER;
+		//
+		// 	Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = PerVertexCustomData_0;
+		// 	NumDataIterator++;
+		// }
 	}, EParallelForFlags::BackgroundPriority);
 
 	const int32 Slice = FMath::Min(
@@ -517,26 +679,25 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			return;
 		}
 
-		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->
-		                                                                                              SkinWeightTexture->HasPendingRenderResourceInitialization())
+		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
 		{
-			FTextureRenderTarget2DArrayResource* TextureResource = static_cast<FTextureRenderTarget2DArrayResource*>(
-				FromAsset->GlobalData->SkinWeightTexture->GameThread_GetRenderTargetResource());
-			TArray<FFloat16Color> OutputBuffer;
+			//FTextureRenderTarget2DArrayResource* TextureResource = static_cast<FTextureRenderTarget2DArrayResource*>(
+			//	FromAsset->GlobalData->SkinWeightTexture->GameThread_GetRenderTargetResource());
+			//TArray<FFloat16Color> OutputBuffer;
 			bool bValidPixels = true;
-			if (TextureResource->ReadPixels(OutputBuffer, GET0_NUMBER))
-			{
-				for (const FFloat16Color& Color : OutputBuffer)
-				{
-					if (!FMath::IsNearlyZero(Color.R.GetFloat(), 1.0f) || !FMath::IsNearlyZero(Color.G.GetFloat(), 1.0f)
-						|| !FMath::IsNearlyZero(Color.B.GetFloat(), 1.0f) || !FMath::IsNearlyZero(
-							Color.A.GetFloat(), 1.0f))
-					{
-						bValidPixels = false;
-						break;
-					}
-				}
-			}
+			// if (TextureResource->ReadFloat16Pixels(OutputBuffer,  FReadSurfaceDataFlags()))
+			// {
+			// 	for (const FFloat16Color& Color : OutputBuffer)
+			// 	{
+			// 		if (!FMath::IsNearlyZero(Color.R.GetFloat(), 1.0f) || !FMath::IsNearlyZero(Color.G.GetFloat(), 1.0f)
+			// 			|| !FMath::IsNearlyZero(Color.B.GetFloat(), 1.0f) || !FMath::IsNearlyZero(
+			// 				Color.A.GetFloat(), 1.0f))
+			// 		{
+			// 			bValidPixels = false;
+			// 			break;
+			// 		}
+			// 	}
+			// }
 			if (bValidPixels)
 			{
 				ENQUEUE_RENDER_COMMAND(TurboSequence_FillRenderThreadSkinWeightData_Lf)(
@@ -586,6 +747,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 		}
 	});
 	World->GetTimerManager().SetTimerForNextTick(WaitTimerCallback);
+
+#endif
 }
 
 void FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(FSkinnedMeshGlobalLibrary_Lf& Library,

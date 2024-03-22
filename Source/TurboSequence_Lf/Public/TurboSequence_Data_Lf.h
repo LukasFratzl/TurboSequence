@@ -427,6 +427,19 @@ struct TURBOSEQUENCE_LF_API FIKBoneData_Lf
 // };
 
 USTRUCT()
+struct TURBOSEQUENCE_LF_API FRenderingMaterialKeyValue_Lf
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UMaterialInterface> MaterialKey;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UMaterialInterface> MaterialValue;
+	
+};
+
+USTRUCT()
 struct TURBOSEQUENCE_LF_API FRenderingMaterialItem_Lf
 {
 	GENERATED_BODY()
@@ -434,8 +447,8 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialItem_Lf
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UNiagaraComponent> NiagaraRenderer;
 
-	UPROPERTY(VisibleAnywhere)
-	TArray<TObjectPtr<UMaterialInterface>> Materials;
+	UPROPERTY(EditAnywhere)
+	TArray<FRenderingMaterialKeyValue_Lf> Materials;
 };
 
 USTRUCT()

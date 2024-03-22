@@ -33,6 +33,7 @@
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "BoneContainer.h"
+#include "SkeletalMeshAttributes.h"
 #include "SkeletalMeshTypes.h"
 #include "TurboSequence_Utility_Lf.h"
 #include "Engine/SkeletalMesh.h"
@@ -381,12 +382,11 @@ public:
 
 
 	// TODO: move in helpers
-	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName)
+	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName, TArray<int32>& OutMeshIndicesOrder)
 	{
 		
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
-
 			if (!IsValid(SkeletalMesh))
 			{
 				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s"), *PackageName);
@@ -414,53 +414,110 @@ public:
 			//UE_LOG(LogTemp, Warning, TEXT("%d"), LodModel.NumVertices);
 			// 	const FSkeletalMeshLODRenderData& LODRenderData = RenderData->LODRenderData[i];
 			FMeshDescription MeshDescription;
-			LodModel.GetMeshDescription(MeshDescription, SkeletalMesh);
+			LodModel.GetMeshDescription(SkeletalMesh, LodIndex, MeshDescription);
+			
 
-			//UE_LOG(LogTemp, Warning, TEXT("%d"), MeshDescription.Vertices().Num());
+			// UE_LOG(LogTemp, Warning, TEXT("%d"), MeshDescription.Vertices().Num());
 
 			//FStaticMeshOperations::ConvertToRawMesh(*MeshDescription, RawMesh, TMap<FName, int32>());
-			FRawMesh RawMesh;
-			FStaticMeshOperations::ConvertToRawMesh(MeshDescription, RawMesh, TMap<FName, int32>());
 
-			//UE_LOG(LogTemp, Warning, TEXT("%d"), RawMesh.VertexPositions.Num());
+			// UE_LOG(LogTemp, Warning, TEXT("%d"), RawMesh.VertexPositions.Num());
 
 			const FSkeletalMeshLODRenderData& LodResource = RenderData->LODRenderData[LodIndex];
 			uint32 MaxNumTextCoord = LodResource.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
 
 			MaxNumTextureCoordinate = FMath::Max(MaxNumTextCoord + GET1_NUMBER, MaxNumTextureCoordinate);
 
-			const int32 MaxNumIndices = RawMesh.WedgeIndices.Num();
-			RawMesh.WedgeTexCoords[MaxNumTextCoord].AddDefaulted(MaxNumIndices);
-			// for (int32 VertexIndex = GET0_NUMBER; VertexIndex < MaxNumVertices; ++VertexIndex)
+			FSkeletalMeshAttributes MeshAttributes(MeshDescription);
+
+			TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = MeshAttributes.GetVertexInstanceUVs();
+			
+			VertexInstanceUVs.InsertChannel(MaxNumTextCoord);
+
+			const int32& NumIndices = LodModel.IndexBuffer.Num();
+			for (int32 Idx = GET0_NUMBER; Idx < NumIndices; ++Idx)
+			{
+				const int32 VertexID = LodModel.IndexBuffer[Idx];
+
+				//UE_LOG(LogTemp, Warning, TEXT("%d"), VertexID)
+
+				if (!OutMeshIndicesOrder.Contains(VertexID))
+				{
+					OutMeshIndicesOrder.Add(VertexID);
+				}
+
+				const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(VertexID);
+
+				VertexInstanceUVs.Set(Idx, MaxNumTextCoord, FVector2f(BitValues.X, BitValues.Y));
+			}
+			
+
+			FRawMesh RawMesh;
+			FStaticMeshOperations::ConvertToRawMesh(MeshDescription, RawMesh, TMap<FName, int32>());
+
+			// const int32 MaxNumIndices = RawMesh.WedgeIndices.Num();
+			// RawMesh.WedgeTexCoords[MaxNumTextCoord].AddDefaulted(MaxNumIndices);
+			// // for (int32 VertexIndex = GET0_NUMBER; VertexIndex < MaxNumVertices; ++VertexIndex)
+			// // {
+			// // 	//RawMesh.WedgeColors[VertexIndex] = FTurboSequence_Helper_Lf::DecodeUInt32ToColor(VertexIndex);//FVector2f(VertexIndex, GET0_NUMBER);
+			// // 	RawMesh.WedgeTexCoords[MaxNumTextCoord][VertexIndex] = FVector2f(RawMesh.WedgeIndices[VertexIndex], GET0_NUMBER);
+			// // }
+			//
+			// const int32& NumTriangles = RawMesh.FaceMaterialIndices.Num();
+			// int32 WedgeIdx = GET0_NUMBER;
+			// for (int32 TriangleIdx = GET0_NUMBER; TriangleIdx < NumTriangles; ++TriangleIdx)
 			// {
-			// 	//RawMesh.WedgeColors[VertexIndex] = FTurboSequence_Helper_Lf::DecodeUInt32ToColor(VertexIndex);//FVector2f(VertexIndex, GET0_NUMBER);
-			// 	RawMesh.WedgeTexCoords[MaxNumTextCoord][VertexIndex] = FVector2f(RawMesh.WedgeIndices[VertexIndex], GET0_NUMBER);
+			// 	for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
+			// 	{
+			// 		const uint32 SourceVertexIndex = RawMesh.WedgeIndices[WedgeIdx];
+			//
+			// 		if (!OutMeshIndicesOrder.Contains(SourceVertexIndex))
+			// 		{
+			// 			OutMeshIndicesOrder.Add(SourceVertexIndex);
+			// 		}
+			//
+			// 		// const FVector3f VertexPosA = RawMesh.VertexPositions[SourceVertexIndex];
+			// 		// const FVector3f VertexPosB = MeshDescription.GetVertexPosition(FVertexID(SourceVertexIndex));
+			// 		// if (!VertexPosA.Equals(VertexPosB))
+			// 		// {
+			// 		// 	UE_LOG(LogTemp, Warning, TEXT("Vertex is off, Static Mesh %s, Skel Mesh %s"), *VertexPosA.ToString(), *VertexPosB.ToString())
+			// 		// }
+			//
+			// 		UE_LOG(LogTemp, Warning, TEXT("%d"), SourceVertexIndex)
+			//
+			// 		const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
+			//
+			// 		RawMesh.WedgeTexCoords[MaxNumTextCoord][WedgeIdx] = FVector2f(BitValues.X, BitValues.Y);
+			//
+			// 		++WedgeIdx;
+			// 	}
 			// }
 
-			// Convert sections to polygon groups, each with their own material.
-			for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); ++SectionIndex)
-			{
-				for (uint32 TriangleID = GET0_NUMBER; TriangleID < static_cast<uint32>(LodModel.Sections[SectionIndex].NumTriangles); ++TriangleID)
-				{
-					const uint32 VertexIndexBase = TriangleID * GET3_NUMBER + LodModel.Sections[SectionIndex].BaseIndex;
-
-					for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
-					{
-						const uint32 TriangleIndex = VertexIndexBase + Corner;
-						const uint32 SourceVertexIndex = RawMesh.WedgeIndices[TriangleIndex];
-
-						const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
-
-						RawMesh.WedgeTexCoords[MaxNumTextCoord][TriangleIndex] = FVector2f(BitValues.X, BitValues.Y);
-					}
-				}
-			}
+			// DestinationRawMesh.FaceSmoothingMasks
+			//
+			// for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); ++SectionIndex)
+			// {
+			// 	for (uint32 TriangleID = GET0_NUMBER; TriangleID < static_cast<uint32>(LodModel.Sections[SectionIndex].NumTriangles); ++TriangleID)
+			// 	{
+			// 		const uint32 VertexIndexBase = TriangleID * GET3_NUMBER + LodModel.Sections[SectionIndex].BaseIndex;
+			//
+			// 		for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
+			// 		{
+			// 			const uint32 TriangleIndex = VertexIndexBase + Corner;
+			// 			const uint32 SourceVertexIndex = RawMesh.WedgeIndices[TriangleIndex];
+			//
+			// 			const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
+			//
+			// 			RawMesh.WedgeTexCoords[MaxNumTextCoord][TriangleIndex] = FVector2f(BitValues.X, BitValues.Y);
+			// 		}
+			// 	}
+			// }
 
 			//RawMeshes.Add(RawMesh);
 
 
 			// Determine which texture coordinate map should be used for storing/generating the lightmap UVs
-			const uint32 LightMapIndex = FMath::Min(MaxNumTextureCoordinate + GET1_NUMBER, static_cast<uint32>(MAX_MESH_TEXTURE_COORDS) - GET1_NUMBER);
+			//const uint32 LightMapIndex = FMath::Min(MaxNumTextureCoordinate + GET1_NUMBER, static_cast<uint32>(MAX_MESH_TEXTURE_COORDS) - GET1_NUMBER);
 
 			// Add source to new StaticMesh
 			if (RawMesh.IsValidOrFixable())
@@ -473,7 +530,7 @@ public:
 				SrcModel.BuildSettings.bUseFullPrecisionUVs = true;
 				SrcModel.BuildSettings.bGenerateLightmapUVs = false;
 				SrcModel.BuildSettings.SrcLightmapIndex = GET0_NUMBER;
-				SrcModel.BuildSettings.DstLightmapIndex = LightMapIndex;
+				SrcModel.BuildSettings.DstLightmapIndex = GET0_NUMBER;
 				SrcModel.SaveRawMesh(RawMesh);
 			}
 			else
@@ -491,7 +548,7 @@ public:
 			StaticMesh->ImportVersion = LastVersion;
 
 			// Set light map coordinate index to match DstLightmapIndex
-			StaticMesh->SetLightMapCoordinateIndex(LightMapIndex);
+			StaticMesh->SetLightMapCoordinateIndex(GET0_NUMBER);
 
 			// setup section info map
 			TArray<int32> UniqueMaterialIndices;
@@ -507,33 +564,24 @@ public:
 				SectionIndex++;
 			}
 			StaticMesh->GetOriginalSectionInfoMap().CopyFrom(StaticMesh->GetSectionInfoMap());
-
-			TArray<FText> OutErrors;
-			StaticMesh->Build(false, &OutErrors);
-			for (const FText& Error : OutErrors)
-			{
-				UE_LOG(LogTurboSequence_Lf, Error, TEXT("%s"), *Error.ToString());
-			}
-			if (OutErrors.Num())
-			{
-				return nullptr;
-			}
+			
+			StaticMesh->Build(false);
 			if (!StaticMesh->GetRenderData())
 			{
 				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s, please delete this asset manually and try again"), *PackageName);
 				return nullptr;
 			}
-			//StaticMesh->PostEditChange();
-
+			StaticMesh->PostEditChange();
+			
 			//StaticMesh->MarkPackageDirty();
-			//
-			// FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
-			// const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
-			// const float& WantedZ = MinMax.Z;
-			// Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
-			//
-			// StaticMesh->GetRenderData()->Bounds = Bounds;
-			// StaticMesh->SetExtendedBounds(Bounds);
+			
+			 FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
+			 const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
+			 const float& WantedZ = MinMax.Z;
+			 Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
+			
+			 StaticMesh->GetRenderData()->Bounds = Bounds;
+			 StaticMesh->SetExtendedBounds(Bounds);
 
 			if (SkinnedMeshVertices != StaticMesh->GetNumVertices(GET0_NUMBER))
 			{
@@ -541,7 +589,7 @@ public:
 				return nullptr;
 			}
 
-			//StaticMesh->MarkPackageDirty();
+			StaticMesh->MarkPackageDirty();
 
 			// Notify asset registry of new asset
 			FAssetRegistryModule::AssetCreated(StaticMesh);

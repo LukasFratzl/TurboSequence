@@ -46,7 +46,8 @@ public class TurboSequence_Lf : ModuleRules
 				"UMG",
 				"RenderCore", 
 				"Renderer",
-				"RHI"
+				"RHI",
+				"MeshDescription"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
