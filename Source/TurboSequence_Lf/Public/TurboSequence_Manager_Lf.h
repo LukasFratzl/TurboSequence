@@ -95,7 +95,7 @@ public:
 	}
 
 	// Will be used internally to collect garbage once per frame even when calling more than 1 time
-	bool bCollectGarbageThisFrame = false;
+	//bool bCollectGarbageThisFrame = false;
 
 
 	/**
@@ -1189,19 +1189,19 @@ public:
 		return GetFootprintAsset_RawID_Concurrent(MeshData.RootMotionMeshID);
 	}
 
-	/**
-	 * Collecting garbage of data which is not possible to shrink dynamically because the data is too much,
-	 * Stuff like:
-	 * - Animation Keyframe Data stored in the GPU
-	 *
-	 * Sometimes it makes sense to Collect is every frame it can help boosting FPS
-	 * @return True if Successful
-	 */
-	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Collect, Garbage, Clear"))
-	static bool CollectGarbage()
-	{
-		return FTurboSequence_Utility_Lf::ClearAnimationsFromLibrary(GlobalLibrary, Instance->GetThreadContext()->CriticalSection, GlobalLibrary_RenderThread);
-	}
+	// /**
+	//  * Collecting garbage of data which is not possible to shrink dynamically because the data is too much,
+	//  * Stuff like:
+	//  * - Animation Keyframe Data stored in the GPU
+	//  *
+	//  * Sometimes it makes sense to Collect is every frame it can help boosting FPS
+	//  * @return True if Successful
+	//  */
+	// UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Collect, Garbage, Clear"))
+	// static bool CollectGarbage()
+	// {
+	// 	return FTurboSequence_Utility_Lf::ClearAnimationsFromLibrary(GlobalLibrary, Instance->GetThreadContext()->CriticalSection, GlobalLibrary_RenderThread);
+	// }
 
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Custom, Data, Rendering, Per Instance") )

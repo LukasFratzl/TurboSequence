@@ -8,11 +8,11 @@ uint NumFirstGPUBones;
 uint NumCPUBones;
 uint NumMeshesPerFrame;
 
-//uint SkinWeightTextureSizeX;
-//uint SkinWeightTextureSizeY;
+// uint AnimationLibraryIndex;
+// uint NumAnimationLibraryWrite;
 
-//uint DataTextureSizeX;
-//uint DataTextureSizeY;
+uint AnimTextureSizeX;
+uint AnimTextureSizeY;
 
 uint OutputTextureSizeX;
 uint OutputTextureSizeY;
@@ -61,6 +61,8 @@ StructuredBuffer<min16uint> AnimationLayerIndex_StructuredBuffer;
 
 StructuredBuffer<float4> AnimationLibrary_StructuredBuffer;
 StructuredBuffer<min16uint> AnimationLayerLibrary_StructuredBuffer;
+
+Texture2DArray<float4> R_AnimationLibrary_InputTexture;
 
 RWTexture2DArray<float4> RW_BoneTransform_OutputTexture;
 //RWTexture2DArray<float4> RW_CustomData_OutputTexture;
@@ -587,10 +589,11 @@ float3x4 BendBoneFromAnimations_Full(in uint BoneIndexCPU, in int AnimStartIndex
 
 		uint LibraryIndexCurrent = AnimationOffset0 + BoneIndexCPU * 3;
 
-		float3x4 RuntimeBoneMatrixCurrent = float3x4(
-			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent],
-			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 1],
-			AnimationLibrary_StructuredBuffer[LibraryIndexCurrent + 2]);
+		float4 C0 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent, AnimTextureSizeX, AnimTextureSizeY)];
+		float4 C1 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent + 1, AnimTextureSizeX, AnimTextureSizeY)];
+		float4 C2 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent + 2, AnimTextureSizeX, AnimTextureSizeY)];
+		
+		float3x4 RuntimeBoneMatrixCurrent = float3x4(C0, C1, C2);
 
 		// uint AnimationOffset1 = AnimationFramePose1_StructuredBuffer[DataIdx];
 		//
@@ -669,6 +672,23 @@ void Main(
 	                                                        0,
 	                                                        OutputTextureSizeX,
 	                                                        OutputTextureSizeY);
+
+	//RW_AnimationInput_OutputTexture[uint3(0,0,11)] = float4(0,0,0,0);
+
+
+	// DebugValue[0] = 0;
+	// DebugValue[1] = NumAnimationLibraryWrite;
+	// DebugValue[2] = AnimationLibraryIndex;
+	// if (NumAnimationLibraryWrite != AnimationLibraryIndex)
+	// {
+	// 	uint RuntimeIndexAnimationLibrary = 0;
+	// 	for (uint AnimationLibraryWriteIdx = AnimationLibraryIndex; AnimationLibraryWriteIdx < NumAnimationLibraryWrite; ++AnimationLibraryWriteIdx)
+	// 	{
+	// 		RW_AnimationInput_OutputTexture[GetDimensionsFromIndex3D(AnimationLibraryWriteIdx, 512, 512)] = AnimationLibrary_StructuredBuffer[RuntimeIndexAnimationLibrary];
+	//
+	// 		RuntimeIndexAnimationLibrary++;
+	// 	}	
+	// }
 
 	//FAnimData_TurboSequence_Lf AnimData = (FAnimData_TurboSequence_Lf)0;
 	//FAnimLayer_TurboSequence_Lf AnimLayer = (FAnimLayer_TurboSequence_Lf)0;

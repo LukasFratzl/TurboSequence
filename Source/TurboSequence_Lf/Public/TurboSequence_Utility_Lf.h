@@ -651,9 +651,9 @@ public:
 	static void RemoveAnimationFromLibraryChunked(FSkinnedMeshGlobalLibrary_Lf& Library,
 	                                              FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                                              FCriticalSection& CriticalSection);
-	static bool ClearAnimationsFromLibrary(FSkinnedMeshGlobalLibrary_Lf& Library, FCriticalSection& CriticalSection,
-	                                       FSkinnedMeshGlobalLibrary_RenderThread_Lf&
-	                                       Library_RenderThread);
+	// static bool ClearAnimationsFromLibrary(FSkinnedMeshGlobalLibrary_Lf& Library, FCriticalSection& CriticalSection,
+	//                                        FSkinnedMeshGlobalLibrary_RenderThread_Lf&
+	//                                        Library_RenderThread);
 
 	static int32 AddAnimationToLibraryChunked(FSkinnedMeshGlobalLibrary_Lf& Library,
 	                                          FCriticalSection& CriticalSection, int32& CPUIndices,

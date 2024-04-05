@@ -582,7 +582,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 
 		FTurboSequence_UpdateContext_Lf UpdateContext = FTurboSequence_UpdateContext_Lf();
 		UpdateContext.GroupIndex = CurrentUpdateGroupIndex;
-		UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
+		//UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
 
 		ATurboSequence_Manager_Lf::SolveMeshes_GameThread(UpdateGroupsDemo.DeltaTime[DeltaTimeIndex], GetWorld(), UpdateContext);
 		UpdateGroupsDemo.DeltaTime[DeltaTimeIndex] = 0;
@@ -595,7 +595,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 	{
 		FTurboSequence_UpdateContext_Lf UpdateContext = FTurboSequence_UpdateContext_Lf();
 		UpdateContext.GroupIndex = 0;
-		UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
+		//UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
 
 		ATurboSequence_Manager_Lf::SolveMeshes_GameThread(DeltaTime, GetWorld(), UpdateContext);
 	}

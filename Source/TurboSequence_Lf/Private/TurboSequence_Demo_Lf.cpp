@@ -132,7 +132,7 @@ void ATurboSequence_Demo_Lf::Tick(float DeltaTime)
 
 		FTurboSequence_UpdateContext_Lf UpdateContext = FTurboSequence_UpdateContext_Lf();
 		UpdateContext.GroupIndex = UpdateGroupIndex;
-		UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
+		//UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
 
 		// Background Groups
 		SolveGroup(UpdateGroupIndex, UpdateGroupDeltaTimes[UpdateGroupIndex], CameraRotation,
@@ -264,8 +264,6 @@ void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
 
 				Mesh.DefaultUpdateGroupIndex = GroupIndex;
 				Mesh.CurrentUpdateGroupIndex = GroupIndex;
-
-				UTurboSequence_ThreadContext_Lf* ThreadContext = NewObject<UTurboSequence_ThreadContext_Lf>();
 
 				ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(GroupIndex, MeshData);
 				Meshes.Add(MeshData.RootMotionMeshID, Mesh);

@@ -16,6 +16,85 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	// ID for memory management
 	uint32 ShaderID;
 
+	double GetNumMB()
+	{
+		int64 Bytes = 0;
+		int32 Num;
+
+		Num = BoneSpaceAnimationIKIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = PerMeshCustomDataIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = ReferenceNumCPUBones.Num();
+		Bytes += Num * 2;
+
+		//Num = AnimationRawData_RenderThread.Num();
+		//Bytes += Num * 2 * 4;
+
+		Bytes += 4;
+		Bytes += 4;
+		Bytes += 4;
+
+		Num = PerMeshCustomDataIndex_Global_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = PerMeshCustomDataLod_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = PerMeshCustomDataCollectionIndex_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = ReferenceNumCPUBones_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = AnimationStartIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = AnimationEndIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = AnimationFramePose0_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = AnimationWeights_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = AnimationLayerIndex_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = AnimationLayers_RenderThread.Num();
+		Bytes += Num * 2;
+
+		Num = BoneSpaceAnimationIKStartIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = BoneSpaceAnimationIKEndIndex_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = BoneSpaceAnimationIKInput_RenderThread.Num();
+		Bytes += Num * 2 * 4;
+
+		Num = BoneSpaceAnimationIKData_RenderThread.Num();
+		Bytes += Num * 4;
+
+		Num = CPUInverseReferencePose.Num();
+		Bytes += Num * 2 * 4;
+
+		Num = Indices.Num();
+		Bytes += Num * 2 * 4;
+
+		Bytes += 4;
+		Bytes += 4;
+		Bytes += 4;
+
+
+		double BytesDouble = (double)Bytes;
+
+		return BytesDouble / 1000.0 / 1000.0;
+	}
+
 	// This is for the CPU Memory
 	//TArray<FVector4f> BoneSpaceAnimationIKInput;
 	// TArray<int32> BoneSpaceAnimationIKData;
@@ -32,7 +111,7 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	//TArray<int32> AnimationFrameMaxFrames;
 	//TArray<int32> AnimationOffset;
 
-	TArray<FVector4f> AnimationRawData_RenderThread;
+	//TArray<FVector4f> AnimationRawData_RenderThread;
 
 	// Minimals getting uploaded to the GPU
 	int32 NumMeshes;
@@ -90,12 +169,16 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	int32 NumMaxCPUBones;
 	int32 NumMaxGPUBones;
 	int32 NumMaxLevelOfDetails;
-	//int32 NumFirstLodGPUBones;
+
+	//int32 AnimationLibraryMaxNum_Previous;
+	//int32 AnimationLibraryMaxNum_Current;
 
 	bool bUse32BitTransformTexture;
 
 	// Debug
 	int32 NumDebugData;
+
+	TObjectPtr<UTextureRenderTarget2DArray> AnimationLibraryTexture;
 
 	//bool bNeedSolveThisFrame;
 
@@ -111,6 +194,11 @@ struct TURBOSEQUENCE_SHADER_LF_API FSettingsComputeShader_Params_Lf
 
 	TArray<FVector4f> SettingsInput;
 	//TArray<FVector4f> SettingsInput_Copy;
+
+	bool bIsAdditiveWrite;
+
+	uint32 AdditiveWriteBaseIndex = GET0_NUMBER;
+	//uint32 NumAdditiveWrite_Previous = GET0_NUMBER;
 
 	//FIntVector3 TargetDimensions;
 };
@@ -131,6 +219,7 @@ public:
 	inline static const FString GraphName = TEXT("TurboSequence_MeshUnit_ComputeShaderExecute_{0}");
 	inline static const FString DebugName = TEXT("TurboSequence_MeshUnit_Debug_{0}");
 	inline static const FString BoneTransformsTextureDebugName = TEXT("TurboSequence_Write_Texture_BoneTransform_Library_{0}");
+	inline static const FString AnimationLibraryTextureDebugName = TEXT("TurboSequence_Write_Texture_Animation_Library_{0}");
 	inline static const FString DataTextureDebugName = TEXT("TurboSequence_Write_Texture_CustomData_Library_{0}");
 	inline static const FString AnimationLibraryBufferDebugName = TEXT("TurboSequence_AnimationLibrary_Buffer_{0}");
 	inline static const FString RefPoseDebugName = TEXT("TurboSequence_ReferencePose_Input_{0}");
@@ -178,11 +267,13 @@ public:
 		SHADER_PARAMETER(int, NumCPUBones)
 		SHADER_PARAMETER(int, NumMeshesPerFrame)
 
-		//SHADER_PARAMETER(int, SkinWeightTextureSizeX)
-		//SHADER_PARAMETER(int, SkinWeightTextureSizeY)
+		//SHADER_PARAMETER(int, AnimationLibraryIndex)
+		//SHADER_PARAMETER(int, NumAnimationLibraryWrite)
 
 		//SHADER_PARAMETER(int, DataTextureSizeX)
 		//SHADER_PARAMETER(int, DataTextureSizeY)
+		SHADER_PARAMETER(int, AnimTextureSizeX)
+		SHADER_PARAMETER(int, AnimTextureSizeY)
 
 		SHADER_PARAMETER(int, OutputTextureSizeX)
 		SHADER_PARAMETER(int, OutputTextureSizeY)
@@ -229,10 +320,12 @@ public:
 		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationID_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerIndex_StructuredBuffer)
 
-		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, AnimationLibrary_StructuredBuffer)
+		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, AnimationLibrary_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerLibrary_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_AnimationLibrary_InputTexture)
+
+		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_AnimationLibrary_InputTexture)
 		//
+		//SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_AnimationInput_OutputTexture)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransform_OutputTexture)
 		//SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_CustomData_OutputTexture)
 
@@ -278,6 +371,7 @@ public:
 		SHADER_PARAMETER(uint32, TextureDimensionX)
 		SHADER_PARAMETER(uint32, TextureDimensionY)
 		SHADER_PARAMETER(uint32, NumPixelPerThread)
+		SHADER_PARAMETER(uint32, BaseIndex)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FVector4f>, BoneWeights_StructuredBuffer)
 
@@ -442,7 +536,7 @@ public:
 	 */
 	static void DispatchRenderThread(
 		FRHICommandListImmediate& RHICmdList,
-		FSettingsComputeShader_Params_Lf Params,
+		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture
 	);
 
@@ -458,7 +552,7 @@ public:
 	{
 		// CREATE A RENDER COMMAND WHICH DISPATCHES THE SHADER ON THE RENDER THREAD
 		ENQUEUE_RENDER_COMMAND(TurboSequence_Settings_ComputeShader_Lf)(
-			[Params, OutputTexture](FRHICommandListImmediate& RHICmdList)
+			[&Params, OutputTexture](FRHICommandListImmediate& RHICmdList)
 			{
 				DispatchRenderThread(RHICmdList, Params, OutputTexture);
 			});

@@ -255,8 +255,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateManager = false;
 
-	UPROPERTY(EditAnywhere)
-	bool bCollectGarbageThisFrame = false;
+	//UPROPERTY(EditAnywhere)
+	//bool bCollectGarbageThisFrame = false;
 
 	UPROPERTY(EditAnywhere)
 	TArray<EFeatureDemoEnableFeature_Lf> EnableFlags;

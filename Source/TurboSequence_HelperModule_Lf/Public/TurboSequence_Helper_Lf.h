@@ -756,7 +756,7 @@ public:
 		{
 			UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Array with ID -> %d is Length 0"), Id);
 		}
-		// else if (Array.Num() > 22000 && Id != 19)
+		// else if (Array.Num() > 1000 && Id != -1)
 		// {
 		// 	UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Array with ID -> %d is Length Greater than 22000 -> %d"), Id, Array.Num());
 		// }
@@ -1516,19 +1516,17 @@ public:
 	}
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureSRVRef CreateReadRenderTargetArrayTexture_Half4_Out(
-		FRDGBuilder& GraphBuilder, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName,
-		const FStaticShaderPlatform& ShaderPlatform)
+		FRDGBuilder& GraphBuilder, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName)
 	{
 		TRefCountPtr<IPooledRenderTarget> PooledRenderTarget;
 		FRDGTextureRef OutputTextureRef;
 		return CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef, Texture,
-		                                                    TextureName, ShaderPlatform);
+		                                                    TextureName);
 	}
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureSRVRef CreateReadRenderTargetArrayTexture_Half4_Out(
 		FRDGBuilder& GraphBuilder, TRefCountPtr<IPooledRenderTarget>& PooledRenderTarget,
-		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName,
-		const FStaticShaderPlatform& ShaderPlatform)
+		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName)
 	{
 		// Get the render target resource
 		const FRenderTarget* RenderTargetResource = Texture.GetRenderTargetResource();

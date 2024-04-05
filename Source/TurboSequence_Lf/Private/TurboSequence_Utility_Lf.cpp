@@ -399,10 +399,10 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 		return;
 	}
 
-	FSettingsComputeShader_Params_Lf Params;
-	Params.bUse32BitTexture = false;
-	Params.ShaderID = GetTypeHash(FromAsset);
-	Params.SettingsInput.Empty();
+	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams = FSettingsComputeShader_Params_Lf();
+	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.bUse32BitTexture = false;
+	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.ShaderID = GetTypeHash(FromAsset);
+	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Empty();
 
 	FromAsset->SetReferenceSkeleton(GetReferenceSkeleton(FromAsset, true));
 
@@ -427,7 +427,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 		NumPixels += NumVertices * FTurboSequence_Helper_Lf::NumSkinWeightPixels;
 	}
-	Params.SettingsInput.AddUninitialized(NumPixels);
+	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.AddUninitialized(NumPixels);
 
 	const uint8& NumLevelOfDetails = Reference.LevelOfDetails.Num();
 	ParallelFor(NumLevelOfDetails, [&](const int32& LodIdx)
@@ -501,8 +501,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 				}
 
 
-				Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER] = Indices;
-				Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER + GET1_NUMBER] = Weights;
+				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER] = Indices;
+				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER + GET1_NUMBER] = Weights;
 			}
 
 			FVector4f PerVertexCustomData_0;
@@ -512,7 +512,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			PerVertexCustomData_0.Z = GET0_NUMBER;
 			PerVertexCustomData_0.W = GET0_NUMBER;
 
-			Params.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
+			FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
 		}
 
 
@@ -662,7 +662,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 	const int32 Slice = FMath::Min(
 		FMath::CeilToInt(
-			static_cast<float>(Params.SettingsInput.Num()) / static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023);
+			static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Num()) / static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023);
 
 	FromAsset->GlobalData->SkinWeightTexture->Init(GET128_NUMBER, GET128_NUMBER, Slice, PF_FloatRGBA);
 	FromAsset->GlobalData->SkinWeightTexture->UpdateResourceImmediate(true);
@@ -670,7 +670,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 	FromAsset->MeshDataCustomData = GET24_NUMBER;
 
 	FTimerDelegate WaitTimerCallback;
-	WaitTimerCallback.BindLambda([Params, FromAsset, PostCall, World, WaitTimerCallback]
+	WaitTimerCallback.BindLambda([FromAsset, PostCall, World, WaitTimerCallback]
 	{
 		FromAsset->MeshDataCustomData--;
 		if (FromAsset->MeshDataCustomData < GET0_NUMBER)
@@ -701,10 +701,10 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			if (bValidPixels)
 			{
 				ENQUEUE_RENDER_COMMAND(TurboSequence_FillRenderThreadSkinWeightData_Lf)(
-					[Params, FromAsset](FRHICommandListImmediate& RHICmdList)
+					[FromAsset](FRHICommandListImmediate& RHICmdList)
 					{
 						FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
-							RHICmdList, Params, FromAsset->GlobalData->SkinWeightTexture);
+							RHICmdList, FromAsset->GlobalData->CachedMeshDataCreationSettingsParams, FromAsset->GlobalData->SkinWeightTexture);
 					});
 
 				ENQUEUE_RENDER_COMMAND(TurboSequence_FillRenderThreadSkinWeightData_Iteration2_Lf)(
@@ -718,6 +718,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 								FromAsset->MeshDataCustomData--;
 								if (FromAsset->MeshDataCustomData < GET0_NUMBER)
 								{
+									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams = FSettingsComputeShader_Params_Lf();
 									PostCall(false);
 									return;
 								}
@@ -725,6 +726,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 								if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !
 									FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
 								{
+									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams = FSettingsComputeShader_Params_Lf();
 									PostCall(true);
 								}
 								else
@@ -857,35 +859,35 @@ void FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(FSkinnedMeshGl
 }
 
 
-bool FTurboSequence_Utility_Lf::ClearAnimationsFromLibrary(FSkinnedMeshGlobalLibrary_Lf& Library,
-                                                           FCriticalSection& CriticalSection,
-                                                           FSkinnedMeshGlobalLibrary_RenderThread_Lf&
-                                                           Library_RenderThread)
-{
-	if (Library.AnimationLibraryMaxNum)
-	{
-		for (TTuple<FUintVector, FAnimationLibraryData_Lf>& LibraryData : Library.AnimationLibraryData)
-		{
-			const int32& NumKeyframes = LibraryData.Value.KeyframesFilled.Num();
-			for (int32 i = GET0_NUMBER; i < NumKeyframes; ++i)
-			{
-				LibraryData.Value.KeyframesFilled[i] = INDEX_NONE;
-			}
-		}
-
-		Library.AnimationLibraryMaxNum = GET0_NUMBER;
-		Library.AnimationLibraryDataAllocatedThisFrame.Empty();
-
-		ENQUEUE_RENDER_COMMAND(TurboSequence_ClearLibraryAnimations_Lf)(
-			[&Library_RenderThread](FRHICommandListImmediate& RHICmdList)
-			{
-				Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.Empty();
-			});
-
-		return true;
-	}
-	return false;
-}
+// bool FTurboSequence_Utility_Lf::ClearAnimationsFromLibrary(FSkinnedMeshGlobalLibrary_Lf& Library,
+//                                                            FCriticalSection& CriticalSection,
+//                                                            FSkinnedMeshGlobalLibrary_RenderThread_Lf&
+//                                                            Library_RenderThread)
+// {
+// 	if (Library.AnimationLibraryMaxNum)
+// 	{
+// 		for (TTuple<FUintVector, FAnimationLibraryData_Lf>& LibraryData : Library.AnimationLibraryData)
+// 		{
+// 			const int32& NumKeyframes = LibraryData.Value.KeyframesFilled.Num();
+// 			for (int32 i = GET0_NUMBER; i < NumKeyframes; ++i)
+// 			{
+// 				LibraryData.Value.KeyframesFilled[i] = INDEX_NONE;
+// 			}
+// 		}
+//
+// 		Library.AnimationLibraryMaxNum = GET0_NUMBER;
+// 		Library.AnimationLibraryDataAllocatedThisFrame.Empty();
+//
+// 		// ENQUEUE_RENDER_COMMAND(TurboSequence_ClearLibraryAnimations_Lf)(
+// 		// 	[&Library_RenderThread](FRHICommandListImmediate& RHICmdList)
+// 		// 	{
+// 		// 		Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.Empty();
+// 		// 	});
+//
+// 		return true;
+// 	}
+// 	return false;
+// }
 
 int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobalLibrary_Lf& Library,
                                                               FCriticalSection& CriticalSection,

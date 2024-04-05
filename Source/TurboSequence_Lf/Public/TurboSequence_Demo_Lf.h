@@ -193,8 +193,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateManager = false;
 
-	UPROPERTY(EditAnywhere)
-	bool bCollectGarbageThisFrame = false;
+	//UPROPERTY(EditAnywhere)
+	//bool bCollectGarbageThisFrame = false;
 
 	UPROPERTY(EditAnywhere)
 	int32 NumInstancesPerUpdateGroup = 21000;

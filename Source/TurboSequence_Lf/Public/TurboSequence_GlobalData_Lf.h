@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TurboSequence_ComputeShaders_Lf.h"
 #include "TurboSequence_Helper_Lf.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DataAsset.h"
@@ -53,12 +54,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UTextureRenderTarget2DArray> SkinWeightTexture;
 
-	//UPROPERTY(EditAnywhere)
-	//TObjectPtr<UTextureRenderTarget2DArray> CustomDataTexture;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTextureRenderTarget2DArray> AnimationLibraryTexture;
 
 	UPROPERTY(EditAnywhere)
 	bool bUseHighPrecisionAnimationMode = true;
 
 	//UPROPERTY(EditAnywhere)
 	//TSubclassOf<UTurboSequence_FootprintAsset_Lf> Asset;
+
+	FSettingsComputeShader_Params_Lf CachedMeshDataCreationSettingsParams;
 };

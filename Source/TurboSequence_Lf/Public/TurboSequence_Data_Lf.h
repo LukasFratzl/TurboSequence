@@ -929,15 +929,16 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	FSettingsComputeShader_Params_Lf SkinWeightParams;
 	FMeshUnitComputeShader_Params_Lf BoneTransformParams;
 
+	FSettingsComputeShader_Params_Lf AnimationLibraryParams;
+
 	uint32 NumMeshesVisibleCurrentFrame = GET0_NUMBER;
 	uint32 NumIKPixelCurrentFrame = GET0_NUMBER;
 	uint32 NumAnimationsCurrentFrame = GET0_NUMBER;
 
 	TMap<uint32, FSkinnedMeshRuntime_RenderThread_Lf> RuntimeSkinnedMeshes;
 	TArray<uint32> RuntimeSkinnedMeshesHashMap;
-
-	//TArray<FUpdateGroup_RenderThread_Lf> UpdateGroups;
-	//int32 CurrentUpdateGroupIndex = GET0_NUMBER;
+	
+	uint32 AnimationLibraryMaxNum = GET0_NUMBER;
 
 	TMap<uint32, int32> MeshIDToGlobalIndex;
 

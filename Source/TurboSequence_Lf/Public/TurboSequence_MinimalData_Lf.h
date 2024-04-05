@@ -495,6 +495,6 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 GroupIndex = GET0_NUMBER;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCollectGarbageThisFrame = true;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//bool bCollectGarbageThisFrame = true;
 };

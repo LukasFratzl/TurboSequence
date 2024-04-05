@@ -39,6 +39,11 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		return;
 	}
 
+	if (!IsValid(Params.AnimationLibraryTexture))
+	{
+		return;
+	}
+
 	// if (!DataOutputTexture->SizeX || !DataOutputTexture->SizeY || !DataOutputTexture->Slices)
 	// {
 	// 	return;
@@ -83,10 +88,31 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		{
 			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTexture->SizeX, AnimationOutputTexture->SizeY, AnimationOutputTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_FloatRGBA);
 		}
+
+		MeshUnitPassParameters->R_AnimationLibrary_InputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *Params.AnimationLibraryTexture, TEXT("AnimationLibrary"));
+
+		// FRDGTextureRef AnimationInputTextureRef;
+		// MeshUnitPassParameters->RW_AnimationInput_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationInputTextureRef, Params.AnimationLibraryTexture->SizeX, Params.AnimationLibraryTexture->SizeY, Params.AnimationLibraryTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryTextureDebugName, Params.ShaderID), PF_FloatRGBA);
+
+
 		//FRDGTextureRef DataOutputTextureRef;
 		//MeshUnitPassParameters->RW_CustomData_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, DataOutputTextureRef, DataOutputTexture->SizeX, DataOutputTexture->SizeY, DataOutputTexture->Slices,*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::DataTextureDebugName, Params.ShaderID), PF_FloatRGBA);
 
-		MeshUnitPassParameters->AnimationLibrary_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Params.AnimationRawData_RenderThread, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryBufferDebugName, Params.ShaderID), true);
+		// if (Params.AnimationLibraryMaxNum_Previous != Params.AnimationLibraryMaxNum_Current)
+		// {
+		// 	MeshUnitPassParameters->AnimationLibrary_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Params.AnimationRawData_RenderThread, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryBufferDebugName, Params.ShaderID), true);
+		//
+		// 	//MeshUnitPassParameters->NumAnimationLibraryWrite = Params.AnimationRawData_RenderThread.Num();
+		// }
+		// else
+		// {
+		// 	TArray<FVector4f> DummyLibraryData;
+		// 	DummyLibraryData.AddUninitialized(GET1_NUMBER);
+		//
+		// 	MeshUnitPassParameters->AnimationLibrary_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, DummyLibraryData, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryBufferDebugName, Params.ShaderID), false);
+		//
+		// 	//MeshUnitPassParameters->NumAnimationLibraryWrite = GET1_NUMBER;
+		// }
 
 		// MeshUnitPassParameters->R_AnimationLibrary_InputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *AnimationLibraryTexture, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryTextureDebugName, Params.ShaderID));
 
@@ -102,6 +128,10 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 
 		MeshUnitPassParameters->OutputTextureSizeX = AnimationOutputTexture->SizeX;
 		MeshUnitPassParameters->OutputTextureSizeY = AnimationOutputTexture->SizeY;
+
+		MeshUnitPassParameters->AnimTextureSizeX = Params.AnimationLibraryTexture->SizeX;
+		MeshUnitPassParameters->AnimTextureSizeY = Params.AnimationLibraryTexture->SizeY;
+		
 		//MeshUnitPassParameters->SkinWeightTextureSizeX = Params.SkinWeightTextureDimensions.X;
 		//MeshUnitPassParameters->SkinWeightTextureSizeY = Params.SkinWeightTextureDimensions.Y;
 
@@ -119,6 +149,8 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->NumMeshesPerFrame = Params.NumMeshes;
 		MeshUnitPassParameters->NumPixelBuffer = FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer;
 		MeshUnitPassParameters->NumCustomStates = FTurboSequence_Helper_Lf::NumCustomStates;
+		//MeshUnitPassParameters->AnimationLibraryIndex = Params.AnimationLibraryMaxNum_Previous;
+		//MeshUnitPassParameters->NumAnimationLibraryWrite = Params.AnimationLibraryMaxNum_Current;
 		//MeshUnitPassParameters->NumCustomDataPixels = FTurboSequence_Helper_Lf::NumInstanceCustomDataPixel;
 		//MeshUnitPassParameters->bIsSimpleAnimationMode = Params.bSimpleAnimationMode;
 		// if (!Params.BoneSpaceAnimationIKInput.Num())
@@ -185,21 +217,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 
 		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputTexture, AnimationOutputTextureRef, AnimationRenderTargetCopyInfo);
 
-		// const FRDGTextureRef RenderTargetCustomDataOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(DataOutputTexture->GetRenderTargetResource()->GetTexture2DArrayRHI(), *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::CustomDataTextureCopyDebugName, Params.ShaderID)));
-		//
-		// FRHICopyTextureInfo CustomDataRenderTargetCopyInfo = FRHICopyTextureInfo();
-		// CustomDataRenderTargetCopyInfo.NumSlices = DataOutputTexture->Slices;
 
-		//AddCopyTexturePass(GraphBuilder, RenderTargetCustomDataOutputTexture, DataOutputTextureRef, CustomDataRenderTargetCopyInfo);
-
-		// GraphBuilder.AddPass(
-		// 	RDG_EVENT_NAME("TurboSequence_Execute_Clear_CustomData_Texture %d", Params.ShaderID),
-		// 	MeshUnitPassParameters,
-		// 	ERDGPassFlags::Compute,
-		// 	[&MeshUnitPassParameters](FRHIComputeCommandList& RHICommandList)
-		// 	{
-		// 		RHICommandList.ClearUAVFloat(MeshUnitPassParameters->RW_CustomData_OutputTexture->GetRHI(), FLinearColor::Transparent);
-		// 	});
 		GraphBuilder.AddPass(
 			RDG_EVENT_NAME("TurboSequence_Execute_Writing_Transform_Texture %d", Params.ShaderID),
 			MeshUnitPassParameters,
@@ -239,6 +257,9 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		// Execute the graph
 		GraphBuilder.Execute();
 
+
+		//Params.AnimationRawData_RenderThread.Reset();
+
 		// if (Params.TestIteration >= Params.MaxFrames)
 		// {
 		// 	Params.TestIteration = GET0_NUMBER;
@@ -249,7 +270,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 // RUNS THE SHADER ON THE RENDER THREAD
 void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	FRHICommandListImmediate& RHICmdList,
-	FSettingsComputeShader_Params_Lf Params,
+	FSettingsComputeShader_Params_Lf& Params,
 	UTextureRenderTarget2DArray* OutputTexture
 )
 {
@@ -271,31 +292,18 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	{
 		return;
 	}
-
-	// CREATE THE RDG GRAPH
+	
 	FRDGBuilder GraphBuilder(RHICmdList, FRDGEventName(*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::GraphName, Params.ShaderID)), ERDGBuilderFlags::AllowParallelExecute);
-	// WE DON'T DO ANY VISUAL APPEARANCE AND ONLY DO HEAVY WORK ON THE GPU WITH AsyncCompute SHADERS
-	// WHICH IS SUPPORTED ON Vulkan AND DX11 AND SHOULD RUN ON ALL MODERN DEVICES
-	// SO WE USE FPermutationDomain = FShaderPermutationNone;
+	
 	const FTurboSequence_Settings_CS_Lf::FPermutationDomain PermutationVector;
-	// HERE WE CREATE THE ACTUAL SHADER, WE USE GMaxRHIFeatureLevel BECAUSE IT SUPPORTS ALL FEATURES, SIMPLY
-	// BECAUSE IT'S A COMPUTE SHADER AND SHOULD RUN ON Vulkan AND DX11 ON ALL DEVICES
+	
 	TShaderMapRef<FTurboSequence_Settings_CS_Lf> ComputeShader(GetGlobalShaderMap(GMaxRHIFeatureLevel), PermutationVector);
-	// HERE WE ALLOCATE THE PARAMETERS FOR THE SHADER SO WE CAN FILL IT LATER DOWN THE ROAD
+	
 	FTurboSequence_Settings_CS_Lf::FParameters* PassParameters = GraphBuilder.AllocParameters<FTurboSequence_Settings_CS_Lf::FParameters>();
-	// 8 192 IS THE TEXTURE SIZE X, WE ITERATE 32 THREADS x 16 CHUNKS x 16 PIXEL ON THE X
-	// 8 192 IS THE TEXTURE SIZE Y, WE ITERATE 32 THREADS x 16 CHUNKS x 16 PIXEL ON THE Y
-	// SO WE NEED 32x32 THREADS AND LEAVING THE 3rd DIMENSION TO 1
+	
 	FIntVector GroupCount = FComputeShaderUtils::GetGroupCount(FIntVector(FTurboSequence_Settings_CS_Lf::NumThreads.X, FTurboSequence_Settings_CS_Lf::NumThreads.Y, GET1_NUMBER), FComputeShaderUtils::kGolden2DGroupSize);
 
-	// CREATE THE AnimationLibraryOutputTextureRef FOR LATER DOWN THE ROAD FOR QueueTextureExtraction
-	// BECAUSE WE WANT COPY THE OUTPUT LATER INTO THE RENDER TARGET TEXTURE
 	FRDGTextureRef SettingOutputTextureRef;
-
-	//const int32& NumPixels = Params.SettingsInput.Num();
-	//const int16& SizeY = FMath::CeilToInt(static_cast<float>(NumPixels) / static_cast<float>(OutputTexture->SizeY));
-
-	// ALLOCATE THE PASS PARAMETER RW_AnimationLibrary_OutputTexture WITH CreateWriteTexture_Half4_Out
 	if (Params.bUse32BitTexture)
 	{
 		PassParameters->RW_Settings_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, SettingOutputTextureRef, OutputTexture->SizeX, OutputTexture->SizeY, OutputTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::WriteTextureDebugName, Params.ShaderID), PF_A32B32G32R32F);
@@ -304,36 +312,51 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	{
 		PassParameters->RW_Settings_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, SettingOutputTextureRef, OutputTexture->SizeX, OutputTexture->SizeY, OutputTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::WriteTextureDebugName, Params.ShaderID), PF_FloatRGBA);
 	}
-
-	// ALLOCATE THE PASS PARAMETER KeyFrame_Input_In_Pixel_StructuredBuffer THIS ARE THE KEYFRAMES WHICH
-	// WRITES THE ANIMATIONS TO RW_AnimationLibrary_OutputTexture
-	// if (!Params.SettingsInput.Num())
-	// {
-	// 	Params.SettingsInput.AddUninitialized(GET1_NUMBER);
-	// }
+	
 	PassParameters->BoneWeights_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Params.SettingsInput, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::DataInputDebugName, Params.ShaderID), true);
-
-	// COPY THE DebugOutputBufferRef FOR DEBUGGING THE SHADER
-	//FRDGBufferRef DebugOutputBufferRef;
-	// CREATE A DEBUG WRITE BUFFER AND ALLOCATE DebugValue
-	//PassParameters->DebugValue = FTurboSequence_Helper_Lf::CreateDebugWriteBuffer(GraphBuilder, DebugOutputBufferRef);
 
 	PassParameters->TextureDimensionX = OutputTexture->SizeX;
 	PassParameters->TextureDimensionY = OutputTexture->SizeY;
 	const int32& NumThreads = FTurboSequence_Settings_CS_Lf::NumThreads.X * FTurboSequence_Settings_CS_Lf::NumThreads.Y;
 	const int32& NumPixelsPerThread = FMath::CeilToInt32(static_cast<float>(Params.SettingsInput.Num()) / static_cast<float>(NumThreads));
 	PassParameters->NumPixelPerThread = NumPixelsPerThread;
+	if (Params.bIsAdditiveWrite)
+	{
+		PassParameters->BaseIndex = Params.AdditiveWriteBaseIndex;
 
-	//UE_LOG(LogTemp, Warning, TEXT("SizeY -> %d | NumPixels -> %d | NumPixelsPerThread -> %d | TexParamY -> %d | TexParamZ -> %d"), SizeY, NumPixels, NumPixelsPerThread, Params.TargetDimensions.Y, Params.TargetDimensions.Z);
+		const uint16& NumSlicesWritten = FMath::Min(FMath::CeilToInt(static_cast<float>((Params.AdditiveWriteBaseIndex + Params.SettingsInput.Num()) / (OutputTexture->SizeX * OutputTexture->SizeY))) + GET1_NUMBER, 1024);
 
-	GraphBuilder.AddPass(
-		RDG_EVENT_NAME("Execute_TurboSequence_Settings_Clear_SettingsTexture %d", Params.ShaderID),
-		PassParameters,
-		ERDGPassFlags::Compute,
-		[&PassParameters](FRHIComputeCommandList& RHICommandList)
+		if (NumSlicesWritten >= OutputTexture->Slices)
 		{
-			RHICommandList.ClearUAVFloat(PassParameters->RW_Settings_OutputTexture->GetRHI(), FLinearColor::Transparent);
-		});
+			UE_LOG(LogTurboSequence_Lf, Warning, TEXT("You run out of Animation Pixel Space, which mean the Data Texture is on it's limits, you can resize the Data Texture when you navigate to ProjectDirectory/Plugins/TurboSequence/Content/Resources/T_TurboSequence_AnimationLibraryTexture_Lf, Make sure to Increase Slices or Upper the X Y ...."));
+		}
+	}
+	else
+	{
+		PassParameters->BaseIndex = GET0_NUMBER;
+	}
+
+	const FRDGTextureRef RenderTargetOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OutputTexture->GetRenderTargetResource()->GetTextureRHI(), *FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName));
+
+	FRHICopyTextureInfo CopyInfo = FRHICopyTextureInfo();
+	CopyInfo.NumSlices = OutputTexture->Slices;
+	
+	
+	if (Params.bIsAdditiveWrite)
+	{
+		AddCopyTexturePass(GraphBuilder, RenderTargetOutputTexture, SettingOutputTextureRef, CopyInfo);
+	}
+	else
+	{
+		GraphBuilder.AddPass(
+			RDG_EVENT_NAME("Execute_TurboSequence_Settings_Clear_SettingsTexture %d", Params.ShaderID),
+			PassParameters,
+			ERDGPassFlags::Compute,
+			[&PassParameters](FRHIComputeCommandList& RHICommandList)
+			{
+				RHICommandList.ClearUAVFloat(PassParameters->RW_Settings_OutputTexture->GetRHI(), FLinearColor::Transparent);
+			});	
+	}
 	GraphBuilder.AddPass(
 		RDG_EVENT_NAME("Execute_TurboSequence_Settings_Input %d", Params.ShaderID),
 		PassParameters,
@@ -343,33 +366,8 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 			FComputeShaderUtils::Dispatch(RHICommandList, ComputeShader, *PassParameters, GroupCount);
 		});
 
-	const FRDGTextureRef RenderTargetOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(OutputTexture->GetRenderTargetResource()->GetTextureRHI(), *FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName));
-	//TRefCountPtr<IPooledRenderTarget> PooledComputeRenderTargetTexture;
-	// FILL PooledComputeRenderTargetTexture WITH THE WANTED REQUIRED INFORMATION OF THE BUFFER
-	//GraphBuilder.QueueTextureExtraction(SettingOutputTextureRef, &PooledComputeRenderTargetTexture, ERDGResourceExtractionFlags::AllowTransient);
-
-	FRHICopyTextureInfo CopyInfo = FRHICopyTextureInfo();
-	// CopyInfo.Size = RenderTargetOutputTexture->Desc.GetSize();
-	CopyInfo.NumSlices = OutputTexture->Slices;
-	// CopyInfo.NumSlices = GET1_NUMBER; // Need to be 1
-	// CopyInfo.SourceSliceIndex = GET0_NUMBER; // Need to be 0
-	// CopyInfo.DestSliceIndex = Params.TargetDimensions.Z; // Can be something between 0 ... OutputTexture.Slices - 1
-	// CopyInfo.SourcePosition = FIntVector::ZeroValue; // We start at 0,0 on the source
-	// CopyInfo.DestPosition = FIntVector(GET0_NUMBER, Params.TargetDimensions.Y, GET0_NUMBER);
-	// CopyInfo.Size = FIntVector(OutputTexture->SizeX, SizeY, GET1_NUMBER);
 	AddCopyTexturePass(GraphBuilder, SettingOutputTextureRef, RenderTargetOutputTexture, CopyInfo);
-
-	// CALLBACK THE DEBUG VALUES
-	//FTurboSequence_Helper_Lf::CallbackDebugValues(GraphBuilder, DebugOutputBufferRef, AsyncCallback);
-
+	
 	// Execute the graph
 	GraphBuilder.Execute();
-
-	//UE_LOG(LogTurboSequence_Lf, Display, TEXT("Written %d Pixels with %d Threads"), Params.SettingsInput.Num(), NumThreads);
-
-
-	//FRHICopyTextureInfo CopyInfo = FRHICopyTextureInfo();
-	//CopyInfo.Size = RenderTargetOutputTexture->Desc.GetSize();
-	//CopyInfo.NumSlices = OutputTexture->Slices;
-	//RHICmdList.CopyTexture(PooledComputeRenderTargetTexture.GetReference()->GetRHI(), OutputTexture->GetRenderTargetResource()->TextureRHI, CopyInfo);
 }
