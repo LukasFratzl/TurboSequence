@@ -78,7 +78,7 @@ public:
 		//Component->bCastStaticShadow = false;
 		
 		TArray<FRenderingMaterialKeyValue_Lf> ConvertedMaterial;
-		for (const TObjectPtr<UMaterialInterface> Material : Materials)
+		for (const TObjectPtr<UMaterialInterface>& Material : Materials)
 		{
 			FRenderingMaterialKeyValue_Lf Mat = FRenderingMaterialKeyValue_Lf();
 			Mat.MaterialKey = Material;

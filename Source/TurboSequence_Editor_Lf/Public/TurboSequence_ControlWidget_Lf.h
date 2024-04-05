@@ -289,7 +289,7 @@ public:
 	{
 		for (const TTuple<EShow_ControlPanel_Buttons_Lf, TArray<TObjectPtr<UButton>>>& ButtonArray : Buttons)
 		{
-			for (const TObjectPtr<UButton> Button : ButtonArray.Value)
+			for (const TObjectPtr<UButton>& Button : ButtonArray.Value)
 			{
 				if (Button)
 				{

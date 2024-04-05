@@ -253,7 +253,7 @@ void UTurboSequence_ControlWidget_Lf::ShowSection(EShow_ControlPanel_Section_Lf 
 	if (Buttons.Contains(GetCommonButtonEnum(SectionToShow)))
 	{
 		const TArray<TObjectPtr<UButton>>& ButtonArray = Buttons[GetCommonButtonEnum(SectionToShow)];
-		for (const TObjectPtr<UButton> Button : ButtonArray)
+		for (const TObjectPtr<UButton>& Button : ButtonArray)
 		{
 			if (Button)
 			{
