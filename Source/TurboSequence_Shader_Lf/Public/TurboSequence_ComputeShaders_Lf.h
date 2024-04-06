@@ -139,6 +139,8 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	int32 NumDebugData;
 
 	TObjectPtr<UTextureRenderTarget2DArray> AnimationLibraryTexture;
+
+	TObjectPtr<UTextureRenderTarget2DArray> AnimationOutputTexturePrevious;
 };
 
 struct TURBOSEQUENCE_SHADER_LF_API FSettingsComputeShader_Params_Lf
@@ -376,40 +378,40 @@ public:
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FRHICommandListImmediate& RHICmdList,
 		FMeshUnitComputeShader_Params_Lf& Params,
-		UTextureRenderTarget2DArray* AnimationOutputTexture, /*UTextureRenderTarget2DArray* DataOutputTexture,*/ TFunction<void(TArray<float>& DebugValues)> AsyncCallback
+		UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*UTextureRenderTarget2DArray* DataOutputTexture,*/ TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	);
 
 	
 	static void DispatchGameThread(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
-		UTextureRenderTarget2DArray* AnimationOutputTexture, /*
+		UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*
 		UTextureRenderTarget2DArray* DataOutputTexture,*/
 		TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	)
 	{
 		ENQUEUE_RENDER_COMMAND(TurboSequence_MeshUnit_ComputeShader_Lf)(
-			[PreCall, &Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback](FRHICommandListImmediate& RHICmdList)
+			[PreCall, &Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback](FRHICommandListImmediate& RHICmdList)
 			{
-				DispatchRenderThread(PreCall, RHICmdList, Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
+				DispatchRenderThread(PreCall, RHICmdList, Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
 			});
 	}
 	
 	static void Dispatch(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
-		UTextureRenderTarget2DArray* AnimationOutputTexture, /*
+		UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*
 		UTextureRenderTarget2DArray* DataOutputTexture,*/
 		TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	)
 	{
 		if (IsInRenderingThread())
 		{
-			DispatchRenderThread(PreCall, GetImmediateCommandList_ForRenderCommand(), Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
+			DispatchRenderThread(PreCall, GetImmediateCommandList_ForRenderCommand(), Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
 		}
 		else
 		{
-			DispatchGameThread(PreCall, Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
+			DispatchGameThread(PreCall, Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
 		}
 	}
 };

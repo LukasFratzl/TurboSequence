@@ -368,8 +368,10 @@ public:
 	inline static const FString NameNiagaraCustomData = FString("User.CustomData");
 
 
-	inline static const FString ReferenceTurboSequenceTransformTexture = FString(
-		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf.T_TurboSequence_TransformTexture_Lf'");
+	inline static const FString ReferenceTurboSequenceTransformTextureCurrentFrame = FString(
+		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_CurrentFrame_Lf.T_TurboSequence_TransformTexture_CurrentFrame_Lf'");
+	inline static const FString ReferenceTurboSequenceTransformTexturePreviousFrame = FString(
+	"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_PreviousFrame_Lf.T_TurboSequence_TransformTexture_PreviousFrame_Lf'");
 	inline static const FString ReferenceTurboSequenceSkinWeightTexture = FString(
 		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_SkinWeightTexture_Lf.T_TurboSequence_SkinWeightTexture_Lf'");
 	inline static const FString ReferenceTurboSequenceDataTexture = FString(
@@ -988,6 +990,21 @@ public:
 		Color.A = Number & 0xFF;
 
 		return Color;
+	}
+
+	static FORCEINLINE_DEBUGGABLE uint16 EncodeUInt16ToUInt8Vector2(const FIntVector2& Int8Vector)
+	{
+		return (Int8Vector.Y << GET8_NUMBER) | Int8Vector.X;
+	}
+
+	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt16ToUInt8Vector2(const uint16& Number)
+	{
+		FIntVector2 Vector;
+		
+		Vector.Y = (Number >> GET8_NUMBER) & 0xFF;
+		Vector.X = Number & 0xFF;
+
+		return Vector;
 	}
 
 	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt32ToUInt16(const int32& PackedValue)
@@ -1807,7 +1824,7 @@ public:
 
 	static FORCEINLINE_DEBUGGABLE TObjectPtr<UTextureRenderTarget2DArray> GenerateBlankRenderTargetArray(
 		const FString& InPath, const FString& InName, const uint16& SizeXY, const uint8& SizeZ,
-		const ETextureRenderTargetFormat& Format)
+		const EPixelFormat& Format)
 	{
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
@@ -1818,8 +1835,7 @@ public:
 				Package, *InName, RF_Public | RF_Standalone);
 
 			Texture->ClearColor = FLinearColor::Transparent;
-			Texture->Init(SizeXY, SizeXY, SizeZ,
-			              GetPixelFormatFromRenderTargetFormat(Format));
+			Texture->Init(SizeXY, SizeXY, SizeZ, Format);
 			Texture->UpdateResourceImmediate(true);
 #if WITH_EDITOR
 			Texture->PostEditChange();

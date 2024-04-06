@@ -38,12 +38,12 @@ public:
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering NiagaraSystem", ConfigRestartRequired = true))
 	FString Default_Rendering_NiagaraSystem = FString("/Script/Niagara.NiagaraSystem'/TurboSequence_Lf/Resources/FXS_TurboSequence_Mesh_Lf.FXS_TurboSequence_Mesh_Lf'");
 
-	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering Transform Texture", ConfigRestartRequired = true))
-	FString Default_Rendering_TransformTexture = FString("/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf.T_TurboSequence_TransformTexture_Lf'");
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering Transform Texture Current Frame", ConfigRestartRequired = true))
+	FString Default_Rendering_TransformTexture_CurrentFrame = FString("/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_CurrentFrame_Lf.T_TurboSequence_TransformTexture_CurrentFrame_Lf'");
 
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering Skin Weight Texture", ConfigRestartRequired = true))
 	FString Default_Rendering_SkinWeightTexture = FString("/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_SkinWeightTexture_Lf.T_TurboSequence_SkinWeightTexture_Lf'");
 
-	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering Custom Data Texture", ConfigRestartRequired = true))
-	FString Default_Rendering_DataTexture = FString("/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_DataTexture_Lf.T_TurboSequence_DataTexture_Lf'");
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Default Rendering Transform Texture Previous Frame", ConfigRestartRequired = true))
+	FString Default_Rendering_TransformTexture_PreviousFrame = FString("/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_PreviousFrame_Lf.T_TurboSequence_TransformTexture_PreviousFrame_Lf'");
 };

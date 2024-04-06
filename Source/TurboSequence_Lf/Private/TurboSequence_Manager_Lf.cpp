@@ -117,6 +117,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 		});
 		
 		GlobalLibrary_RenderThread.BoneTransformParams.AnimationLibraryTexture = GlobalData->AnimationLibraryTexture;
+		GlobalLibrary_RenderThread.BoneTransformParams.AnimationOutputTexturePrevious = GlobalData->TransformTexture_PreviousFrame;
 		
 		FMeshUnit_Compute_Shader_Execute_Lf::Dispatch(
 			[&](FRHICommandListImmediate& RHICmdList)
@@ -124,7 +125,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				SolveMeshes_RenderThread(RHICmdList);
 			},
 			GlobalLibrary_RenderThread.BoneTransformParams,
-			Instance->GlobalData->TransformTexture, /*Instance->GlobalData->CustomDataTexture,*/
+			Instance->GlobalData->TransformTexture_CurrentFrame, /*Instance->GlobalData->CustomDataTexture,*/
 			[&](TArray<float>& DebugValue)
 			{
 				if (DebugValue.Num() && FMath::IsNearlyEqual(DebugValue[GET0_NUMBER], 777.0f, 0.1f))
@@ -252,16 +253,16 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			if (!IsValid(FromAsset->GlobalData))
 			{
 				UE_LOG(LogTurboSequence_Lf, Warning,
-				       TEXT("Can't create Mesh Instance, there is no global data available...."));
+					   TEXT("Can't create Mesh Instance, there is no global data available...."));
 				UE_LOG(LogTurboSequence_Lf, Error,
-				       TEXT(
-					       "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
-				       ));
+					   TEXT(
+						   "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
+					   ));
 				return GET0_NUMBER;
 			}
 		}
 
-		if (!IsValid(FromAsset->GlobalData->TransformTexture))
+		if (!IsValid(FromAsset->GlobalData->TransformTexture_CurrentFrame) || !IsValid(FromAsset->GlobalData->TransformTexture_PreviousFrame))
 		{
 			UE_LOG(LogTurboSequence_Lf, Warning,
 			       TEXT(
@@ -269,7 +270,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			       ));
 			UE_LOG(LogTurboSequence_Lf, Error,
 			       TEXT(
-				       "Can not find Transform Texture, it should at .../Plugins/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths, if it's not there please create a default Render Target 2D Array Texture and assign the reference in the TurboSequence Lf -> Reference Paths Project settings and open ../Plugins/TurboSequence_Lf/Resources/MF_TurboSequence_PositionOffset_Lf and assign it into the Texture Object with the Transform Texture Comment"
+				       "Can not find Transform Texture ... "
 			       ));
 			return GET0_NUMBER;
 		}
@@ -768,7 +769,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 		}
 
 		if (bMeshIsVisible && GlobalLibrary.PerReferenceData.Num() && IsValid(Instance->GlobalData) && IsValid(
-			Instance->GlobalData->TransformTexture))
+			Instance->GlobalData->TransformTexture_CurrentFrame))
 		{
 			GlobalLibrary.NumGroupsUpdatedThisFrame++;
 

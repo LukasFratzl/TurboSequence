@@ -376,8 +376,8 @@ void ATurboSequence_Test::Tick(float DeltaTime)
 	// 		BonesMatrixArray[GET0_NUMBER] = FVector4f(UVCoord, GET0_NUMBER,GET0_NUMBER,GET0_NUMBER);
 	// 		BonesMatrixArray[GET1_NUMBER].X = Asset->SkinWeightTexture->SizeX;
 	// 		BonesMatrixArray[GET1_NUMBER].Y = Asset->SkinWeightTexture->SizeY;
-	// 		BonesMatrixArray[GET1_NUMBER].Z = Asset->TransformTexture->SizeX;
-	// 		BonesMatrixArray[GET1_NUMBER].W = Asset->TransformTexture->SizeY;
+	// 		BonesMatrixArray[GET1_NUMBER].Z = Asset->TransformTexture_CurrentFrame->SizeX;
+	// 		BonesMatrixArray[GET1_NUMBER].W = Asset->TransformTexture_CurrentFrame->SizeY;
 	// 	}
 	//
 	// 	int32 CustomDataIndex = 2;
@@ -430,11 +430,11 @@ void ATurboSequence_Test::Tick(float DeltaTime)
 	// 	});
 	// }
 
-	// if (Asset->TransformTexture && BonesMatrixArray.Num())
+	// if (Asset->TransformTexture_CurrentFrame && BonesMatrixArray.Num())
 	// {
 	// 	FMeshUnitComputeShader_Params_Lf Params;
 	// 	Params.BoneMatricesInput = BonesMatrixArray;
-	// 	Params.AnimationOutputTexture = Asset->TransformTexture;
+	// 	Params.AnimationOutputTexture = Asset->TransformTexture_CurrentFrame;
 	// 	Params.NumShaders = 150;
 	// 	Params.NumMeshesPerThread = 2;
 	// 	Params.NumMeshes = 1;

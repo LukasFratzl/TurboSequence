@@ -531,6 +531,13 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 			bAssetEdited = true;
 		}
 
+		// Makes no sense at all
+		if (GlobalData->bUseHighPrecisionAnimationMode != false)
+		{
+			GlobalData->bUseHighPrecisionAnimationMode = false;
+			bAssetEdited = true;
+		}
+
 		GlobalData->NameNiagaraEmitter = FName(EmitterName);
 		GlobalData->NameNiagaraMeshObject = MeshName;
 		GlobalData->NameNiagaraMaterialObject = MaterialsName;
@@ -541,22 +548,22 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		GlobalData->NameNiagaraCustomData = FName(CustomDataName);
 		GlobalData->NameNiagaraParticleRemove = FName(ParticleRemoveName);
 
-		FString DefaultTransformTextureReferencePath;
-		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePath,
+		FString DefaultTransformTextureReferencePathCurrentFrame;
+		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePathCurrentFrame,
 		                                                 TEXT(
 			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
-		                                                 TEXT("Default_Rendering_TransformTexture"));
-		if (DefaultTransformTextureReferencePath.IsEmpty())
+		                                                 TEXT("Default_Rendering_TransformTexture_CurrentFrame"));
+		if (DefaultTransformTextureReferencePathCurrentFrame.IsEmpty())
 		{
-			DefaultTransformTextureReferencePath = FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTexture;
+			DefaultTransformTextureReferencePathCurrentFrame = FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTextureCurrentFrame;
 		}
-		if (!IsValid(GlobalData->TransformTexture))
+		if (!IsValid(GlobalData->TransformTexture_CurrentFrame))
 		{
-			GlobalData->TransformTexture = FTurboSequence_Helper_Lf::LoadAssetFromReferencePath<
-				UTextureRenderTarget2DArray>(DefaultTransformTextureReferencePath);
+			GlobalData->TransformTexture_CurrentFrame = FTurboSequence_Helper_Lf::LoadAssetFromReferencePath<
+				UTextureRenderTarget2DArray>(DefaultTransformTextureReferencePathCurrentFrame);
 			bAssetEdited = true;
 		}
-		if (!IsValid(GlobalData->TransformTexture))
+		if (!IsValid(GlobalData->TransformTexture_CurrentFrame))
 		{
 			UE_LOG(LogTurboSequence_Lf, Error,
 			       TEXT(
@@ -565,14 +572,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		}
 		else
 		{
-			bool bUse32BitTexture = true;
-			bool bValidSetting = FTurboSequence_Helper_Lf::GetBoolConfigSetting(bUse32BitTexture,
-			                                                                    TEXT("/Script/TurboSequence_Editor_Lf.TurboSequence_RenderSettings_Lf"),
-			                                                                    TEXT("bUseHighPrecisionAnimationMode"));
-			if (!bValidSetting)
-			{
-				bUse32BitTexture = true;
-			}
+			bool bUse32BitTexture = GlobalData->bUseHighPrecisionAnimationMode;
 
 			ETextureRenderTargetFormat Format = RTF_RGBA16f;
 			if (bUse32BitTexture)
@@ -580,18 +580,58 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 				Format = RTF_RGBA32f;
 			}
 
-			if (GlobalData->TransformTexture->GetFormat() != GetPixelFormatFromRenderTargetFormat(Format))
+			if (GlobalData->TransformTexture_CurrentFrame->GetFormat() != GetPixelFormatFromRenderTargetFormat(Format))
 			{
 				bAssetEdited = true;
-				GlobalData->bUseHighPrecisionAnimationMode = bUse32BitTexture;
-				const UPackage* Package = GlobalData->TransformTexture->GetOutermost();
+				const UPackage* Package = GlobalData->TransformTexture_CurrentFrame->GetOutermost();
 				const FString PackagePath = FPackageName::LongPackageNameToFilename(
 					Package->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PackagePath);
-				GlobalData->TransformTexture = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
-					PackagePath, GlobalData->TransformTexture->GetName(), GET2048_NUMBER, GET12_NUMBER, Format);
+				GlobalData->TransformTexture_CurrentFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
+					PackagePath, GlobalData->TransformTexture_CurrentFrame->GetName(), GET2048_NUMBER, GET12_NUMBER, GetPixelFormatFromRenderTargetFormat(Format));
 			}
 		}
+
+		FString DefaultTransformTextureReferencePathPreviousFrame;
+		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePathPreviousFrame,
+														 TEXT(
+															 "/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
+														 TEXT("Default_Rendering_TransformTexture_PreviousFrame"));
+		if (DefaultTransformTextureReferencePathPreviousFrame.IsEmpty())
+		{
+			DefaultTransformTextureReferencePathPreviousFrame = FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTexturePreviousFrame;
+		}
+		if (!IsValid(GlobalData->TransformTexture_PreviousFrame))
+		{
+			GlobalData->TransformTexture_PreviousFrame = FTurboSequence_Helper_Lf::LoadAssetFromReferencePath<
+				UTextureRenderTarget2DArray>(DefaultTransformTextureReferencePathPreviousFrame);
+			bAssetEdited = true;
+		}
+
+		if (!IsValid(GlobalData->TransformTexture_PreviousFrame))
+		{
+			UE_LOG(LogTurboSequence_Lf, Error,
+				   TEXT(
+					   "Can not find Transform Texture, it should at .../Plugins/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths, if it's not there please create a default Render Target 2D Array Texture and assign the reference in the TurboSequence Lf -> Reference Paths Project settings and open ../Plugins/TurboSequence_Lf/Resources/MF_TurboSequence_PositionOffset_Lf and assign it into the Texture Object with the Transform Texture Comment"
+				   ));
+		}
+		else
+		{
+
+			if (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeX || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
+			!= FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeY || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->Slices != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetFormat() != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetFormat())
+			{
+				bAssetEdited = true;
+				const UPackage* Package = GlobalData->TransformTexture_PreviousFrame->GetOutermost();
+				const FString PackagePath = FPackageName::LongPackageNameToFilename(
+					Package->GetName(), FPackageName::GetAssetPackageExtension());
+				UPackageTools::LoadPackage(*PackagePath);
+				GlobalData->TransformTexture_PreviousFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
+					PackagePath, GlobalData->TransformTexture_PreviousFrame->GetName(), GlobalData->TransformTexture_CurrentFrame->SizeX, GlobalData->TransformTexture_CurrentFrame->Slices, GlobalData->TransformTexture_CurrentFrame->GetFormat());
+			}
+		}
+
+		
 
 		FString DefaultSkinWeightTextureReferencePath;
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultSkinWeightTextureReferencePath,
@@ -625,7 +665,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 					Package->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PackagePath);
 				GlobalData->SkinWeightTexture = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
-					PackagePath, GlobalData->SkinWeightTexture->GetName(), GET128_NUMBER, GET24_NUMBER, RTF_RGBA16f);
+					PackagePath, GlobalData->SkinWeightTexture->GetName(), GET128_NUMBER, GET24_NUMBER, GetPixelFormatFromRenderTargetFormat(RTF_RGBA16f));
 			}
 		}
 

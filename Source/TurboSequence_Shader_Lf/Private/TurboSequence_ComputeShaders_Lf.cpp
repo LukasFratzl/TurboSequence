@@ -17,7 +17,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 	const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 	FRHICommandListImmediate& RHICmdList,
 	FMeshUnitComputeShader_Params_Lf& Params,
-	UTextureRenderTarget2DArray* AnimationOutputTexture, /*
+	UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*
 	UTextureRenderTarget2DArray* DataOutputTexture,*/
 	TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 )
@@ -29,8 +29,19 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		return;
 	}
 
-	if (!AnimationOutputTexture->SizeX || !AnimationOutputTexture->SizeY || !AnimationOutputTexture->Slices)
+	if (!AnimationOutputTextureCurrent->SizeX || !AnimationOutputTextureCurrent->SizeY || !AnimationOutputTextureCurrent->Slices)
 	{
+		return;
+	}
+
+	if (!IsValid(Params.AnimationOutputTexturePrevious))
+	{
+		return;
+	}
+
+	if (AnimationOutputTextureCurrent->SizeX != Params.AnimationOutputTexturePrevious->SizeX || AnimationOutputTextureCurrent->SizeY != Params.AnimationOutputTexturePrevious->SizeY || AnimationOutputTextureCurrent->Slices != Params.AnimationOutputTexturePrevious->Slices || AnimationOutputTextureCurrent->GetFormat() != Params.AnimationOutputTexturePrevious->GetFormat())
+	{
+		UE_LOG(LogTurboSequence_Lf, Error, TEXT("The Transform Texture Current and the Transform Texture Previous are not the same size or format ... Please use the Control Panel Texture Generator in the Tweaks section to sync it, CurrentTexture -> %d, %d, %d, %hhd | PreviousTexture -> %d, %d, %d, %hhd"), AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, AnimationOutputTextureCurrent->GetFormat(), Params.AnimationOutputTexturePrevious->SizeX, Params.AnimationOutputTexturePrevious->SizeY, Params.AnimationOutputTexturePrevious->Slices, Params.AnimationOutputTexturePrevious->GetFormat());
 		return;
 	}
 
@@ -59,11 +70,11 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		FRDGTextureRef AnimationOutputTextureRef;
 		if (Params.bUse32BitTransformTexture)
 		{
-			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTexture->SizeX, AnimationOutputTexture->SizeY, AnimationOutputTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_A32B32G32R32F);
+			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_A32B32G32R32F);
 		}
 		else
 		{
-			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTexture->SizeX, AnimationOutputTexture->SizeY, AnimationOutputTexture->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_FloatRGBA);
+			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_FloatRGBA);
 		}
 
 		MeshUnitPassParameters->R_AnimationLibrary_InputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *Params.AnimationLibraryTexture, TEXT("AnimationLibrary"));
@@ -73,8 +84,8 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 
 		MeshUnitPassParameters->ReferencePoseIndices_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Params.Indices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::RefPoseCPUIndicesDebugName, Params.ShaderID), true);
 
-		MeshUnitPassParameters->OutputTextureSizeX = AnimationOutputTexture->SizeX;
-		MeshUnitPassParameters->OutputTextureSizeY = AnimationOutputTexture->SizeY;
+		MeshUnitPassParameters->OutputTextureSizeX = AnimationOutputTextureCurrent->SizeX;
+		MeshUnitPassParameters->OutputTextureSizeY = AnimationOutputTextureCurrent->SizeY;
 
 		MeshUnitPassParameters->AnimTextureSizeX = Params.AnimationLibraryTexture->SizeX;
 		MeshUnitPassParameters->AnimTextureSizeY = Params.AnimationLibraryTexture->SizeY;
@@ -122,12 +133,16 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->DebugValue = FTurboSequence_Helper_Lf::TCreateWriteBuffer<float>(GraphBuilder, DebugData.Num(), *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::DebugName, Params.ShaderID), PF_R32_FLOAT, OutputDebugBufferRef);
 		MeshUnitPassParameters->NumDebugBuffer = FMath::Max(Params.NumDebugData, 0);
 
-		const FRDGTextureRef RenderTargetAnimationOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(AnimationOutputTexture->GetRenderTargetResource()->GetTexture2DArrayRHI(), *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName, Params.ShaderID)));
+		const FRDGTextureRef RenderTargetAnimationOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(AnimationOutputTextureCurrent->GetRenderTargetResource()->GetTexture2DArrayRHI(), *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName, Params.ShaderID)));
 
 		FRHICopyTextureInfo AnimationRenderTargetCopyInfo = FRHICopyTextureInfo();
-		AnimationRenderTargetCopyInfo.NumSlices = AnimationOutputTexture->Slices;
+		AnimationRenderTargetCopyInfo.NumSlices = AnimationOutputTextureCurrent->Slices;
 
 		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputTexture, AnimationOutputTextureRef, AnimationRenderTargetCopyInfo);
+
+		const FRDGTextureRef RenderTargetAnimationOutputPreviousFrameTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Params.AnimationOutputTexturePrevious->GetRenderTargetResource()->GetTextureRHI(), TEXT("TurboSequence_AnimationOutputRenderTargetTexturePreviousFrame")));
+
+		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputTexture, RenderTargetAnimationOutputPreviousFrameTexture, AnimationRenderTargetCopyInfo);
 
 
 		GraphBuilder.AddPass(

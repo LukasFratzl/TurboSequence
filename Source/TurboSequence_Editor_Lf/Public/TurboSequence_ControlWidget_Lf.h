@@ -309,8 +309,8 @@ public:
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Bones In all Skeletons", ClampMin = "5", ClampMax = "200"), Category="Texture Tweaking")
 	uint32 MaxNumBones = 75;
 
-	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Use high precision 32 bit Textures for Animations"), Category="Texture Tweaking")
-	bool bUseHighPrecisionAnimationMode = true;
+	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Use high precision 32 bit Textures for Animations"), Category="Texture Tweaking")
+	//bool bUseHighPrecisionAnimationMode = true;
 
 	UPROPERTY(VisibleAnywhere, Config, meta = (DisplayName = "Allocated GPU Memory in MB"), Category="Texture Tweaking")
 	uint32 AverageAllocatedMemory = 0;

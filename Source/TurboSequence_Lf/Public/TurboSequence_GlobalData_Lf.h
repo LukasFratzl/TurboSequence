@@ -49,7 +49,10 @@ public:
 	FName NameNiagaraCustomData = FName("User.CustomData");
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture;
+	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_CurrentFrame;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_PreviousFrame;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UTextureRenderTarget2DArray> SkinWeightTexture;

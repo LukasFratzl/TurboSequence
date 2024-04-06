@@ -36,6 +36,11 @@ void UTurboSequence_ControlWidget_Lf::OnTick(const float& DeltaTime)
 			}
 		}
 	}
+
+	// if (IsValid(FTurboSequence_Editor_LfModule::GlobalData))
+	// {
+	// 	bUseHighPrecisionAnimationMode = FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode;
+	// }
 }
 
 void UTurboSequence_ControlWidget_Lf::OnAssignMainAsset()
@@ -388,7 +393,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 {
 	bool bEditedData = false;
-	if (IsValid(FTurboSequence_Editor_LfModule::GlobalData) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture)/* && IsValid(FTurboSequence_Editor_LfModule::GlobalData->CustomDataTexture)*/)
+	if (IsValid(FTurboSequence_Editor_LfModule::GlobalData) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame))
 	{
 		constexpr uint16 Resolution = GET512_NUMBER;
 
@@ -399,10 +404,10 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 		const uint16& NumSlicesTransformTexture = FMath::Min(FMath::CeilToInt(static_cast<float>(MaxMeshes / PowXY)) + GET1_NUMBER, 1023);
 
 		uint8 TextureByteType = GET8_NUMBER;
-		if (bUseHighPrecisionAnimationMode)
-		{
-			TextureByteType = GET16_NUMBER;
-		}
+		// if (bUseHighPrecisionAnimationMode)
+		// {
+		// 	TextureByteType = GET16_NUMBER;
+		// }
 
 		const uint64& MaxNumTransformByte = PowXY * NumSlicesTransformTexture * TextureByteType;
 
@@ -415,32 +420,39 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 
 		if (!bManuallyAdjustTextureSize)
 		{
-			if (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->SizeX != Resolution || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->SizeY
-				!= Resolution || NumSlicesTransformTexture != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->Slices || FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode)
+			if ((FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != Resolution || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
+			!= Resolution || NumSlicesTransformTexture != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices /* || FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode*/) || (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeX || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
+			!= FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeY || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->Slices != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetFormat() != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetFormat()))
 			{
-				const UPackage* Package = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->GetOutermost();
-				const FString PackagePath = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
-				UPackageTools::LoadPackage(*PackagePath);
+				const UPackage* CurrentPackage = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetOutermost();
+				const FString CurrentPackagePath = FPackageName::LongPackageNameToFilename(CurrentPackage->GetName(), FPackageName::GetAssetPackageExtension());
+				UPackageTools::LoadPackage(*CurrentPackagePath);
 
 				ETextureRenderTargetFormat Format = RTF_RGBA16f;
-				if (bUseHighPrecisionAnimationMode)
-				{
-					Format = RTF_RGBA32f;
-				}
+				// if (bUseHighPrecisionAnimationMode)
+				// {
+				// 	Format = RTF_RGBA32f;
+				// }
 
-				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(PackagePath, FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->GetName(), Resolution, NumSlicesTransformTexture, Format);
+				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(CurrentPackagePath, FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetName(), Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
+
+				const UPackage* PreviousPackage = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetOutermost();
+				const FString PreviousPackagePath = FPackageName::LongPackageNameToFilename(PreviousPackage->GetName(), FPackageName::GetAssetPackageExtension());
+				UPackageTools::LoadPackage(*PreviousPackagePath);
+
+				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(PreviousPackagePath, FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetName(), Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
 
 				bEditedData = true;
 			}
 			
 			if (bEditedData)
 			{
-				if (FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode)
-				{
-					FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode = bUseHighPrecisionAnimationMode;
-
-					FTurboSequence_Helper_Lf::SaveAsset(FTurboSequence_Editor_LfModule::GlobalData);
-				}
+				// if (FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode)
+				// {
+				// 	FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode = bUseHighPrecisionAnimationMode;
+				//
+				// 	FTurboSequence_Helper_Lf::SaveAsset(FTurboSequence_Editor_LfModule::GlobalData);
+				// }
 
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("--------------------------------------------------"));
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Succesfully Applied new Render Settings...."));
@@ -453,10 +465,15 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Switched to manual texture adjustment mode...."));
 			UE_LOG(LogTurboSequence_Lf, Display, TEXT("--------------------------------------------------"));
 
-			const UPackage* PackageTransformTexture = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture->GetOutermost();
+			const UPackage* PackageTransformTexture = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetOutermost();
 			const FString PackagePathTransformTexture = FPackageName::LongPackageNameToFilename(PackageTransformTexture->GetName(), FPackageName::GetAssetPackageExtension());
 
-			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Transform Texture is at Path -> %s"), *PackagePathTransformTexture);
+			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Current Frame Transform Texture is at Path -> %s"), *PackagePathTransformTexture);
+
+			const UPackage* PackageTransformTexturePrevious = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetOutermost();
+			const FString PackagePathTransformTexturePrevious = FPackageName::LongPackageNameToFilename(PackageTransformTexturePrevious->GetName(), FPackageName::GetAssetPackageExtension());
+
+			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Previous Frame Transform Texture is at Path -> %s"), *PackagePathTransformTexturePrevious);
 
 			const UPackage* PackageSkinWeightTexture = FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture->GetOutermost();
 			const FString PackagePathSkinWeightTexture = FPackageName::LongPackageNameToFilename(PackageSkinWeightTexture->GetName(), FPackageName::GetAssetPackageExtension());
