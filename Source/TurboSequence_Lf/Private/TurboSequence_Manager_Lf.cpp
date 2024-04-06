@@ -1026,7 +1026,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 						CurrentAnimationIndex++;
 					}
 
-					MeshParams.AnimationEndIndex_RenderThread[i] = CurrentAnimationIndex;
+					MeshParams.AnimationEndIndex_RenderThread[i] = NumAnimations;
 				}
 			}
 			else
@@ -1048,6 +1048,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 				{
 					const int32& CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
 					const int32 LastIKDataIndex = CurrentIKDataIndex;
+
+					int16 NumIKBones = GET0_NUMBER;
 
 					// Really important to keep it INDEX_NONE otherwise it goes out of bounds when index
 					// smoothing is activated
@@ -1083,6 +1085,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 								}
 
 								CurrentIKDataIndex++;
+								NumIKBones++;
 
 								// Runtime.IKData.Empty(); Replaced now without disposing the memory
 								// Cause we will write the new data anyway every IK frame
@@ -1096,7 +1099,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 					// it will never enter, because i < Count
 					// otherwise if the data is writable the indices may always change
 					MeshParams.BoneSpaceAnimationIKStartIndex_RenderThread[i] = LastIKDataIndex;
-					MeshParams.BoneSpaceAnimationIKEndIndex_RenderThread[i] = CurrentIKDataIndex;
+					MeshParams.BoneSpaceAnimationIKEndIndex_RenderThread[i] = NumIKBones;
 				}
 			}
 			else

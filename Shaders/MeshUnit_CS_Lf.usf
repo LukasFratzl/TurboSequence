@@ -29,14 +29,14 @@ StructuredBuffer<float4> ReferencePoseIndices_StructuredBuffer;
 StructuredBuffer<float4> BoneSpaceAnimationInput_StructuredBuffer;
 StructuredBuffer<min16int> BoneSpaceAnimationDataInput_StructuredBuffer;
 StructuredBuffer<int> BoneSpaceAnimationDataStartIndex_StructuredBuffer;
-StructuredBuffer<int> BoneSpaceAnimationDataEndIndex_StructuredBuffer;
+StructuredBuffer<min16int> BoneSpaceAnimationDataEndIndex_StructuredBuffer; // Start Index + End Index = Real End Index
 StructuredBuffer<int> PerMeshCustomDataIndices_StructuredBuffer;
 StructuredBuffer<min16int> PerMeshCustomDataLod_StructuredBuffer;
 StructuredBuffer<min16uint> PerMeshCustomDataCollectionIndex_StructuredBuffer;
 StructuredBuffer<min16uint> ReferenceNumCPUBones_StructuredBuffer;
 
 StructuredBuffer<int> AnimationStartIndex_StructuredBuffer;
-StructuredBuffer<int> AnimationEndIndex_StructuredBuffer;
+StructuredBuffer<min16int> AnimationEndIndex_StructuredBuffer; // Start Index + End Index = Real End Index
 StructuredBuffer<min16int> AnimationWeight_StructuredBuffer;
 
 StructuredBuffer<int> AnimationFramePose0_StructuredBuffer;
@@ -581,11 +581,11 @@ void Main(
 
 		uint CurrentTextureIndex = CPUMeshIndex * NumFirstGPUBones * NumPixelBuffer + 2;
 
-		uint IKDataIndexStart = BoneSpaceAnimationDataStartIndex_StructuredBuffer[LocalMeshData];
-		uint IKDataIndexEnd = BoneSpaceAnimationDataEndIndex_StructuredBuffer[LocalMeshData];
+		int IKDataIndexStart = BoneSpaceAnimationDataStartIndex_StructuredBuffer[LocalMeshData];
+		int IKDataIndexEnd = IKDataIndexStart + BoneSpaceAnimationDataEndIndex_StructuredBuffer[LocalMeshData];
 
 		int AnimStartIndex = AnimationStartIndex_StructuredBuffer[LocalMeshData];
-		int AnimEndIndex = AnimationEndIndex_StructuredBuffer[LocalMeshData];
+		int AnimEndIndex = AnimStartIndex + AnimationEndIndex_StructuredBuffer[LocalMeshData];
 
 
 		uint ReferenceIndex = PerMeshCustomDataCollectionIndex_StructuredBuffer[LocalMeshData];
@@ -637,11 +637,11 @@ void Main(
 				if (RuntimeIndexGPU > -1)
 				{
 					bool bIsBoneSolvedByIK = false;
-					for (uint IKIdx = IKDataIndexStart; IKIdx < IKDataIndexEnd; ++IKIdx)
+					for (int IKIdx = IKDataIndexStart; IKIdx < IKDataIndexEnd; ++IKIdx)
 					{
 						if (BoneSpaceAnimationDataInput_StructuredBuffer[IKIdx] == RuntimeIndexGPU)
 						{
-							uint IKBoneIndex = IKIdx * 3;
+							int IKBoneIndex = IKIdx * 3;
 							float3x4 IKBoneMatrix = float3x4(
 								BoneSpaceAnimationInput_StructuredBuffer[IKBoneIndex],
 								BoneSpaceAnimationInput_StructuredBuffer[IKBoneIndex + 1],

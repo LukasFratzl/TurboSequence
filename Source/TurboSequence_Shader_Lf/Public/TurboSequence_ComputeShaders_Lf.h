@@ -53,7 +53,7 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 		Bytes += Num * 4;
 
 		Num = AnimationEndIndex_RenderThread.Num();
-		Bytes += Num * 4;
+		Bytes += Num * 2;
 
 		Num = AnimationFramePose0_RenderThread.Num();
 		Bytes += Num * 4;
@@ -71,7 +71,7 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 		Bytes += Num * 4;
 
 		Num = BoneSpaceAnimationIKEndIndex_RenderThread.Num();
-		Bytes += Num * 4;
+		Bytes += Num * 2;
 
 		Num = BoneSpaceAnimationIKInput_RenderThread.Num();
 		Bytes += Num * 2 * 4;
@@ -227,14 +227,14 @@ public:
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, BoneSpaceAnimationInput_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, BoneSpaceAnimationDataInput_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, BoneSpaceAnimationDataStartIndex_StructuredBuffer)
-		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, BoneSpaceAnimationDataEndIndex_StructuredBuffer)
+		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, BoneSpaceAnimationDataEndIndex_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, PerMeshCustomDataIndices_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, PerMeshCustomDataLod_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, PerMeshCustomDataCollectionIndex_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, ReferenceNumCPUBones_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationStartIndex_StructuredBuffer)
-		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationEndIndex_StructuredBuffer)
+		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationEndIndex_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationWeight_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationFramePose0_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerIndex_StructuredBuffer)
