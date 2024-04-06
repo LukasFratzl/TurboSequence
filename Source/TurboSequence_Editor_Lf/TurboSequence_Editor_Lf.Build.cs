@@ -1,4 +1,6 @@
-﻿using UnrealBuildTool;
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
+
+using UnrealBuildTool;
 
 public class TurboSequence_Editor_Lf : ModuleRules
 {

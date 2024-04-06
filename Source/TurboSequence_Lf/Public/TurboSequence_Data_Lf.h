@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -192,33 +192,16 @@ USTRUCT()
 struct TURBOSEQUENCE_LF_API FAnimationLibraryData_Lf
 {
 	GENERATED_BODY()
-
-	//int32 AnimationOffsetIndex = GET0_NUMBER;
-	//int32 MaxNumAnimationOffset = GET0_NUMBER;
-	//int32 NumRawAnimationData = GET0_NUMBER;
+	
 	int32 MaxFrames = GET0_NUMBER;
 
 	uint16 NumBones = GET0_NUMBER;
-	//int32 AnimationIndex = GET0_NUMBER;
-	//UPROPERTY()
-	// nullptr is Rest Pose
-	//TObjectPtr<UAnimSequence> Animation;
-	//UPROPERTY()
-	//TObjectPtr<UTurboSequence_MeshAsset_Lf> BelongsTo;
-	//bool bIsIncludedInLibrary = false;
-
-	//float AnimationFrameDelay = GET1_NUMBER;
 
 	// < Keyframe Index | Pose >
 	TMap<int32, FCPUAnimationPose_Lf> AnimPoses;
 
 	TArray<int32> KeyframesFilled;
-	//int32 NumKeyframesFilled = GET0_NUMBER;
 	int32 IndexInCollection = GET0_NUMBER;
-	//TArray<int32> KeyframesFilledSortedByGreaterValue;
-	// // Sum of -> ( Values * Library Hash, Mesh Bones ) is the Keyframe index, the first TMap is the Pose Index
-	// // We need this construct to easy determinate the index when we remove an animation from the GPU
-	// TMap<int32, TMap<FUintVector, int32>> KeyframeDimensions;
 
 	TMap<FName, int16> BoneNameToAnimationBoneIndex;
 
@@ -228,28 +211,6 @@ struct TURBOSEQUENCE_LF_API FAnimationLibraryData_Lf
 	FAnimPoseEvaluationOptions_Lf PoseOptions;
 
 	bool bHasPoseData = false;
-
-	//bool bAutoManageGPUData = true;
-
-	//bool bNeedAsyncChunkedDataUnload = false;
-	//bool bIsRemoveDatSorted = false;
-	//int32 NumKeyframesUnloaded = GET0_NUMBER;
-
-	// FAnimPose_Lf AlphaPose;
-	//
-	// FBoneContainer RequiredBones;
-	//
-	// FCompactPose CompactPose;
-	// FBlendedCurve Curve;
-	//
-	// FAnimExtractContext Context;
-	//
-	// FCompactPose BasePose;
-
-	//uint16 GPUAnimationID = GET0_NUMBER; // Is equals to AnimationIndex
-
-	// < Reference Bone, Track Index >
-	//TMap<int32, int32> ReferenceBoneToTrackIndexMap;
 };
 
 USTRUCT()
@@ -264,21 +225,12 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_RenderThread_Lf
 	~FAnimationMetaData_RenderThread_Lf()
 	{
 	}
-
-	//uint16 GPUAnimationID = GET0_NUMBER;
+	
 	int32 GPUAnimationIndex_0 = GET0_NUMBER;
-	//int32 GPUAnimationIndex_1 = GET0_NUMBER;
-
-	//int16 AnimationAlpha = GET0_NUMBER;
 
 	uint16 FinalAnimationWeight = GET0_NUMBER;
-	//uint16 FinalBoneLocationAnimationWeight = GET0_NUMBER;
-	//uint16 FinalBoneRotationAnimationWeight = GET0_NUMBER;
-	//uint16 FinalBoneScaleAnimationWeight = GET0_NUMBER;
 
 	uint16 LayerMaskIndex = GET0_NUMBER;
-
-	//TArray<uint16> PerBoneAnimationWeight;
 };
 
 
@@ -307,15 +259,6 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 	UPROPERTY(EditAnywhere, Category="Current Frame")
 	float FinalAnimationWeight = GET1_NUMBER;
 
-	//UPROPERTY(EditAnywhere, Category="Current Frame")
-	//float FinalBoneLocationAnimationWeight = GET1_NUMBER;
-
-	//UPROPERTY(EditAnywhere, Category="Current Frame")
-	//float FinalBoneRotationAnimationWeight = GET1_NUMBER;
-
-	//UPROPERTY(EditAnywhere, Category="Current Frame")
-	//float FinalBoneScaleAnimationWeight = GET1_NUMBER;
-
 	UPROPERTY(EditAnywhere, Category="Current Frame")
 	float AnimationWeightTime = 0.25f;
 
@@ -334,13 +277,9 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 	UPROPERTY(EditAnywhere, Category="Animation")
 	bool bIsOldAnimation = false;
 
-	//UPROPERTY(EditAnywhere, Category="Animation")
-	//bool bIsFastAnimationType = false;
-
 	UPROPERTY(EditAnywhere, Category="Animation")
 	uint16 LayerMaskIndex = GET0_NUMBER;
-
-	//TArray<uint8> AnimationLayers;
+	
 	bool bNeedRebuildAnimationLayers = false;
 	// < Hash >
 	uint32 AnimationLayerHash = GET0_NUMBER;
@@ -348,24 +287,15 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 	uint32 AnimationGroupLayerHash = GET0_NUMBER;
 
 	FUintVector AnimationLibraryHash = FUintVector::ZeroValue;
-
-	//uint32 AnimationStartIndex = GET0_NUMBER;
+	
 	float AnimationNormalizedTime = GET0_NUMBER;
 	float AnimationMaxPlayLength = GET1_NUMBER;
 	int32 CurrentFrame = GET0_NUMBER;
-	//int32 NextFrame = GET0_NUMBER;
-	//float FramePercentage = GET0_NUMBER;
-
-	//float AnimationMaxFrames = GET0_NUMBER;
-	//uint16 GPUAnimationID = GET0_NUMBER; // Moved to the Animation Library for better utilization
 
 	bool bIsRootBoneAnimation = false;
 	bool bIsSelfManagedAnimation = false;
 
 	int32 CPUAnimationIndex_0 = GET0_NUMBER;
-	//int32 CPUAnimationIndex_1 = GET0_NUMBER;
-
-	//float CPUAnimationAlpha = GET0_NUMBER;
 
 	uint32 AnimationID = GET0_NUMBER;
 
@@ -416,16 +346,6 @@ struct TURBOSEQUENCE_LF_API FIKBoneData_Lf
 	uint8 AliveCount = GET0_NUMBER;
 };
 
-// Doing at as runtime is better, the user always can translate the socket transform later how he want
-// USTRUCT()
-// struct TURBOSEQUENCE_LF_API FSocketBoneData_Lf
-// {
-// 	GENERATED_BODY()
-//
-// 	FTransform SocketBoneSpaceTransform = FTransform::Identity;
-// 	int16 ParentBone = INDEX_NONE;
-// };
-
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FRenderingMaterialKeyValue_Lf
 {
@@ -472,12 +392,8 @@ struct TURBOSEQUENCE_LF_API FAnimationBlendSpaceData_Lf
 	UPROPERTY(EditAnywhere)
 	FVector3f CurrentPosition = FVector3f::ZeroVector;
 
-	//FVector3f LastPosition = FVector3f::ZeroVector;
-
 	TArray<FBlendSampleData> CachedBlendSampleData;
 	FBlendFilter BlendFilter;
-	// < Anim Weight | Anim Speed | Anim Time >
-	//TArray<FVector3f> CachedAnimationProperties;
 
 	float LongestPlayLength = GET0_NUMBER;
 	float CurrentTime = GET0_NUMBER;
@@ -486,7 +402,6 @@ struct TURBOSEQUENCE_LF_API FAnimationBlendSpaceData_Lf
 	FMarkerTickRecord Record;
 	FAnimNotifyQueue NotifyQueue;
 	FDeltaTimeRecord DeltaTimeRecord = FDeltaTimeRecord();
-	//FAnimAssetTickContext Context;
 };
 
 /*	==============================================================================================================
@@ -513,9 +428,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReferenceLodElement_Lf
 	uint8 MeshIndex = GET0_NUMBER;
 	uint8 GPUMeshIndex = GET0_NUMBER;
 	uint8 CollectionIndex = GET0_NUMBER;
-	//int32 NumVertices = GET0_NUMBER;
-
-	//	uint8 MaxNumSkinWeightsPerVertex = GET0_NUMBER;
 
 	uint32 MinLodDistance = GET0_NUMBER;
 	uint32 MaxLodDistance = GET0_NUMBER;
@@ -526,30 +438,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReferenceLodElement_Lf
 
 	// CPU Indices, GPU Indices > -> Only contains bones with skin weight and Lod with mesh
 	TMap<uint16, uint16> CPUBoneToGPUBoneIndicesMap;
-	// CPU Skeleton Indices Which are required to draw a pose, not required bones are not included
-	//TArray<uint16> CPUBoneMap;
-
-	//TArray<FVector4f> MeshVertexData;
 };
-
-// USTRUCT()
-// struct TURBOSEQUENCE_LF_API FHybridInstanceManagementData_Lf
-// {
-// 	GENERATED_BODY()
-//
-// 	FHybridInstanceManagementData_Lf()
-// 	{
-// 	}
-//
-// 	~FHybridInstanceManagementData_Lf()
-// 	{
-// 	}
-//
-// 	bool bIsAdd = false;
-//
-// 	bool bIsDraw = false;
-//
-// };
 
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_RenderThread_Lf
@@ -564,10 +453,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_RenderThread_Lf
 
 	int32 ReferenceCollectionIndex = GET0_NUMBER;
 
-	// Level Of Details
-	// < Level Of Detail Offset | Per Reference Offset >
-	//TArray<FUintVector2> SkinWeightTextureOffsetPerLevelOfDetail;
-
 	// Since we have Async Chunked dynamic loading of all data we need to store skin weights locally
 	// in the reference to async chunked load it into the GPU
 	TArray<FVector4f> LocalMeshSkinWeights;
@@ -581,10 +466,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 
 	FSkinnedMeshReference_Lf()
 	{
-		//ComputeShaderParams = FMeshUnitComputeShader_Params_Lf();
-		//SkinWeightParams = FSettingsComputeShader_Params_Lf();
-		//AnimationLibraryParams = FSettingsComputeShader_Params_Lf();
-		//RenderDataParams = FRenderDataComputeShader_Params_Lf();
 	}
 
 	~FSkinnedMeshReference_Lf()
@@ -594,12 +475,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 	explicit FSkinnedMeshReference_Lf(const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset)
 	{
 		DataAsset = Asset;
-		//AllocationSize = Asset->MaxNumMeshes;
-		//ComputeShaderParams = FMeshUnitComputeShader_Params_Lf();
-		//SkinWeightParams = FSettingsComputeShader_Params_Lf();
-		//AnimationLibraryParams = FSettingsComputeShader_Params_Lf();
-		//RenderDataParams = FRenderDataComputeShader_Params_Lf();
-		//AnimationLibraryFrameDelay = Asset->TimeBetweenAnimationLibraryFrames;
 	}
 
 	FORCEINLINE_DEBUGGABLE bool operator==(const FSkinnedMeshReference_Lf& Rhs) const
@@ -622,57 +497,12 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 	UPROPERTY()
 	TObjectPtr<UStaticMesh> FirstValidMeshLevelOfDetail;
 
-	//TMap<int32, int32> SkeletonToVirtualBoneIdxMap;
-
 	uint16 NumCPUBones = GET0_NUMBER;
 
 	uint16 NumFirstLodGPUBones = GET0_NUMBER;
 	uint8 NumLevelOfDetailsWithMesh = GET0_NUMBER;
 
-	// < Lod Idx | < Skin Weights > >
-	//TMap<int16, TArray<FVector4f>> CachedSkinWeights;
-
-	//bool bNeedComputeSkinWeights = false;
-	//bool bNeedComputeAnimationLibrary = false;
-	//bool bNeedRefreshGPUDataOfAllInstances = false;
-
-	// FMeshUnitComputeShader_Params_Lf ComputeShaderParams;
-	//FSettingsComputeShader_Params_Lf AnimationLibraryParams;
-	//FRenderDataComputeShader_Params_Lf RenderDataParams;
-
 	FTransform FirstReferenceBone;
-
-	//uint32 NumMeshesVisibleCurrentFrame = GET0_NUMBER;
-	//uint32 NumIKPixelCurrentFrame = GET0_NUMBER;
-
-	//bool bHasSkinWeightsComputed = false;
-	//bool bHasBoneMapsComputed = false;
-	//bool bHasTargetAnimationsComputed = false;
-	// uint32 GetMaxNumMeshes() const
-	// {
-	// 	return AllocationSize;		
-	// }
-	//uint32 GetCurrentNumMeshes() const
-	//{
-	///	return CurrentMeshes;	
-	//}
-	// uint32 GetNumMeshesVisible() const
-	// {
-	// 	return NumMeshesVisibleCurrentFrame;		
-	// }
-	// void AddMesh()
-	// {
-	// 	CurrentMeshes++;
-	// }
-	// void RemoveMesh()
-	// {
-	// 	CurrentMeshes--;
-	// }
-
-	// float GetAnimationFrameDelay() const
-	// {
-	// 	return AnimationLibraryFrameDelay;
-	// }
 
 	TArray<FTransform> ComponentSpaceRestPose;
 
@@ -712,15 +542,11 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 
 	bool bIsVisible = true;
 	uint8 CurrentGPUMeshIndex = GET0_NUMBER;
-	//bool bIsMinimalAnimationMode = false;
 
 	TArray<FAnimationMetaData_RenderThread_Lf> AnimationMetaData_RenderThread;
 
 	bool bIKDataInUse = false;
 	TMap<uint16, FIKBoneData_Lf> IKData;
-
-	//uint32 TransformTextureOffsetIndex = GET0_NUMBER;
-	//uint32 SkinWeightOffsetIndex = GET0_NUMBER;
 
 protected:
 	uint32 MeshID = GET0_NUMBER;
@@ -785,25 +611,17 @@ public:
 	}
 
 	FTransform WorldSpaceTransform = FTransform::Identity;
-	//FTransform DeltaOffsetTransform = FTransform::Identity;
 
 	TArray<FAnimationMetaData_Lf> AnimationMetaData;
 	// < Animation ID | Animation Index >
 	TMap<uint32, int32> AnimationIDs;
-	//bool bUpdatedAnimationThisFrame = false;
 
 	// < Animation Group Layer Hash | Animation Group >
 	TMap<uint32, FAnimationGroup_Lf> AnimationGroups;
 
 	TMap<TObjectPtr<UBlendSpace>, FAnimationBlendSpaceData_Lf> AnimationBlendSpaceMetaData;
-	// Contains Blend Layer Hash
-	//TArray<uint32> AnimationLayerMasksToRemove;
-	// < Contains the Animation ID | true when it's getting added > 
-	//TMap<uint32, bool> AnimationLayerMasksToChange;
 
 	int16 LodIndex = GET0_NUMBER;
-	//uint32 TransformTextureOffsetIndex = GET0_NUMBER;
-	//float IsVisibleTimer = GET0_NUMBER;
 	bool bIsDistanceUpdatingThisFrame = true;
 
 	float ClosestCameraDistance = GET0_NUMBER;
@@ -820,23 +638,8 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<AActor> HybridMeshInstance;
-
-	// bool bAnimateHybridActor = false;
-	// bool bDrawHybridActor = false;
+	
 	bool bSpawnedHybridActor = false;
-
-	// In order to make a smoother transition between UE and TS System,
-	// we toggle this bool for draw and the other for animation to give some kind if deterministic Random
-	// Distance when the Instance should switch Animation Mode or Draw Mode
-	//bool bIsShorterDrawHybridMeshInstanceDistance = false;
-	//bool bIsShorterAnimationHybridMeshInstanceDistance = false;
-
-	//uint16 NumAnimationsRuntime = GET0_NUMBER;
-
-	//int32 MeshExecuteIndex = GET0_NUMBER;
-
-	// Refactored to Reference.InstanceMap
-	//int32 RendererIndex = GET0_NUMBER;
 };
 
 
@@ -868,17 +671,10 @@ struct TURBOSEQUENCE_LF_API FAsyncTextureGenerationChunk_Lf
 	TArray<FUintVector3> LodDimensions;
 
 	int32 NumPixelsPerIteration = GET0_NUMBER;
-
-	//int16 MaxIterations = GET0_NUMBER;;
-	//int16 CurrentIterationIndex = GET0_NUMBER;
+	
 	int32 NumPixelsComputed = GET0_NUMBER;
-
-	//bool bIsSliceStartIteration = false;
-	//int32 SliceStartPixelIndex = GET0_NUMBER;
-	//int32 NumSliceStartPixel = GET0_NUMBER;
+	
 	TMap<int32, bool> TestValue;
-
-	//bool bIsSliceTransitionIteration = false;
 
 	UPROPERTY()
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
@@ -894,16 +690,6 @@ struct TURBOSEQUENCE_LF_API FAsyncTextureGenerationChunk_Lf
 		LodDimensions[Index].Z = CeilRows;
 
 		LodDimensions[Index].Y = ChunkSizeY;
-
-		//UE_LOG(LogTemp, Warning, TEXT("%d"), Dimensions.Y / Tex->SizeX);
-
-		// uint16 NumRows = DataAsset->NumRowsToLoadOnAsyncSkinWeightLoad + !DataAsset->NumRowsToLoadOnAsyncSkinWeightLoad;
-		// if (NumRows > Tex->SizeY)
-		// {
-		// 	NumRows = Tex->SizeY;
-		// }
-		//
-		// NumPixelsPerIteration = NumRows * Tex->SizeX;
 	}
 };
 
@@ -922,8 +708,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	~FSkinnedMeshGlobalLibrary_RenderThread_Lf()
 	{
 	}
-
-	//float DeltaTime = GET0_NUMBER;
 
 
 	FSettingsComputeShader_Params_Lf SkinWeightParams;
@@ -945,8 +729,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_RenderThread_Lf> PerReferenceData;
 	UPROPERTY()
 	TArray<TObjectPtr<UTurboSequence_MeshAsset_Lf>> PerReferenceDataKeys;
-
-	//TMap<uint32, FIntVector2> AnimationComputeShaderDataSize;
 };
 
 
@@ -989,8 +771,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 	// Contains the Runtime ID which is having dirty Animation Data
 	TMap<FUintVector2, bool> AnimationBlendLayerMasksRuntimeDirty;
 
-	//bool bAnimationLayerMasksAreDirty = false;
-
 	uint16 MaxNumCPUBones = GET0_NUMBER;
 	uint16 MaxNumGPUBones = GET0_NUMBER;
 	uint16 MaxNumLevelOfDetailsWithMesh = GET0_NUMBER;
@@ -1001,9 +781,4 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 	TMap<uint32, int32> MeshIDToGlobalIndex;
 
 	int16 NumGroupsUpdatedThisFrame = GET0_NUMBER;
-
-	// The array is always ordered from lowest to highest to make a smoother calculation
-	//TArray<FAsyncTextureGenerationChunk_Lf> SkinWeightTextureIndices;
-
-	//TArray<FVector4f> ChunkedSkinWeightRuntimePixels;
 };

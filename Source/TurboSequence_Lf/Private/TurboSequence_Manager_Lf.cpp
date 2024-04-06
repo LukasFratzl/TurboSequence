@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 
 #include "TurboSequence_Manager_Lf.h"
@@ -62,14 +62,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 		}
 
 		const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = Reference.DataAsset;
-
-
-		// for (TTuple<uint8, FSkinnedMeshReferenceLodElement_Lf>& Level : Reference.LevelOfDetails)
-		// {
-		// 	if (const FSkinnedMeshReferenceLodElement_Lf& LodElement = Level.Value; LodElement.bIsRenderStateValid)
-		// 	{
-		// 	}
-		// }
 
 		for (TTuple<uint32, FRenderData_Lf>& RenderData : Reference.RenderData)
 		{
@@ -146,21 +138,8 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				}
 			});
 	}
-
-	// if (!GlobalLibrary.NumGroupsUpdatedThisFrame && Instance->bMeshVisible_PreviousFrame)
-	// {
-	// 	Instance->bMeshVisible_PreviousFrame = false;
-	//
-	// 	FTurboSequence_ClearRenderTarget_CS_Lf::ClearRenderTarget_GameThread(Instance->GlobalData->CustomDataTexture, PF_FloatRGBA);
-	// }
+	
 	GlobalLibrary.NumGroupsUpdatedThisFrame = GET0_NUMBER;
-
-	// if (bCollectGarbageThisFrame)
-	// {
-	// 	CollectGarbage();
-	// }
-	//
-	// bCollectGarbageThisFrame = false;
 
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Num())
 	{
@@ -168,11 +147,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 		Instance->RefreshThreadContext_GameThread();
 	}
 }
-
-// void ATurboSequence_Manager_Lf::InitializeManager_GameThread()
-// {
-// 	CleanManager_GameThread(false);
-// }
 
 FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 	const FTurboSequence_MeshSpawnData_Lf FromSpawnData, const FTransform SpawnTransform,
@@ -609,16 +583,9 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 			return;
 		}
 
-		// if (UpdateContext.bCollectGarbageThisFrame)
-		// {
-		// 	Instance->bCollectGarbageThisFrame = true;
-		// }
-
 		const int64& CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
 
 		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
-
-		//UE_LOG(LogTemp, Warning, TEXT("%lld"), CurrentFrameCount)
 
 		FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread = GlobalLibrary_RenderThread;
 
@@ -676,10 +643,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 				FTurboSequence_Utility_Lf::UpdateDistanceUpdating(Runtime, DeltaTime);
 
 				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
-				//const int32& NewTransformIndex = Index * GlobalLibrary_RenderThread.BoneTransformParams.NumMaxGPUBones *
-				//FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer;
-
-				//Runtime.TransformTextureOffsetIndex = NewTransformIndex;
 				if (LodElement.bIsRenderStateValid)
 				{
 					FTurboSequence_Utility_Lf::SetCustomDataForInstance(
@@ -828,16 +791,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 						Library_RenderThread.AnimationLibraryMaxNum = AnimationMaxNum;
 					});
 			}
-			// else
-			// {
-			// 	ENQUEUE_RENDER_COMMAND(TurboSequence_AddLibraryAnimationChunked_Lf)(
-			// 		[&Library_RenderThread, AnimationMaxNum](FRHICommandListImmediate& RHICmdList)
-			// 		{
-			// 			Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.Empty();
-			//
-			// 			Library_RenderThread.AnimationLibraryMaxNum = AnimationMaxNum;
-			// 		});
-			// }
 
 			FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(
 				GlobalLibrary, Library_RenderThread, ThreadContext->CriticalSection);
@@ -868,8 +821,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	const int32 NumMeshes = GlobalLibrary_RenderThread.RuntimeSkinnedMeshesHashMap.Num();
 	const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
 	const int32& NumMeshesPerThread = FMath::CeilToInt(static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-
-	//UE_LOG(LogTemp, Warning, TEXT("%d | %d"), NumMeshes, GlobalLibrary_RenderThread.CurrentUpdateGroupIndex);
 
 	FTurboSequence_Utility_Lf::ResizeBuffers(GlobalLibrary_RenderThread, NumMeshes);
 
@@ -982,20 +933,11 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	MeshParams.PerMeshCustomDataIndex_Global_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
 	MeshParams.PerMeshCustomDataLod_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
 	MeshParams.PerMeshCustomDataCollectionIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
-	//MeshParams.SkinWeightOffsetLod_RenderThread.SetNumUninitialized(
-	//	NumReferences_RenderThread * MeshParams.NumMaxLevelOfDetails);
 	MeshParams.AnimationStartIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
 	MeshParams.AnimationEndIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
-
-	//MeshParams.AnimationFrameAlpha_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
+	
 	MeshParams.AnimationFramePose0_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
-	//MeshParams.AnimationFramePose1_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
-	//MeshParams.PerBoneAnimationWeights_RenderThread.SetNumUninitialized(FMath::Max(NumPerBoneAnimationWeightData, 1));
-	//MeshParams.PerBoneAnimationWeightIndices_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
 	MeshParams.AnimationWeights_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
-	//MeshParams.AnimationLocationWeights_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
-	//MeshParams.AnimationRotationWeights_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
-	//MeshParams.AnimationScaleWeights_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
 	MeshParams.AnimationLayerIndex_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
 
 	MeshParams.BoneSpaceAnimationIKData_RenderThread.SetNumUninitialized(NumIKData_RenderThread);
@@ -1031,8 +973,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationLocationWeights_RenderThread, 23);
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationRotationWeights_RenderThread, 24);
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationScaleWeights_RenderThread, 25);
-
-	//UE_LOG(LogTemp, Warning, TEXT("%d"), NumAnimations_RenderThread);
 
 	constexpr uint8 NumOperations = GET4_NUMBER;
 	ParallelFor(NumOperations, [&](const int32& ThreadsIndex)
@@ -1078,40 +1018,10 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 							AnimIdx];
 
 						const int32& BufferIndex = CurrentAnimationIndex;
-
-						//MeshParams.AnimationFrameAlpha_RenderThread[BufferIndex] = Animation.AnimationAlpha;
+						
 						MeshParams.AnimationFramePose0_RenderThread[BufferIndex] = Animation.GPUAnimationIndex_0;
-						//MeshParams.AnimationFramePose1_RenderThread[BufferIndex] = Animation.GPUAnimationIndex_1;
-						//MeshParams.AnimationID_RenderThread[BufferIndex] = Animation.GPUAnimationID;
-						//MeshParams.AnimationFrameNormalizedTime_RenderThread[BufferIndex] = Animation.AnimationNormalizedTime;
 						MeshParams.AnimationWeights_RenderThread[BufferIndex] = Animation.FinalAnimationWeight;
-						//MeshParams.AnimationLocationWeights_RenderThread[BufferIndex] = Animation.
-						//	FinalBoneLocationAnimationWeight;
-						//MeshParams.AnimationRotationWeights_RenderThread[BufferIndex] = Animation.
-						//	FinalBoneRotationAnimationWeight;
-						//MeshParams.AnimationScaleWeights_RenderThread[BufferIndex] = Animation.
-						//	FinalBoneScaleAnimationWeight;
 						MeshParams.AnimationLayerIndex_RenderThread[BufferIndex] = Animation.LayerMaskIndex;
-						//MeshParams.AnimationRootIndexMax_RenderThread[BufferIndex] = Animation.RootBoneIndexMax;
-
-						// if (const int16& NumPerBoneWeights = Animation.PerBoneAnimationWeight.Num())
-						// // Should be always Num CPU Bones
-						// {
-						// 	MeshParams.PerBoneAnimationWeightIndices_RenderThread[BufferIndex] =
-						// 		CurrentPerBoneWeightIndex;
-						//
-						// 	for (int16 WeightIdx = GET0_NUMBER; WeightIdx < NumPerBoneWeights; ++WeightIdx)
-						// 	{
-						// 		const int32& WeightIndex = CurrentPerBoneWeightIndex + WeightIdx;
-						//
-						// 		MeshParams.PerBoneAnimationWeights_RenderThread[WeightIndex] = Animation.
-						// 			PerBoneAnimationWeight[WeightIdx];
-						// 	}
-						// }
-						// else
-						// {
-						// 	MeshParams.PerBoneAnimationWeightIndices_RenderThread[BufferIndex] = INDEX_NONE;
-						// }
 
 						CurrentAnimationIndex++;
 					}
@@ -1206,8 +1116,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 			}
 		}
 	}, EParallelForFlags::BackgroundPriority);
-
-	//UE_LOG(LogTemp, Warning, TEXT("Alloc MB -> %f"), MeshParams.GetNumMB());
 }
 
 void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, const int64& MeshID)

@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -18,7 +18,6 @@ struct FDemoMeshWrapper_Lf
 	float DeltaTimeAccumulator;
 	float IKWeight;
 	int32 AssetDataIndex;
-	//TObjectPtr<UTurboSequence_MeshAsset_Lf> AssetToUse;
 
 	int32 DefaultUpdateGroupIndex;
 	int32 CurrentUpdateGroupIndex;
@@ -193,9 +192,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateManager = false;
 
-	//UPROPERTY(EditAnywhere)
-	//bool bCollectGarbageThisFrame = false;
-
 	UPROPERTY(EditAnywhere)
 	int32 NumInstancesPerUpdateGroup = 21000;
 
@@ -230,15 +226,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Test")
 	FTransform TestRotationTransform = FTransform::Identity;
-
-	//UPROPERTY(EditAnywhere, Category="Test")
-	//TObjectPtr<UBlendSpace> TestBlendSpace = nullptr;
-
-	//UPROPERTY(EditAnywhere, Category="Test", meta=(ClampMin=-100, ClampMax=100))
-	//float TestBlendSpaceSlider = 0;
-
-	//UPROPERTY(VisibleAnywhere)
-	//TObjectPtr<UStaticMeshComponent> TestCube;
 
 
 	TMap<uint32, FDemoMeshWrapper_Lf> Meshes;

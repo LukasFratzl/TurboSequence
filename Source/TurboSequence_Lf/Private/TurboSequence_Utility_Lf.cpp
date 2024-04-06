@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #include "TurboSequence_Utility_Lf.h"
 
@@ -37,25 +37,21 @@ void FTurboSequence_Utility_Lf::CreateTurboSequenceReference(FSkinnedMeshGlobalL
 {
 	if (!IsValid(FromAsset))
 	{
-		//UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can't create Mesh Instance, the Asset you use is not valid...."));
 		return;
 	}
 
 	if (!IsValid(FromAsset->GetSkeleton()))
 	{
-		//UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can't create Mesh Instance, the Asset you use has no Skeleton assigned...."));
 		return;
 	}
 
 	if (!FromAsset->MeshData.Num())
 	{
-		//UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can't create Mesh Instance, the Asset you use has no Reference Mesh assigned...."));
 		return;
 	}
 
 	if (!FromAsset->InstancedMeshes.Num())
 	{
-		//UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can't create Mesh Instance, the Asset you use has no LODs...."));
 		return;
 	}
 
@@ -66,35 +62,16 @@ void FTurboSequence_Utility_Lf::CreateTurboSequenceReference(FSkinnedMeshGlobalL
 
 	FSkinnedMeshReference_Lf Reference = FSkinnedMeshReference_Lf(FromAsset);
 	FSkinnedMeshReference_RenderThread_Lf Reference_RenderThread = FSkinnedMeshReference_RenderThread_Lf();
-
-	// const FString& CurrentPlatform = UGameplayStatics::GetPlatformName();
-	///*FName TargetPlatform = */GetTargetPlatformManagerRef().GetRunningTargetPlatform()
+	
 
 	CreateLevelOfDetails(Reference, Reference_RenderThread, CriticalSection, FromAsset);
-
-	// Created the Renderer and assign all data corresponding to it
-	//Reference.RenderData.RenderReference = FromAsset->RendererSystem;
 
 	const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(FromAsset);
 	const TArray<FTransform>& ReferencePose = GetSkeletonRefPose(ReferenceSkeleton);
 	Reference.FirstReferenceBone = ReferencePose[GET0_NUMBER];
 
-	//CreateBoneMaps(Library);
-	// CreateSkinWeightTextureBuffer(Reference, FromAsset, false);
-	//Reference.bNeedComputeSkinWeights = true;
-	//CreateAnimationLibraryBuffer(Reference, FromAsset);
-	//Reference.bNeedComputeAnimationLibrary = true; // Invokes the compute shader
-	//CreateInverseReferencePose(Reference, Library, FromAsset);
-
-	//DisposeBuffers(Reference);
-	//ResizeBuffers(Reference, Reference.GetMaxNumMeshes());
-	//AllocateBuffers(Reference);
-
 	CriticalSection.Lock();
 	Library.PerReferenceDataKeys.Add(FromAsset);
-	// Make sure to call it as well on removing references if this ever a thing
-	//Reference.ReferenceCollectionIndex = Library.PerReferenceDataKeys.IndexOfByKey(Reference.DataAsset);
-	//Reference_RenderThread.ReferenceCollectionIndex = Reference.ReferenceCollectionIndex;
 	Reference_RenderThread.DataAsset = FromAsset;
 	Library.PerReferenceData.Add(FromAsset, Reference);
 	CriticalSection.Unlock();
@@ -225,29 +202,22 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 
 				const int32& NumReferences = Library_RenderThread.PerReferenceData.Num();
 				Library_RenderThread.BoneTransformParams.ReferenceNumCPUBones.SetNum(NumReferences);
-				//int32 IndicesBufferAddition = GET0_NUMBER;
 				for (int32 i = GET0_NUMBER; i < NumReferences; ++i)
 				{
-					//IndicesBufferAddition += MaxNumCPUBones * MaxNumLevelOfDetails;
 
 					FSkinnedMeshReference_RenderThread_Lf& Reference = Library_RenderThread.PerReferenceData[
 						Library_RenderThread.PerReferenceDataKeys[i]];
 
-					//Reference.SkinWeightTextureOffsetPerLevelOfDetail.SetNumZeroed(MaxNumMeshLevelOfDetails);
-
 					const int32& NumCpuBones = GetSkeletonNumBones(GetReferenceSkeleton(Reference.DataAsset));
 					Library_RenderThread.BoneTransformParams.ReferenceNumCPUBones[i] = NumCpuBones;
 				}
-				//Library_RenderThread.BoneTransformParams.Indices.SetNum(IndicesBufferAddition);
 			});
 
 		const int16& NumReferences = Library.PerReferenceData.Num();
 
 		TArray<FVector4f> CachedIndices;
 		const int32& NumBoneIndices = NumReferences * MaxNumCPUBones * MaxNumMeshLevelOfDetails;
-		//CriticalSection.Lock();
 		CachedIndices.AddUninitialized(NumBoneIndices);
-		//CriticalSection.Unlock();
 		for (int32 RefIdx = GET0_NUMBER; RefIdx < NumReferences; ++RefIdx)
 		{
 			const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = Library.PerReferenceDataKeys[RefIdx];
@@ -262,14 +232,10 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 			ParallelFor(NumLevelOfDetails, [&](const int32& LodIdx)
 			{
 				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[LodIdx];
-				//LodElement.CPUBoneToGPUBoneIndicesMap.Empty();
 				if (!LodElement.bIsRenderStateValid)
 				{
-					//goto NotValidLOD;
 					return;
 				}
-
-				//UE_LOG(LogTemp, Warning, TEXT("Valid LOD Idx %d"), LodIdx);
 
 				CriticalSection.Lock();
 				if (LodIdx < FirstGPULodCollectionIndex)
@@ -299,7 +265,6 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 						}
 						Data.Z = GetSkeletonParentIndex(ReferenceSkeleton, i);
 						Data.W = GET0_NUMBER; // Reserved
-						//UE_LOG(LogTemp, Warning, TEXT("Skeleton Y -> %f"), Data.Y);
 					}
 					else // It's not part of the rig anymore, so tell the Compute Shader to not compute it
 					{
@@ -307,12 +272,10 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 						Data.Y = INDEX_NONE;
 						Data.Z = INDEX_NONE;
 						Data.W = GET0_NUMBER;
-						//UE_LOG(LogTemp, Warning, TEXT("Other Y -> %f"), Data.Y);
 					}
 					CachedIndices[BaseIndex + i] = Data;
 				}
-
-				//NotValidLOD:;
+				
 			}, EParallelForFlags::BackgroundPriority);
 
 
@@ -337,16 +300,6 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 				MaxNumGPUBones = NumBones;
 			}
 		}
-
-		// for (const TTuple<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf>& ReferenceOther : Library.PerReferenceData)
-		// {
-		// 	if (const int32 NumBones = ReferenceOther.Value.NumFirstLodGPUBones; MaxNumGPUBones <= NumBones)
-		// 	{
-		// 		MaxNumGPUBones = NumBones;
-		// 	}
-		// }
-
-		//UE_LOG(LogTemp, Warning, TEXT("%d"), NumBoneIndices)
 
 		Library.MaxNumGPUBones = MaxNumGPUBones;
 		ENQUEUE_RENDER_COMMAND(TurboSequence_FillBoneCollection_Lf)(
@@ -478,19 +431,13 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 					const uint8& Weight = WeightFloat * 0xFF;
 
-					//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
-
 					Weights[WeightIdx] = Weight;
 
 					const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(RealVertexIndex, ChunkIndex + WeightIdx);
 
 					const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
 					                                                    Section.BoneMap, RawBoneIndex, Weight);
-
-					//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
-
-					//if (IndexedBoneIndex)
-					//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
+					
 
 					Indices[WeightIdx] = IndexedBoneIndex;
 
@@ -506,7 +453,6 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			}
 
 			FVector4f PerVertexCustomData_0;
-			//PerVertexCustomData_0.X = MaxSkinWeightVertex;
 			PerVertexCustomData_0.X = GET12_NUMBER;
 			PerVertexCustomData_0.Y = GET0_NUMBER;
 			PerVertexCustomData_0.Z = GET0_NUMBER;
@@ -514,150 +460,6 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 			FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
 		}
-
-
-		// const uint32& NumVertices = RenderData.GetNumVertices();
-		//
-		// const FSkeletalMeshLODModel& LodModel = FromAsset->ReferenceMeshEdited->GetImportedModel()->LODModels[LodElement.MeshIndex];
-		// const uint32& SkinnedMeshVertices = LodModel.NumVertices;
-		//
-		// FMeshDescription MeshDescription;
-		// LodModel.GetMeshDescription(FromAsset->ReferenceMeshEdited, LodElement.MeshIndex, MeshDescription);
-		//
-		// int32 NumDataIterator = GET0_NUMBER;
-		// for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); SectionIndex++)
-		// {
-		// 	const FSkelMeshSection& Section = LodModel.Sections[SectionIndex];
-		//
-		// 	// Convert positions and bone weights
-		// 	const TArray<FSoftSkinVertex>& SourceVertices = Section.SoftVertices;
-		// 	for (int32 VertexIndex = GET0_NUMBER; VertexIndex < SourceVertices.Num(); VertexIndex++)
-		// 	{
-		// 		const int32 SourceVertexIndex = VertexIndex + Section.BaseVertexIndex;
-		// 		const int32 TargetVertexIndex = SourceToTargetVertexMap[SourceVertexIndex];
-		//
-		//
-		// 		uint8 MaxSkinWeightVertex = GET0_NUMBER;
-		// 		for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
-		// 		{
-		// 			const uint8& ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
-		//
-		// 			FVector4f Weights;
-		// 			FVector4f Indices;
-		// 			for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
-		// 			{
-		// 				const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(SourceVertexIndex, ChunkIndex + WeightIdx);
-		//
-		// 				const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
-		//
-		// 				const uint8& Weight = WeightFloat * 0xFF;
-		//
-		// 				//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
-		//
-		// 				Weights[WeightIdx] = Weight;
-		//
-		// 				const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(SourceVertexIndex, ChunkIndex + WeightIdx);
-		//
-		// 				const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
-		// 				                                                    Section.BoneMap, RawBoneIndex, Weight);
-		//
-		// 				//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
-		//
-		// 				//if (IndexedBoneIndex)
-		// 				//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
-		//
-		// 				Indices[WeightIdx] = IndexedBoneIndex;
-		//
-		// 				if (Weight)
-		// 				{
-		// 					MaxSkinWeightVertex = ChunkIndex + WeightIdx;
-		// 				}
-		// 			}
-		//
-		//
-		// 			Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Indices;
-		// 			NumDataIterator++;
-		// 			Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Weights;
-		// 			NumDataIterator++;
-		// 		}
-		//
-		// 		FVector4f PerVertexCustomData_0;
-		// 		//PerVertexCustomData_0.X = MaxSkinWeightVertex;
-		// 		PerVertexCustomData_0.X = GET12_NUMBER;
-		// 		PerVertexCustomData_0.Y = GET0_NUMBER;
-		// 		PerVertexCustomData_0.Z = GET0_NUMBER;
-		// 		PerVertexCustomData_0.W = GET0_NUMBER;
-		//
-		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = PerVertexCustomData_0;
-		// 		NumDataIterator++;
-		// 	}
-		// }
-
-
-		// for (uint32 i = GET0_NUMBER; i < NumVertices; ++i)
-		// {
-		// 	int32 VertexIndexSection;
-		// 	int32 SectionIndex;
-		// 	RenderData.GetSectionFromVertexIndex(i, SectionIndex, VertexIndexSection);
-		//
-		//
-		// 	const FSkelMeshRenderSection& Section = RenderData.RenderSections[SectionIndex];
-		// 	const uint32& VertIdx = Section.BaseVertexIndex + VertexIndexSection;
-		//
-		// 	uint8 MaxSkinWeightVertex = GET0_NUMBER;
-		// 	for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
-		// 	{
-		// 		const uint8& ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
-		//
-		// 		FVector4f Weights;
-		// 		FVector4f Indices;
-		// 		for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
-		// 		{
-		// 			const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx);
-		//
-		// 			const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
-		//
-		// 			const uint8& Weight = WeightFloat * 0xFF;
-		//
-		// 			//UE_LOG(LogTemp, Warning, TEXT("%d"), SkinWeightBuffer->GetBoneWeight(VertIdx, ChunkIndex + WeightIdx));
-		//
-		// 			Weights[WeightIdx] = Weight;
-		//
-		// 			const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(VertIdx, ChunkIndex + WeightIdx);
-		//
-		// 			const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
-		// 			                                                    Section.BoneMap, RawBoneIndex, Weight);
-		//
-		// 			//const int32& FinalBoneIndex = GetValidBoneData(IndexedBoneIndex, ChunkIndex + WeightIdx, SkinWeightBuffer->GetMaxBoneInfluences());
-		//
-		// 			//if (IndexedBoneIndex)
-		// 			//UE_LOG(LogTemp, Warning, TEXT("%d"), IndexedBoneIndex);
-		//
-		// 			Indices[WeightIdx] = IndexedBoneIndex;
-		//
-		// 			if (Weight)
-		// 			{
-		// 				MaxSkinWeightVertex = ChunkIndex + WeightIdx;
-		// 			}
-		// 		}
-		//
-		//
-		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Indices;
-		// 		NumDataIterator++;
-		// 		Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = Weights;
-		// 		NumDataIterator++;
-		// 	}
-		//
-		// 	FVector4f PerVertexCustomData_0;
-		// 	//PerVertexCustomData_0.X = MaxSkinWeightVertex;
-		// 	PerVertexCustomData_0.X = GET12_NUMBER;
-		// 	PerVertexCustomData_0.Y = GET0_NUMBER;
-		// 	PerVertexCustomData_0.Z = GET0_NUMBER;
-		// 	PerVertexCustomData_0.W = GET0_NUMBER;
-		//
-		// 	Params.SettingsInput[LodElement.SkinWeightOffset + NumDataIterator] = PerVertexCustomData_0;
-		// 	NumDataIterator++;
-		// }
 	}, EParallelForFlags::BackgroundPriority);
 
 	const int32 Slice = FMath::Min(
@@ -681,23 +483,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
 		{
-			//FTextureRenderTarget2DArrayResource* TextureResource = static_cast<FTextureRenderTarget2DArrayResource*>(
-			//	FromAsset->GlobalData->SkinWeightTexture->GameThread_GetRenderTargetResource());
-			//TArray<FFloat16Color> OutputBuffer;
 			bool bValidPixels = true;
-			// if (TextureResource->ReadFloat16Pixels(OutputBuffer,  FReadSurfaceDataFlags()))
-			// {
-			// 	for (const FFloat16Color& Color : OutputBuffer)
-			// 	{
-			// 		if (!FMath::IsNearlyZero(Color.R.GetFloat(), 1.0f) || !FMath::IsNearlyZero(Color.G.GetFloat(), 1.0f)
-			// 			|| !FMath::IsNearlyZero(Color.B.GetFloat(), 1.0f) || !FMath::IsNearlyZero(
-			// 				Color.A.GetFloat(), 1.0f))
-			// 		{
-			// 			bValidPixels = false;
-			// 			break;
-			// 		}
-			// 	}
-			// }
 			if (bValidPixels)
 			{
 				ENQUEUE_RENDER_COMMAND(TurboSequence_FillRenderThreadSkinWeightData_Lf)(
@@ -758,136 +544,9 @@ void FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(FSkinnedMeshGl
                                                                   Library_RenderThread,
                                                                   FCriticalSection& CriticalSection)
 {
-	// for (TTuple<FUint32Vector, FAnimationLibraryData_Lf>& LibraryData : Library.AnimationLibraryData)
-	// {
-	// 	FAnimationLibraryData_Lf& LibraryDataToRemove = LibraryData.Value;
-	// 	if (LibraryDataToRemove.bNeedAsyncChunkedDataUnload)
-	// 	{
-	// 		if (!LibraryDataToRemove.bIsRemoveDatSorted)
-	// 		{
-	// 			LibraryDataToRemove.bIsRemoveDatSorted = true;
-	// 			//LibraryDataToRemove.KeyframesFilledSortedByGreaterValue = LibraryDataToRemove.KeyframesFilled;
-	// 			//LibraryDataToRemove.KeyframesFilledSortedByGreaterValue.Sort(TGreater<int32>());
-	// 		}
-	// 		//AnimationLibraryDataToRemove.Sort(TGreater<int32>());
-	//
-	// 		//Library.AnimationLibraryData.Remove(AnimationLibraryHash);
-	//
-	// 		if (const int32 NumKeyframes = LibraryDataToRemove.KeyframesFilled.Num())
-	// 		{
-	// 			int16 NumKeyframesAtOnce = GET2_NUMBER;
-	// 			TArray<int32> AnimationLibraryDataToRemove;
-	// 			int32 NumDataMaxNumSubtract = GET0_NUMBER;
-	// 			const int32 NumLibraryBones = LibraryDataToRemove.NumBones * GET3_NUMBER;
-	// 			for (int32 RemoveIdx = LibraryDataToRemove.NumKeyframesUnloaded; RemoveIdx < NumKeyframes; ++RemoveIdx)
-	// 			{
-	// 				int32& RemoveDataItem = LibraryDataToRemove.KeyframesFilled[RemoveIdx];
-	// 				if (RemoveDataItem > INDEX_NONE)
-	// 				{
-	// 					NumDataMaxNumSubtract += NumLibraryBones;
-	// 					for (TTuple<FUintVector, FAnimationLibraryData_Lf>& Data : Library.AnimationLibraryData)
-	// 					{
-	// 						if (Data.Key == LibraryData.Key)
-	// 						{
-	// 							continue;
-	// 						}
-	// 						const int32& NumData = Data.Value.KeyframesFilled.Num();
-	// 						for (int32 i = GET0_NUMBER; i < NumData; ++i)
-	// 						{
-	// 							if (int32& Keyframe = Data.Value.KeyframesFilled[i]; Keyframe > INDEX_NONE && Keyframe > RemoveDataItem)
-	// 							{
-	// 								Keyframe -= NumLibraryBones;
-	// 							}
-	// 						}
-	// 					}
-	//
-	// 					AnimationLibraryDataToRemove.Add(RemoveDataItem);
-	// 					RemoveDataItem = INDEX_NONE;
-	// 					NumKeyframesAtOnce--;
-	// 					LibraryDataToRemove.NumKeyframesUnloaded++;
-	// 					if (NumKeyframesAtOnce <= GET0_NUMBER)
-	// 					{
-	// 						break;
-	// 					}
-	// 				}
-	// 			}
-	//
-	// 			Library.AnimationLibraryMaxNum -= NumDataMaxNumSubtract;
-	//
-	// 			const int32 NumDataToRemove = AnimationLibraryDataToRemove.Num();
-	// 			AnimationLibraryDataToRemove.Sort(TGreater<int32>());
-	//
-	// 			if (NumDataToRemove)
-	// 			{
-	// 				ENQUEUE_RENDER_COMMAND(TurboSequence_RemoveLibraryAnimation_Lf)(
-	// 					[&Library_RenderThread, AnimationLibraryDataToRemove, NumLibraryBones, NumDataToRemove](FRHICommandListImmediate& RHICmdList)
-	// 					{
-	// 						UE_LOG(LogTemp, Warning, TEXT("Iteration Start num data %d, Num Library %d"), NumDataToRemove, NumLibraryBones);
-	// 						// Forward loop because we sorted it greater
-	// 						for (int32 i = GET0_NUMBER; i < NumDataToRemove; ++i)
-	// 						{
-	// 							if (const int32& BaseIndex = AnimationLibraryDataToRemove[i]; BaseIndex > INDEX_NONE)
-	// 							{
-	// 								for (int32 b = NumLibraryBones - GET1_NUMBER; b >= GET0_NUMBER; --b)
-	// 								{
-	// 									UE_LOG(LogTemp, Display, TEXT("%d | Num %d"), BaseIndex + b, Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.Num())
-	// 									Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.RemoveAt(BaseIndex + b);
-	// 								}
-	// 							}
-	// 						}
-	// 					});	
-	// 			}
-	//
-	// 			if (LibraryDataToRemove.NumKeyframesUnloaded >= LibraryDataToRemove.KeyframesFilled.Num())
-	// 			{
-	// 				for (TTuple<FUintVector, FAnimationLibraryData_Lf>& Data : Library.AnimationLibraryData)
-	// 				{
-	// 					if (Data.Value.IndexInCollection > LibraryData.Value.IndexInCollection)
-	// 					{
-	// 						Data.Value.IndexInCollection--;
-	// 					}
-	// 				}
-	// 				
-	// 				Library.AnimationLibraryData.Remove(LibraryData.Key);
-	// 				//continue;
-	// 			}
-	//
-	// 			break;
-	// 		}
-	// 	}
-	// }
+	
 }
 
-
-// bool FTurboSequence_Utility_Lf::ClearAnimationsFromLibrary(FSkinnedMeshGlobalLibrary_Lf& Library,
-//                                                            FCriticalSection& CriticalSection,
-//                                                            FSkinnedMeshGlobalLibrary_RenderThread_Lf&
-//                                                            Library_RenderThread)
-// {
-// 	if (Library.AnimationLibraryMaxNum)
-// 	{
-// 		for (TTuple<FUintVector, FAnimationLibraryData_Lf>& LibraryData : Library.AnimationLibraryData)
-// 		{
-// 			const int32& NumKeyframes = LibraryData.Value.KeyframesFilled.Num();
-// 			for (int32 i = GET0_NUMBER; i < NumKeyframes; ++i)
-// 			{
-// 				LibraryData.Value.KeyframesFilled[i] = INDEX_NONE;
-// 			}
-// 		}
-//
-// 		Library.AnimationLibraryMaxNum = GET0_NUMBER;
-// 		Library.AnimationLibraryDataAllocatedThisFrame.Empty();
-//
-// 		// ENQUEUE_RENDER_COMMAND(TurboSequence_ClearLibraryAnimations_Lf)(
-// 		// 	[&Library_RenderThread](FRHICommandListImmediate& RHICmdList)
-// 		// 	{
-// 		// 		Library_RenderThread.BoneTransformParams.AnimationRawData_RenderThread.Empty();
-// 		// 	});
-//
-// 		return true;
-// 	}
-// 	return false;
-// }
 
 int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobalLibrary_Lf& Library,
                                                               FCriticalSection& CriticalSection,
@@ -1165,21 +824,13 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 	UpdateRenderInstanceLod_Concurrent(PostReference, Runtime, LodElement,
 	                                   Runtime.bIsVisible && LodElement.bIsRenderStateValid);
 
-	//RemoveAnimation(Runtime, CriticalSection, Library, Library_RenderThread, GET0_NUMBER);
-
 	TArray<FAnimationMetaData_Lf> Animations = Runtime.AnimationMetaData;
-	//UE_LOG(LogTemp, Warning, TEXT("Pre %d"), Runtime.AnimationMetaData.Num());
 	const float BaseLayerWeight = Animations[GET0_NUMBER].FinalAnimationWeight;
 	const float BaseLayerStartTime = Animations[GET0_NUMBER].AnimationWeightStartTime;
 	Animations.RemoveAt(GET0_NUMBER);
-	// ClearAnimations(CriticalSection, Runtime, Library, Library_RenderThread, ETurboSequence_AnimationForceMode_Lf::AllLayers, TArray<FTurboSequence_BoneLayer_Lf>(), [](const FAnimationMetaData_Lf& AnimationMetaData)
-	// {
-	// 	return true;
-	// });
 	FTurboSequence_AnimPlaySettings_Lf PlaySettings = FTurboSequence_AnimPlaySettings_Lf();
 	PlaySettings.ForceMode = ETurboSequence_AnimationForceMode_Lf::AllLayers;
 	PlaySettings.RootMotionMode = ETurboSequence_RootMotionMode_Lf::None;
-	//PlaySettings.Animation = TargetMesh->OverrideDefaultAnimation;
 
 	bool bLoop = true;
 	if (IsValid(TargetMesh->OverrideDefaultAnimation)) // Cause of rest pose will pass here
@@ -1210,8 +861,6 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 		              Animation.AnimationRemoveTime);
 	}
 	Runtime.bForceVisibilityUpdatingThisFrame = true;
-
-	//UE_LOG(LogTemp, Warning, TEXT("Post %d"), Runtime.AnimationMetaData.Num());
 
 	const uint32 MeshID = Runtime.GetMeshID();
 	ENQUEUE_RENDER_COMMAND(TurboSequence_CustomizeRenderInstance_Lf)(

@@ -1,4 +1,4 @@
-﻿// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 
 #include "TurboSequence_FeaturesDemo_Lf.h"
@@ -193,26 +193,6 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 			BlendSpaceDemo.MeshData[0], BlendSpaceDemo.DemoBlendSpace, AnimationPlaySettings);
 	}
 
-	// if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::Additive) && AdditiveAnimationDemo.bEnable &&
-	// 	AdditiveAnimationDemo.Spawns.Num())
-	// {
-	// 	AdditiveAnimationDemo.MeshData.Add(ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
-	// 		AdditiveAnimationDemo.Spawns[0], AdditiveAnimationDemo.ActionTransforms[0], GetWorld()));
-	// 	ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(0, AdditiveAnimationDemo.MeshData[0]);
-	//
-	// 	FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
-	// 	//AnimationPlaySettings.Animation = AdditiveAnimationDemo.DemoAnimation;
-	// 	AnimationPlaySettings.AnimationManagementMode = ETurboSequence_ManagementMode_Lf::SelfManaged;
-	// 	AnimationPlaySettings.AnimationBoneLocationWeight = 1;
-	// 	AnimationPlaySettings.AnimationBoneRotationWeight = 0;
-	// 	AnimationPlaySettings.AnimationBoneScaleWeight = 1;
-	//
-	// 	AdditiveAnimationDemo.DemoAnimationData = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-	// 		AdditiveAnimationDemo.MeshData[0], AdditiveAnimationDemo.DemoAnimation, AnimationPlaySettings);
-	// 	AdditiveAnimationDemo.AdditiveAnimationData = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-	// 		AdditiveAnimationDemo.MeshData[0], AdditiveAnimationDemo.AdditiveAnimation, AnimationPlaySettings);
-	// }
-
 	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::Curves) && CurveDemo.bEnable && CurveDemo.Spawns.Num())
 	{
 		CurveDemo.MeshData.Add(
@@ -299,11 +279,6 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// if (bCollectGarbageThisFrame)
-	// {
-	// 	ATurboSequence_Manager_Lf::CollectGarbage();
-	// }
 
 	FCriticalSection CriticalSection;
 
@@ -478,77 +453,9 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			LastDemoBlendSpacePosition = Position;
 
 			ATurboSequence_Manager_Lf::TweakBlendSpace_Concurrent(BlendSpaceDemo.TweakingBlendSpace, Position);
-
-
-			//UE_LOG(LogTemp, Warning, TEXT("Pos -> %f"), RandomX);
+			
 		}
-		//ATurboSequence_Manager_Lf::RefreshBlendSpaceInfo_Concurrent(BlendSpaceDemo.TweakingBlendSpace);
 	}
-
-	// if (AdditiveAnimationDemo.bEnable && AdditiveAnimationDemo.MeshData.Num())
-	// {
-	// 	AdditiveAnimationDemo.RandomTimer -= DeltaTime;
-	// 	if (AdditiveAnimationDemo.RandomTimer < 0)
-	// 	{
-	// 		AdditiveAnimationDemo.RandomTimer = FMath::RandRange(3.0f, 5.0f);
-	//
-	// 		// AdditiveAnimationDemo.RandomAnimationData++;
-	// 		// if (AdditiveAnimationDemo.RandomAnimationData > 3)
-	// 		// {
-	// 		// 	AdditiveAnimationDemo.RandomAnimationData = 0;
-	// 		// }
-	// 		// if (!AdditiveAnimationDemo.RandomAnimationData)
-	// 		// {
-	// 		// 	AdditiveAnimationDemo.RandomAnimationData = 1;
-	// 		// }
-	// 		// else
-	// 		// {
-	// 		// 	AdditiveAnimationDemo.RandomAnimationData = 0;
-	// 		// }
-	// 		AdditiveAnimationDemo.RandomAnimationData = FMath::RandRange(0.0f, 1.0f);
-	// 	}
-	//
-	// 	if (AdditiveAnimationDemo.AdditiveAnimationData.IsAnimCollectionValid())
-	// 	{
-	// 		FTurboSequence_AnimPlaySettings_Lf AdditiveSettings;
-	// 		ATurboSequence_Manager_Lf::GetAnimationSettings_Concurrent(
-	// 			AdditiveSettings, AdditiveAnimationDemo.AdditiveAnimationData.RootMotionMesh);
-	//
-	// 		AdditiveSettings.AnimationBoneRotationWeight =
-	// 			FMath::Lerp(
-	// 				AdditiveSettings.AnimationBoneRotationWeight,
-	// 				AdditiveAnimationDemo.RandomAnimationData, DeltaTime * 5.0f);
-	//
-	// 		FTurboSequence_AnimPlaySettings_Lf DemoSettings;
-	// 		ATurboSequence_Manager_Lf::GetAnimationSettings_Concurrent(DemoSettings,
-	// 		                                                           AdditiveAnimationDemo.DemoAnimationData.
-	// 		                                                           RootMotionMesh);
-	//
-	// 		const float& Weight = AdditiveSettings.AnimationBoneRotationWeight;
-	//
-	// 		// AdditiveAnimationDemo.AdditiveAnimationData.RootMotionMesh.Settings.AnimationBoneLocationWeight = Weight;
-	// 		// AdditiveAnimationDemo.AdditiveAnimationData.RootMotionMesh.Settings.AnimationBoneScaleWeight = Weight;
-	//
-	// 		// AdditiveAnimationDemo.DemoAnimationData.RootMotionMesh.Settings.AnimationBoneLocationWeight = 1.0f - Weight;
-	// 		DemoSettings.AnimationBoneRotationWeight = 1.0f - Weight;
-	// 		// AdditiveAnimationDemo.DemoAnimationData.RootMotionMesh.Settings.AnimationBoneScaleWeight = 1.0f - Weight;
-	//
-	// 		const float& AdditiveAnimPlayLength = AdditiveAnimationDemo.AdditiveAnimation->GetPlayLength();
-	//
-	// 		const float& DemoAnimPlayLength = AdditiveAnimationDemo.DemoAnimation->GetPlayLength();
-	//
-	// 		const float& MaxAnimPlayLength = FMath::Max(AdditiveAnimPlayLength, DemoAnimPlayLength);
-	//
-	// 		AdditiveSettings.AnimationSpeed = AdditiveAnimPlayLength / MaxAnimPlayLength * 1.5f;
-	// 		DemoSettings.AnimationSpeed = DemoAnimPlayLength / MaxAnimPlayLength * 1.5f;
-	//
-	// 		ATurboSequence_Manager_Lf::TweakAnimation_Concurrent(AdditiveSettings,
-	// 		                                                     AdditiveAnimationDemo.AdditiveAnimationData.
-	// 		                                                     RootMotionMesh);
-	// 		ATurboSequence_Manager_Lf::TweakAnimation_Concurrent(DemoSettings,
-	// 		                                                     AdditiveAnimationDemo.DemoAnimationData.RootMotionMesh);
-	// 	}
-	// }
 
 	if (CurveDemo.bEnable && CurveDemo.MeshData.Num())
 	{

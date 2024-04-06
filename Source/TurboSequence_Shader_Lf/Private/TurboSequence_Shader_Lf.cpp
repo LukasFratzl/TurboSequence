@@ -1,4 +1,6 @@
-﻿#include "TurboSequence_Shader_Lf.h"
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
+
+#include "TurboSequence_Shader_Lf.h"
 
 #include "Interfaces/IPluginManager.h"
 

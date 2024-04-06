@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// Copyright Lukas Fratzl, 2G22-2G24. All Rights Reserved.
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "TurboSequence_AnimLibraryAction_Lf.h"
@@ -19,7 +21,6 @@ public:
 
 	TSharedPtr<FTurboSequence_MeshAssetAction_Lf> TurboSequence_MeshAssetTypeActions;
 	TSharedPtr<FTurboSequence_AnimLibraryAction_Lf> TurboSequence_AnimLibraryTypeActions;
-	//TSharedPtr<FTurboSequence_HybridMeshInstanceAssetAction> TurboSequence_HybridMeshInstanceTypeAction;
 
 	inline static EAssetTypeCategories::Type PluginAssetCategory;
 
@@ -33,7 +34,4 @@ public:
 	void OnInvalidMeshAssetCaches() const;
 
 	void OnFilesLoaded();
-	//  void OnFilesLoadedUpdate(const float DeltaTime);
-
-	// FDelegateHandle OnFileLoadedDelegateHandle;
 };

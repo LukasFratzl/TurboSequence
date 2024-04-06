@@ -1,4 +1,6 @@
-﻿#include "TurboSequence_HelperModule_Lf.h"
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
+
+#include "TurboSequence_HelperModule_Lf.h"
 
 #define LOCTEXT_NAMESPACE "FTurboSequence_HelperModule_LfModule"
 

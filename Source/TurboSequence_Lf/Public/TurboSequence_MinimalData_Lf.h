@@ -1,4 +1,4 @@
-﻿// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -480,7 +480,6 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 
 	FTurboSequence_UpdateContext_Lf()
 	{
-		//ThreadContext = NewObject<UTurboSequence_ThreadContext_Lf>();
 	}
 
 	~FTurboSequence_UpdateContext_Lf()
@@ -494,7 +493,4 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 GroupIndex = GET0_NUMBER;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//bool bCollectGarbageThisFrame = true;
 };

@@ -1,4 +1,4 @@
-﻿// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -59,9 +59,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bUseHighPrecisionAnimationMode = true;
-
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<UTurboSequence_FootprintAsset_Lf> Asset;
 
 	FSettingsComputeShader_Params_Lf CachedMeshDataCreationSettingsParams;
 };

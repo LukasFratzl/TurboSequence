@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -122,16 +122,6 @@ public:
 	virtual ~UTurboSequence_ControlWidget_Lf() override;
 
 	TMap<EShow_ControlPanel_Objects_Lf, TObjectPtr<UObject>> EditorObjects;
-	//TMap<EShow_ControlPanel_Parents_Lf, TObjectPtr<UPanelWidget>> Parents;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resources")
-	//TSubclassOf<UUserWidget> BoneTreeItem;
-
-	//UFUNCTION(BlueprintCallable)
-	//void CacheObjects(UStaticMesh* ViewportSkybox, UStaticMesh* ViewportGround, UStaticMesh* ViewportCharacterBoneSelectMesh, UMaterial* CharacterAdditiveMaterial, UMaterial* SelectionMaterial);
-
-	//UFUNCTION(BlueprintCallable)
-	//void CacheParents(UPanelWidget* AutoRigBoneTreeParent, UPanelWidget* AutoRigLodListParent);
 
 	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object, const EShow_ControlPanel_Objects_Lf& Category, const bool& SuppressInfo = false)
 	{
@@ -141,14 +131,6 @@ public:
 		}
 		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Object, Category);
 	}
-
-	// FORCEINLINE_DEBUGGABLE void AddParent(const TObjectPtr<UPanelWidget> Parent, const EShow_ControlPanel_Parents_Lf& Category)
-	// {
-	// 	if (Parent && !Parents.Contains(Category))
-	// 	{
-	// 		Parents.Add(Category, Parent);
-	// 	}
-	// }
 
 	UFUNCTION(BlueprintCallable)
 	void OnTick(const float& DeltaTime);
@@ -220,12 +202,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnGenerateButtonPressed();
-
-	//UFUNCTION(BlueprintCallable)
-	//void OnLodValueChanged(FName PropertyName, EShow_ControlPanel_Viewports_Lf InViewport);
-
-	//UFUNCTION(BlueprintCallable)
-	//void AddBonesToLodSection(EShow_ControlPanel_Viewports_Lf InViewport);
 
 
 	FORCEINLINE_DEBUGGABLE void AddSection(const TObjectPtr<UScrollBox> Section, const EShow_ControlPanel_Section_Lf& Category)
@@ -333,12 +309,6 @@ public:
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Bones In all Skeletons", ClampMin = "5", ClampMax = "200"), Category="Texture Tweaking")
 	uint32 MaxNumBones = 75;
 
-	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Unique Meshes", ClampMin = "5", ClampMax = "900"), Category="Texture Tweaking")
-	//uint32 MaxNumUniqueMeshes = 30;
-
-	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Average Vertex Count Of the Lod 0 Unique Meshes", ClampMin = "5000", ClampMax = "200000"), Category="Texture Tweaking")
-	//uint32 AverageVertexCount = 40000;
-
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Use high precision 32 bit Textures for Animations"), Category="Texture Tweaking")
 	bool bUseHighPrecisionAnimationMode = true;
 
@@ -402,26 +372,16 @@ public:
 			StaticMesh->InitResources();
 
 			StaticMesh->SetLightingGuid();
-
-			//constexpr int32 MaxNumLODs = 1; //SkeletalMesh->GetLODNum(); // Since we only have 1 LOD per mesh
-			//TArray<FRawMesh> RawMeshes;
+			
 			uint32 MaxNumTextureCoordinate = GET0_NUMBER;
 			const FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetResourceForRendering();
 
 
 			const FSkeletalMeshLODModel& LodModel = SkeletalMesh->GetImportedModel()->LODModels[LodIndex];
 			const uint32& SkinnedMeshVertices = LodModel.NumVertices;
-			//UE_LOG(LogTemp, Warning, TEXT("%d"), LodModel.NumVertices);
-			// 	const FSkeletalMeshLODRenderData& LODRenderData = RenderData->LODRenderData[i];
+		
 			FMeshDescription MeshDescription;
 			LodModel.GetMeshDescription(SkeletalMesh, LodIndex, MeshDescription);
-			
-
-			// UE_LOG(LogTemp, Warning, TEXT("%d"), MeshDescription.Vertices().Num());
-
-			//FStaticMeshOperations::ConvertToRawMesh(*MeshDescription, RawMesh, TMap<FName, int32>());
-
-			// UE_LOG(LogTemp, Warning, TEXT("%d"), RawMesh.VertexPositions.Num());
 
 			const FSkeletalMeshLODRenderData& LodResource = RenderData->LODRenderData[LodIndex];
 			uint32 MaxNumTextCoord = LodResource.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
@@ -439,8 +399,6 @@ public:
 			{
 				const int32 VertexID = LodModel.IndexBuffer[Idx];
 
-				//UE_LOG(LogTemp, Warning, TEXT("%d"), VertexID)
-
 				if (!OutMeshIndicesOrder.Contains(VertexID))
 				{
 					OutMeshIndicesOrder.Add(VertexID);
@@ -454,70 +412,6 @@ public:
 
 			FRawMesh RawMesh;
 			FStaticMeshOperations::ConvertToRawMesh(MeshDescription, RawMesh, TMap<FName, int32>());
-
-			// const int32 MaxNumIndices = RawMesh.WedgeIndices.Num();
-			// RawMesh.WedgeTexCoords[MaxNumTextCoord].AddDefaulted(MaxNumIndices);
-			// // for (int32 VertexIndex = GET0_NUMBER; VertexIndex < MaxNumVertices; ++VertexIndex)
-			// // {
-			// // 	//RawMesh.WedgeColors[VertexIndex] = FTurboSequence_Helper_Lf::DecodeUInt32ToColor(VertexIndex);//FVector2f(VertexIndex, GET0_NUMBER);
-			// // 	RawMesh.WedgeTexCoords[MaxNumTextCoord][VertexIndex] = FVector2f(RawMesh.WedgeIndices[VertexIndex], GET0_NUMBER);
-			// // }
-			//
-			// const int32& NumTriangles = RawMesh.FaceMaterialIndices.Num();
-			// int32 WedgeIdx = GET0_NUMBER;
-			// for (int32 TriangleIdx = GET0_NUMBER; TriangleIdx < NumTriangles; ++TriangleIdx)
-			// {
-			// 	for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
-			// 	{
-			// 		const uint32 SourceVertexIndex = RawMesh.WedgeIndices[WedgeIdx];
-			//
-			// 		if (!OutMeshIndicesOrder.Contains(SourceVertexIndex))
-			// 		{
-			// 			OutMeshIndicesOrder.Add(SourceVertexIndex);
-			// 		}
-			//
-			// 		// const FVector3f VertexPosA = RawMesh.VertexPositions[SourceVertexIndex];
-			// 		// const FVector3f VertexPosB = MeshDescription.GetVertexPosition(FVertexID(SourceVertexIndex));
-			// 		// if (!VertexPosA.Equals(VertexPosB))
-			// 		// {
-			// 		// 	UE_LOG(LogTemp, Warning, TEXT("Vertex is off, Static Mesh %s, Skel Mesh %s"), *VertexPosA.ToString(), *VertexPosB.ToString())
-			// 		// }
-			//
-			// 		UE_LOG(LogTemp, Warning, TEXT("%d"), SourceVertexIndex)
-			//
-			// 		const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
-			//
-			// 		RawMesh.WedgeTexCoords[MaxNumTextCoord][WedgeIdx] = FVector2f(BitValues.X, BitValues.Y);
-			//
-			// 		++WedgeIdx;
-			// 	}
-			// }
-
-			// DestinationRawMesh.FaceSmoothingMasks
-			//
-			// for (int32 SectionIndex = GET0_NUMBER; SectionIndex < LodModel.Sections.Num(); ++SectionIndex)
-			// {
-			// 	for (uint32 TriangleID = GET0_NUMBER; TriangleID < static_cast<uint32>(LodModel.Sections[SectionIndex].NumTriangles); ++TriangleID)
-			// 	{
-			// 		const uint32 VertexIndexBase = TriangleID * GET3_NUMBER + LodModel.Sections[SectionIndex].BaseIndex;
-			//
-			// 		for (int32 Corner = GET0_NUMBER; Corner < GET3_NUMBER; ++Corner)
-			// 		{
-			// 			const uint32 TriangleIndex = VertexIndexBase + Corner;
-			// 			const uint32 SourceVertexIndex = RawMesh.WedgeIndices[TriangleIndex];
-			//
-			// 			const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(SourceVertexIndex);
-			//
-			// 			RawMesh.WedgeTexCoords[MaxNumTextCoord][TriangleIndex] = FVector2f(BitValues.X, BitValues.Y);
-			// 		}
-			// 	}
-			// }
-
-			//RawMeshes.Add(RawMesh);
-
-
-			// Determine which texture coordinate map should be used for storing/generating the lightmap UVs
-			//const uint32 LightMapIndex = FMath::Min(MaxNumTextureCoordinate + GET1_NUMBER, static_cast<uint32>(MAX_MESH_TEXTURE_COORDS) - GET1_NUMBER);
 
 			// Add source to new StaticMesh
 			if (RawMesh.IsValidOrFixable())
@@ -572,8 +466,6 @@ public:
 				return nullptr;
 			}
 			StaticMesh->PostEditChange();
-			
-			//StaticMesh->MarkPackageDirty();
 			
 			 FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
 			 const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;

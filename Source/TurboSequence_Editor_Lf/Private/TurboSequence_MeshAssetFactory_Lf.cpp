@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 
 #include "TurboSequence_MeshAssetFactory_Lf.h"
@@ -39,9 +39,7 @@ UTurboSequence_MeshAssetFactory_Lf::UTurboSequence_MeshAssetFactory_Lf()
 UObject* UTurboSequence_MeshAssetFactory_Lf::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
 	const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = NewObject<UTurboSequence_MeshAsset_Lf>(InParent, Class, Name, Flags, Context);
-
-	// Asset->Platform = FTurboSequence_Helper_Lf::GetEditorPlatformAsString();
-	// Asset->EngineVersion = FTurboSequence_Helper_Lf::GetEngineVersionAsString();
+	
 	Asset->bNeedGeneratedNextEngineStart = false;
 
 	const FAssetRegistryModule& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");

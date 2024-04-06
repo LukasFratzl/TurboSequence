@@ -94,56 +94,26 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 
 		return BytesDouble / 1000.0 / 1000.0;
 	}
-
-	// This is for the CPU Memory
-	//TArray<FVector4f> BoneSpaceAnimationIKInput;
-	// TArray<int32> BoneSpaceAnimationIKData;
+	
 	TArray<int32> BoneSpaceAnimationIKIndex_RenderThread;
-	// //TArray<int32> BoneSpaceAnimationIKGlobalIndex_RenderThread;
 	TArray<int32> PerMeshCustomDataIndex_RenderThread;
-	// TArray<int32> PerMeshCustomDataLod;
-	// TArray<int32> PerMeshCustomDataCollectionIndex;
 	TArray<int32> ReferenceNumCPUBones;
-	// TArray<int32> AnimationFrameNormalizedTime;
-	// TArray<int32> AnimationWeights;
-	// TArray<int32> AnimationID;
-
-	//TArray<int32> AnimationFrameMaxFrames;
-	//TArray<int32> AnimationOffset;
-
-	//TArray<FVector4f> AnimationRawData_RenderThread;
 
 	// Minimals getting uploaded to the GPU
 	int32 NumMeshes;
 	int32 NumAnimations;
-	//int32 MaxNumMeshesRenderThread;
-	//float MaxNumMeshesRefreshTimer;
-	//float DeltaTime;
 	int32 NumIKData;
-	//int32 MaxNumIKDataRenderThread;
 	float MaxNumIKDataRefreshTimer;
 	TArray<int32> PerMeshCustomDataIndex_Global_RenderThread;
-	//TArray<int32> PerMeshCustomDataIndex_Minimal_RenderThread;
 	TArray<int32> PerMeshCustomDataLod_RenderThread;
 	TArray<int32> PerMeshCustomDataCollectionIndex_RenderThread;
 	TArray<int32> ReferenceNumCPUBones_RenderThread;
-	//TArray<FVector4f> PerMeshCustomData_RenderThread;
-	//TArray<int32> SkinWeightVertexLod_RenderThread;
-	//TArray<int32> SkinWeightOffsetLod_RenderThread;
-
+	
 	TArray<int32> AnimationStartIndex_RenderThread;
 	TArray<int32> AnimationEndIndex_RenderThread;
-	//TArray<int32> AnimationFrameAlpha_RenderThread;
 	TArray<int32> AnimationFramePose0_RenderThread;
-	//TArray<int32> AnimationFramePose1_RenderThread;
 
 	TArray<int32> AnimationWeights_RenderThread;
-	//TArray<int32> PerBoneAnimationWeights_RenderThread;
-	//TArray<int32> PerBoneAnimationWeightIndices_RenderThread;
-
-	//TArray<int32> AnimationLocationWeights_RenderThread;
-	//TArray<int32> AnimationRotationWeights_RenderThread;
-	//TArray<int32> AnimationScaleWeights_RenderThread;
 
 	TArray<int32> AnimationLayerIndex_RenderThread;
 
@@ -158,20 +128,10 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 
 	// Const Getting uploaded as well
 	TArray<FVector4f> CPUInverseReferencePose;
-	//TArray<float> CPUParentIndices;
-	//TArray<float> CPUIndices;
-	//TArray<float> GPUIndices;
 	TArray<FVector4f> Indices;
-	//int32 UVCoordIndex;
-	//FIntVector2 SkinWeightTextureDimensions;
-	//FIntVector2 AnimationTextureDimensions;
-	//int32 NumGPUBonesPixelOffset;
 	int32 NumMaxCPUBones;
 	int32 NumMaxGPUBones;
 	int32 NumMaxLevelOfDetails;
-
-	//int32 AnimationLibraryMaxNum_Previous;
-	//int32 AnimationLibraryMaxNum_Current;
 
 	bool bUse32BitTransformTexture;
 
@@ -179,11 +139,6 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	int32 NumDebugData;
 
 	TObjectPtr<UTextureRenderTarget2DArray> AnimationLibraryTexture;
-
-	//bool bNeedSolveThisFrame;
-
-	//uint32 TestIteration;
-	//uint32 MaxFrames = GET32_NUMBER;
 };
 
 struct TURBOSEQUENCE_SHADER_LF_API FSettingsComputeShader_Params_Lf
@@ -193,23 +148,11 @@ struct TURBOSEQUENCE_SHADER_LF_API FSettingsComputeShader_Params_Lf
 	bool bUse32BitTexture;
 
 	TArray<FVector4f> SettingsInput;
-	//TArray<FVector4f> SettingsInput_Copy;
 
 	bool bIsAdditiveWrite;
 
 	uint32 AdditiveWriteBaseIndex = GET0_NUMBER;
-	//uint32 NumAdditiveWrite_Previous = GET0_NUMBER;
-
-	//FIntVector3 TargetDimensions;
 };
-
-// struct TURBOSEQUENCE_SHADER_LF_API FRenderDataComputeShader_Params_Lf
-// {
-// 	int32 TextureStride;
-// 	TMap<uint8, TArray<FVector4f>> InputData;
-// 	TArray<FIntVector2> CleanUpData;
-// 	TArray<FVector4f> InputData_RenderThread;
-// };
 
 class TURBOSEQUENCE_SHADER_LF_API FTurboSequence_BoneTransform_CS_Lf : public FGlobalShader
 {
@@ -230,8 +173,7 @@ public:
 	//inline static const FString CustomDataDebugName = TEXT("TurboSequence_PerMeshCustomData_{0}");
 	inline static const FString CustomDataLodDebugName = TEXT("TurboSequence_PerMeshCustomDataLod_{0}");
 	inline static const FString SkinWeightOffsetLodDebugName = TEXT("TurboSequence_SkinWeightOffsetLod_{0}");
-	//inline static const FString SkinWeightVertexLodDebugName = TEXT("TurboSequence_SkinWeightVertexLod_{0}");
-	//inline static const FString AnimationFrameNormalizedTimeDebugName = TEXT("TurboSequence_AnimationNormalizedTime_{0}");
+	
 	inline static const FString AnimationWeightsDebugName = TEXT("TurboSequence_AnimationWeights_{0}");
 	inline static const FString PerBoneAnimationWeightsDebugName = TEXT("TurboSequence_PerBoneAnimationWeights_{0}");
 	inline static const FString PerBoneAnimationWeightIndicesDebugName = TEXT("TurboSequence_PerBoneAnimationWeightIndices_{0}");
@@ -266,12 +208,7 @@ public:
 
 		SHADER_PARAMETER(int, NumCPUBones)
 		SHADER_PARAMETER(int, NumMeshesPerFrame)
-
-		//SHADER_PARAMETER(int, AnimationLibraryIndex)
-		//SHADER_PARAMETER(int, NumAnimationLibraryWrite)
-
-		//SHADER_PARAMETER(int, DataTextureSizeX)
-		//SHADER_PARAMETER(int, DataTextureSizeY)
+	
 		SHADER_PARAMETER(int, AnimTextureSizeX)
 		SHADER_PARAMETER(int, AnimTextureSizeY)
 
@@ -284,12 +221,7 @@ public:
 		SHADER_PARAMETER(int, NumCustomStates)
 		SHADER_PARAMETER(int, NumPixelBuffer)
 
-		//SHADER_PARAMETER(int, NumCustomDataPixels)
-
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, ReferencePose_StructuredBuffer)
-		// SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float>, ReferencePoseParentIndices_StructuredBuffer)
-		// SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float>, ReferencePoseCPUIndices_StructuredBuffer)
-		// SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float>, ReferencePoseGPUIndices_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, ReferencePoseIndices_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, BoneSpaceAnimationInput_StructuredBuffer)
@@ -300,34 +232,17 @@ public:
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, PerMeshCustomDataLod_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, PerMeshCustomDataCollectionIndex_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, ReferenceNumCPUBones_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, SkinWeightVertexLod_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, SkinWeightOffsetLod_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, PerMeshCustomData_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationStartIndex_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationEndIndex_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationFrameOffset_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationMaxFrames_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationFrameAlpha_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationWeight_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, PerBoneAnimationWeight_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, PerBoneAnimationWeightIndex_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationLocationWeight_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationRotationWeight_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationScaleWeight_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationFramePose0_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationFramePose1_StructuredBuffer)
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationID_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerIndex_StructuredBuffer)
-
-		//SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<float4>, AnimationLibrary_StructuredBuffer)
+	
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerLibrary_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_AnimationLibrary_InputTexture)
-		//
-		//SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_AnimationInput_OutputTexture)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransform_OutputTexture)
-		//SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_CustomData_OutputTexture)
 
 		SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<float>, DebugValue)
 
@@ -374,8 +289,7 @@ public:
 		SHADER_PARAMETER(uint32, BaseIndex)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FVector4f>, BoneWeights_StructuredBuffer)
-
-		//SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<float>, DebugValue)
+	
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<FVector4f>, RW_Settings_OutputTexture)
 	END_SHADER_PARAMETER_STRUCT()
 
@@ -403,7 +317,6 @@ public:
 class TURBOSEQUENCE_SHADER_LF_API FTurboSequence_ClearRenderTarget_CS_Lf
 {
 public:
-	//SHADER_USE_PARAMETER_STRUCT(FTurboSequence_ClearRenderTarget_CS_Lf, FGlobalShader);
 
 	BEGIN_SHADER_PARAMETER_STRUCT(FParameters,)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_OutputTexture)
@@ -459,12 +372,6 @@ class TURBOSEQUENCE_SHADER_LF_API FMeshUnit_Compute_Shader_Execute_Lf
 	inline static TArray<float> DebugData;
 
 public:
-	/**
-	 * @brief RUNS THE SHADER ON THE RENDER THREAD
-	 * @param RHICmdList THE RENDER COMMAND LIST FROM ENQUEUE_RENDER_COMMAND
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-	 */
 	static void DispatchRenderThread(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FRHICommandListImmediate& RHICmdList,
@@ -472,12 +379,7 @@ public:
 		UTextureRenderTarget2DArray* AnimationOutputTexture, /*UTextureRenderTarget2DArray* DataOutputTexture,*/ TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	);
 
-
-	/**
-	 * @brief RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-	 */
+	
 	static void DispatchGameThread(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
@@ -486,20 +388,13 @@ public:
 		TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	)
 	{
-		// CREATE A RENDER COMMAND WHICH DISPATCHES THE SHADER ON THE RENDER THREAD
 		ENQUEUE_RENDER_COMMAND(TurboSequence_MeshUnit_ComputeShader_Lf)(
 			[PreCall, &Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback](FRHICommandListImmediate& RHICmdList)
 			{
 				DispatchRenderThread(PreCall, RHICmdList, Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
 			});
 	}
-
-
-	/**
-	 * @brief RUNS THE BAKE SHADER COMMAND AND CAN CALLED ON EVERY THREAD
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-	 */
+	
 	static void Dispatch(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
@@ -508,49 +403,32 @@ public:
 		TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	)
 	{
-		// WHEN WE ARE ON THE RENDER THREAD CALL DispatchRenderThread DIRECTLY
 		if (IsInRenderingThread())
 		{
-			// WE CAN START WITH THE SHADER DISPATCH BY GETTING THE RENDER COMMAND IMMEDIATELY
 			DispatchRenderThread(PreCall, GetImmediateCommandList_ForRenderCommand(), Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
 		}
-		// WHEN WE ARE ON THE GAME THREAD
 		else
 		{
-			// RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
 			DispatchGameThread(PreCall, Params, AnimationOutputTexture, /*DataOutputTexture,*/ AsyncCallback);
 		}
 	}
 };
 
-/**
- * @brief THIS EXECUTES THE BAKE SHADER ON THE GAME OR RENDER THREAD BY CALLING FAnimation_Baker_Compute_Shader_Execute_Lf::Dispatch()
- */
 class TURBOSEQUENCE_SHADER_LF_API FSettingsCompute_Shader_Execute_Lf
 {
 public:
-	/**
-	 * @brief RUNS THE SHADER ON THE RENDER THREAD
-	 * @param RHICmdList THE RENDER COMMAND LIST FROM ENQUEUE_RENDER_COMMAND
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 */
 	static void DispatchRenderThread(
 		FRHICommandListImmediate& RHICmdList,
 		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture
 	);
 
-
-	/**
-	 * @brief RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 */
+	
 	static void DispatchGameThread(
 		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture
 	)
 	{
-		// CREATE A RENDER COMMAND WHICH DISPATCHES THE SHADER ON THE RENDER THREAD
 		ENQUEUE_RENDER_COMMAND(TurboSequence_Settings_ComputeShader_Lf)(
 			[&Params, OutputTexture](FRHICommandListImmediate& RHICmdList)
 			{
@@ -558,97 +436,19 @@ public:
 			});
 	}
 
-
-	/**
-	 * @brief RUNS THE BAKE SHADER COMMAND AND CAN CALLED ON EVERY THREAD
-	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-	 */
+	
 	static void Dispatch(
 		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture
 	)
 	{
-		// WHEN WE ARE ON THE RENDER THREAD CALL DispatchRenderThread DIRECTLY
 		if (IsInRenderingThread())
 		{
-			// WE CAN START WITH THE SHADER DISPATCH BY GETTING THE RENDER COMMAND IMMEDIATELY
 			DispatchRenderThread(GetImmediateCommandList_ForRenderCommand(), Params, OutputTexture);
 		}
-		// WHEN WE ARE ON THE GAME THREAD
 		else
 		{
-			// RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
 			DispatchGameThread(Params, OutputTexture);
 		}
 	}
 };
-
-
-// /**
-//  * @brief THIS EXECUTES THE BAKE SHADER ON THE GAME OR RENDER THREAD BY CALLING FAnimation_Baker_Compute_Shader_Execute_Lf::Dispatch()
-//  */
-// class TURBOSEQUENCE_SHADER_LF_API FRenderDataCompute_Shader_Execute_Lf
-// {
-// public:
-// 	/**
-// 	 * @brief RUNS THE SHADER ON THE RENDER THREAD
-// 	 * @param RHICmdList THE RENDER COMMAND LIST FROM ENQUEUE_RENDER_COMMAND
-// 	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-// 	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-// 	 */
-// 	void DispatchRenderThread(
-// 		FRHICommandListImmediate& RHICmdList,
-// 		FRenderDataComputeShader_Params_Lf& Params,
-// 		UTextureRenderTarget2DArray* OutputTexture, const TFunction<void(FVector4f DebugValues)>& AsyncCallback
-// 	);
-//
-//
-// 	/**
-// 	 * @brief RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
-// 	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-// 	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-// 	 */
-// 	void DispatchGameThread(
-// 		FRenderDataComputeShader_Params_Lf& Params,
-// 		UTextureRenderTarget2DArray* OutputTexture,
-// 		const TFunction<void(FVector4f DebugValues)>& AsyncCallback
-// 	)
-// 	{
-// 		// CREATE A RENDER COMMAND WHICH DISPATCHES THE SHADER ON THE RENDER THREAD
-// 		ENQUEUE_RENDER_COMMAND(TurboSequence_RenderData_ComputeShader_Lf)(
-// 			[&Params, OutputTexture, AsyncCallback, this](FRHICommandListImmediate& RHICmdList)
-// 			{
-// 				if (!this)
-// 				{
-// 					return;
-// 				}
-// 				this->DispatchRenderThread(RHICmdList, Params, OutputTexture, AsyncCallback);
-// 			});
-// 	}
-//
-//
-// 	/**
-// 	 * @brief RUNS THE BAKE SHADER COMMAND AND CAN CALLED ON EVERY THREAD
-// 	 * @param Params THE PARAMETER WHICH THE SHADER NEEDS
-// 	 * @param AsyncCallback THE ASYNC CALLBACK, IN THIS CASE WE RETURN A DEBUG VALUE
-// 	 */
-// 	void Dispatch(
-// 		FRenderDataComputeShader_Params_Lf& Params,
-// 		UTextureRenderTarget2DArray* OutputTexture,
-// 		const TFunction<void(FVector4f DebugValues)>& AsyncCallback
-// 	)
-// 	{
-// 		// WHEN WE ARE ON THE RENDER THREAD CALL DispatchRenderThread DIRECTLY
-// 		if (IsInRenderingThread())
-// 		{
-// 			// WE CAN START WITH THE SHADER DISPATCH BY GETTING THE RENDER COMMAND IMMEDIATELY
-// 			DispatchRenderThread(GetImmediateCommandList_ForRenderCommand(), Params, OutputTexture, AsyncCallback);
-// 		}
-// 		// WHEN WE ARE ON THE GAME THREAD
-// 		else
-// 		{
-// 			// RUNS THE SHADER ON THE GAME THREAD BY ENQUEUE A RENDER COMMAND
-// 			DispatchGameThread(Params, OutputTexture, AsyncCallback);
-// 		}
-// 	}
-// };

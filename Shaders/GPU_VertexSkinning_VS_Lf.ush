@@ -1,19 +1,7 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
-
-// struct TurboSequenceVSSkinData_Lf
-// {
-// 	int3x4 Indices;
-// 	min16int3x4 Weights;
-// };
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 struct TurboSequenceVSFunctions_Lf
 {
-	// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 	int GetModulus(in int A, in int B)
-	// 	{
-	// 		return A - B * (int)(A / B);
-	// 	}
-	// #endif
 
 	int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
 	{
@@ -27,196 +15,7 @@ struct TurboSequenceVSFunctions_Lf
 		// #endif
 	}
 
-	int3x3 GetDimensionsFromIndices3D_3x3(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
-	{
-		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-		// 		if (GetModulus(Index, TextureSizeX) < TextureSizeX - 3)
-		// #else
-		if (Index % TextureSizeX < TextureSizeX - 3)
-		// #endif
-		{
-			// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-			// 			int SliceBase = GetModulus(Index, TexPow);
-			// 			int Mod = GetModulus(SliceBase, TextureSizeX);
-			// #else
-			int SliceBase = Index % TexPow;
-			int Mod = SliceBase % TextureSizeX;
-			// #endif
-			int Slice = Index / TexPow;
-			int Div = SliceBase / TextureSizeY;
-
-			return int3x3(int3(Mod, Div, Slice),
-			              int3(Mod + 1, Div, Slice),
-			              int3(Mod + 2, Div, Slice));
-		}
-
-		return int3x3(GetDimensionsFromIndex3D(Index, TextureSizeX, TextureSizeY, TexPow),
-		              GetDimensionsFromIndex3D(Index + 1, TextureSizeX, TextureSizeY, TexPow),
-		              GetDimensionsFromIndex3D(Index + 2, TextureSizeX, TextureSizeY, TexPow));
-	}
-
-	int2x3 GetDimensionsFromIndices3D_2x3(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
-	{
-		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-		// 		if (GetModulus(Index, TextureSizeX) < TextureSizeX - 3)
-		// #else
-		if (Index % TextureSizeX < TextureSizeX - 2)
-		// #endif
-		{
-			// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-			// 			int SliceBase = GetModulus(Index, TexPow);
-			// 			int Mod = GetModulus(SliceBase, TextureSizeX);
-			// #else
-			int SliceBase = Index % TexPow;
-			int Mod = SliceBase % TextureSizeX;
-			// #endif
-			int Slice = Index / TexPow;
-			int Div = SliceBase / TextureSizeY;
-
-			return int2x3(int3(Mod, Div, Slice),
-			              int3(Mod + 1, Div, Slice));
-		}
-
-		return int2x3(GetDimensionsFromIndex3D(Index, TextureSizeX, TextureSizeY, TexPow),
-		              GetDimensionsFromIndex3D(Index + 1, TextureSizeX, TextureSizeY, TexPow));
-	}
-
-	// void GetDimensionsFromIndices3D_2x3x3_3(inout int3x4 Indices, inout min16int3x4 Weights, in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow, in Texture2DArray<float4> SkinWeightTexture)
-	// 	{
-	// 	// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 	// 		if (GetModulus(Index, TextureSizeX) < TextureSizeX - 3)
-	// 	// #else
-	// 	if (Index % TextureSizeX < TextureSizeX - 12)
-	// 		// #endif
-	// 		{
-	// 		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 		// 			int SliceBase = GetModulus(Index, TexPow);
-	// 		// 			int Mod = GetModulus(SliceBase, TextureSizeX);
-	// 		// #else
-	// 		int SliceBase = Index % TexPow;
-	// 		int Mod = SliceBase % TextureSizeX;
-	// 		// #endif
-	// 		int Slice = Index / TexPow;
-	// 		int Div = SliceBase / TextureSizeY;
-	//
-	// 		Indices = int3x4(SkinWeightTexture[int3(Mod, Div, Slice)],
-	// 						 SkinWeightTexture[int3(Mod + 2, Div, Slice)],
-	// 						 SkinWeightTexture[int3(Mod + 4, Div, Slice)]);
-	//
-	// 		Weights = min16int3x4(SkinWeightTexture[int3(Mod + 1, Div, Slice)],
-	// 							  SkinWeightTexture[int3(Mod + 3, Div, Slice)],
-	// 							  SkinWeightTexture[int3(Mod + 5, Div, Slice)]);
-	// 				
-	// 			//return Weights;
-	// 		}
-	//
-	// 	Indices = int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index, TextureSizeX, TextureSizeY, TexPow)],
-	// 					 SkinWeightTexture[GetDimensionsFromIndex3D(Index + 2, TextureSizeX, TextureSizeY,TexPow)],
-	// 					 SkinWeightTexture[GetDimensionsFromIndex3D(Index + 4, TextureSizeX, TextureSizeY, TexPow)]);
-	//
-	// 	Weights = min16int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index + 1, TextureSizeX, TextureSizeY, TexPow)],
-	// 						  SkinWeightTexture[GetDimensionsFromIndex3D(Index + 3, TextureSizeX, TextureSizeY, TexPow)],
-	// 						  SkinWeightTexture[GetDimensionsFromIndex3D(Index + 5, TextureSizeX, TextureSizeY, TexPow)]);
-	//
-	// 	//return Weights;
-	// }
-	//
-	// void GetDimensionsFromIndices3D_2x3x3_2(inout int3x4 Indices, inout min16int3x4 Weights, in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow, in Texture2DArray<float4> SkinWeightTexture)
-	// {
-	// 	// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 	// 		if (GetModulus(Index, TextureSizeX) < TextureSizeX - 3)
-	// 	// #else
-	// 	if (Index % TextureSizeX < TextureSizeX - 12)
-	// 		// #endif
-	// 		{
-	// 		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 		// 			int SliceBase = GetModulus(Index, TexPow);
-	// 		// 			int Mod = GetModulus(SliceBase, TextureSizeX);
-	// 		// #else
-	// 		int SliceBase = Index % TexPow;
-	// 		int Mod = SliceBase % TextureSizeX;
-	// 		// #endif
-	// 		int Slice = Index / TexPow;
-	// 		int Div = SliceBase / TextureSizeY;
-	//
-	// 		Indices = int3x4(SkinWeightTexture[int3(Mod, Div, Slice)],
-	// 						 SkinWeightTexture[int3(Mod + 2, Div, Slice)],
-	// 						 int4(0,0,0,0));
-	//
-	// 		Weights = min16int3x4(SkinWeightTexture[int3(Mod + 1, Div, Slice)],
-	// 							  SkinWeightTexture[int3(Mod + 3, Div, Slice)],
-	// 							  int4(0,0,0,0));
-	// 				
-	// 		//return Weights;
-	// 		}
-	//
-	// 	Indices = int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index, TextureSizeX, TextureSizeY, TexPow)],
-	// 					 SkinWeightTexture[GetDimensionsFromIndex3D(Index + 2, TextureSizeX, TextureSizeY,TexPow)],
-	// 					 int4(0,0,0,0));
-	//
-	// 	Weights = min16int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index + 1, TextureSizeX, TextureSizeY, TexPow)],
-	// 						  SkinWeightTexture[GetDimensionsFromIndex3D(Index + 3, TextureSizeX, TextureSizeY, TexPow)],
-	// 						  int4(0,0,0,0));
-	//
-	// 	//return Weights;
-	// }
-	//
-	// void GetDimensionsFromIndices3D_2x3x3_1(inout int3x4 Indices, inout min16int3x4 Weights, in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow, in Texture2DArray<float4> SkinWeightTexture)
-	// {
-	// 	// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 	// 		if (GetModulus(Index, TextureSizeX) < TextureSizeX - 3)
-	// 	// #else
-	// 	if (Index % TextureSizeX < TextureSizeX - 12)
-	// 		// #endif
-	// 		{
-	// 		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-	// 		// 			int SliceBase = GetModulus(Index, TexPow);
-	// 		// 			int Mod = GetModulus(SliceBase, TextureSizeX);
-	// 		// #else
-	// 		int SliceBase = Index % TexPow;
-	// 		int Mod = SliceBase % TextureSizeX;
-	// 		// #endif
-	// 		int Slice = Index / TexPow;
-	// 		int Div = SliceBase / TextureSizeY;
-	//
-	// 		Indices = int3x4(SkinWeightTexture[int3(Mod, Div, Slice)],
-	// 						 int4(0,0,0,0),
-	// 						 int4(0,0,0,0));
-	//
-	// 		Weights = min16int3x4(SkinWeightTexture[int3(Mod + 1, Div, Slice)],
-	// 							  int4(0,0,0,0),
-	// 							  int4(0,0,0,0));
-	// 				
-	// 		//return Weights;
-	// 		}
-	//
-	// 	Indices = int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index, TextureSizeX, TextureSizeY, TexPow)],
-	// 					 int4(0,0,0,0),
-	// 					 int4(0,0,0,0));
-	//
-	// 	Weights = min16int3x4(SkinWeightTexture[GetDimensionsFromIndex3D(Index + 1, TextureSizeX, TextureSizeY, TexPow)],
-	// 						  int4(0,0,0,0),
-	// 						  int4(0,0,0,0));
-	//
-	// 	//return Weights;
-	// }
-	//
-	// 	void MatrixSkin(inout float3 FinalBlendPosition, in Texture2DArray<float4> TransformTexture, in int Settings0_W, in int2 Settings1_ZW, in float4 VertexPosition, in int TransformTextureOffset, in int TexturePow, in int BoneIndex, min16int BoneWeight)
-	// 	{
-	// 		if (BoneIndex > -1 && BoneWeight)
-	// 		{
-	// 			//int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
-	// 			
-	// 			int3x3 MatrixIndices = GetDimensionsFromIndices3D_3x3(TransformTextureOffset + BoneIndex * Settings0_W, Settings1_ZW.x, Settings1_ZW.y, TexturePow);
-	// 			
-	// 			//float Weight = (float)BoneWeight / (float)0xFF;
-	// 			FinalBlendPosition += (mul(float3x4(
-	// 										TransformTexture[MatrixIndices[0]],
-	// 										TransformTexture[MatrixIndices[1]],
-	// 										TransformTexture[MatrixIndices[2]]
-	// 									), VertexPosition).xyz - VertexPosition) * (float)BoneWeight / (float)0xFF;
-	// 		}
-	// 	}
+	
 	// Might Change to Non Bit Shifting Version if compiler <= ES3.2
 	int EncodeUInt16ToUInt32_Int(in uint XValue, in uint YValue)
 	{
@@ -245,9 +44,9 @@ struct TurboSequenceVSFunctions_Lf
 	{
 		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
 		int TransformTexPow = Settings1.z * Settings1.w;
-		float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+		//float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
 
-		min16int QualityLevel = (min16int)CustomData.x;
+		//min16int QualityLevel = (min16int)CustomData.x;
 		for (min16int i = 0; i < 3; ++i)
 		{
 			int VertexOffsetIndex = VertexBaseIndex + i * 2;
@@ -257,10 +56,10 @@ struct TurboSequenceVSFunctions_Lf
 			for (min16int W = 0; W < 4; ++W)
 			{
 				// Since we have Skin Weight Culling Automated
-				if (QualityLevel < i * 4 + W)
-				{
-					return;
-				}
+				//if (QualityLevel < i * 4 + W)
+				//{
+				//	return;
+				//}
 
 				int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
 				float3x4 BoneMatrix = float3x4(
@@ -281,8 +80,7 @@ float3 FinalBlendPosition = float3(0, 0, 0);
 TurboSequenceVSFunctions_Lf f;
 
 int SwTextureOffset = f.EncodeUInt16ToUInt32_Float(CustomData.x, CustomData.y);
-if
-(SwTextureOffset)
+if (SwTextureOffset)
 {
 	int4 Settings0 = (int4)TransformTexture[int3(0, 0, 0)];
 
@@ -293,11 +91,8 @@ if
 	int4 Settings1 = (int4)TransformTexture[int3(1, 0, 0)];
 	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
 	                              (int)MeshDataTextureDimension.y);
-	//Settings1.x = (int)MeshDataTextureDimension.x;
-	//Settings1.y = (int)MeshDataTextureDimension.y;
-	//int4 CustomDataBatch_1 = (int4)DataTexture[f.GetDimensionsFromIndex3D(CustomDataBatchIndex + 1, Settings0.x, Settings0.y, Setting0Pow)];
+	
 	f.VertexSkin(FinalBlendPosition, TransformTexture, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w, Settings1, MaterialSettings0, VertexPosition);
 }
 
-return
-FinalBlendPosition;
+return FinalBlendPosition;

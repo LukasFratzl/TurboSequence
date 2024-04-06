@@ -1,4 +1,6 @@
-﻿#include "TurboSequence_Editor_Lf.h"
+﻿// Copyright Lukas Fratzl, 2G22-2G24. All Rights Reserved.
+
+#include "TurboSequence_Editor_Lf.h"
 
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
@@ -25,9 +27,6 @@ void FTurboSequence_Editor_LfModule::StartupModule()
 	TurboSequence_AnimLibraryTypeActions = MakeShared<FTurboSequence_AnimLibraryAction_Lf>();
 	AssetTools.RegisterAssetTypeActions(TurboSequence_AnimLibraryTypeActions.ToSharedRef());
 
-	//TurboSequence_HybridMeshInstanceTypeAction = MakeShared<FTurboSequence_HybridMeshInstanceAssetAction>();
-	//AssetTools.RegisterAssetTypeActions(TurboSequence_HybridMeshInstanceTypeAction.ToSharedRef());
-
 	FLevelEditorModule& LevelEditorModule =
 		FModuleManager::LoadModuleChecked<FLevelEditorModule>
 		("LevelEditor");
@@ -39,9 +38,7 @@ void FTurboSequence_Editor_LfModule::StartupModule()
 		FMenuBarExtensionDelegate::CreateRaw(this, &FTurboSequence_Editor_LfModule::AddMenu)
 	);
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
-
-
-	//FCoreUObjectDelegates::PostLoadMapWithWorld.AddRaw(this, &FTurboSequence_Editor_LfModule::OnFilesLoaded);
+	
 	IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	AssetRegistry.OnFilesLoaded().AddRaw(this, &FTurboSequence_Editor_LfModule::OnFilesLoaded);
 }
@@ -56,10 +53,7 @@ void FTurboSequence_Editor_LfModule::ShutdownModule()
 	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(TurboSequence_MeshAssetTypeActions.ToSharedRef());
 
 	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(TurboSequence_AnimLibraryTypeActions.ToSharedRef());
-
-	//FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(TurboSequence_HybridMeshInstanceTypeAction.ToSharedRef());
-
-	//FCoreUObjectDelegates::PostLoadMapWithWorld.RemoveAll(this);
+	
 	IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	AssetRegistry.OnFilesLoaded().RemoveAll(this);
 }
@@ -645,33 +639,6 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 			DefaultDataTextureReferencePath = FTurboSequence_Helper_Lf::ReferenceTurboSequenceDataTexture;
 		}
 
-		// if (!IsValid(GlobalData->CustomDataTexture))
-		// {
-		// 	GlobalData->CustomDataTexture = FTurboSequence_Helper_Lf::LoadAssetFromReferencePath<UTextureRenderTarget2DArray>(DefaultDataTextureReferencePath);
-		// 	bAssetEdited = true;
-		// }
-		// if (!IsValid(GlobalData->CustomDataTexture))
-		// {
-		// 	UE_LOG(LogTurboSequence_Lf, Error,
-		// 	       TEXT(
-		// 		       "Can not find Custom Data Texture, it should at .../Plugins/TurboSequence_Lf/Resources/T_TurboSequence_DataTexture_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths, if it's not there please create a default Render Target 2D Array Texture and assign the reference in the TurboSequence Lf -> Reference Paths Project settings and open ../Plugins/TurboSequence_Lf/Resources/MF_TurboSequence_PositionOffset_Lf and assign it into the Texture Object with the Custom Data Texture Comment"
-		// 	       ));
-		// }
-		// else
-		// {
-		// 	if (GlobalData->CustomDataTexture->GetFormat() != GetPixelFormatFromRenderTargetFormat(RTF_RGBA16f))
-		// 	{
-		// 		bAssetEdited = true;
-		// 		const UPackage* Package = GlobalData->CustomDataTexture->GetOutermost();
-		// 		const FString PackagePath = FPackageName::LongPackageNameToFilename(Package->GetName(), FPackageName::GetAssetPackageExtension());
-		// 		UPackageTools::LoadPackage(*PackagePath);
-		// 		GlobalData->CustomDataTexture = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(PackagePath, GlobalData->CustomDataTexture->GetName(), GET128_NUMBER, GET16_NUMBER, RTF_RGBA16f);
-		// 	}
-		// }
-
-
-		//UE_LOG(LogTemp, Warning, TEXT("1"));
-
 		if (bAssetEdited)
 		{
 			FTurboSequence_Helper_Lf::SaveAsset(GlobalData);
@@ -689,21 +656,13 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 
 	AssetRegistry.Get().GetAssetsByClass(FTopLevelAssetPath(UTurboSequence_MeshAsset_Lf::StaticClass()->GetPathName()),
 	                                     TurboSequence_MeshAssetData_AsyncComputeSwapBack);
-
-
-	//UE_LOG(LogTemp, Warning, TEXT("%d"), AssetData.Num());
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *UTurboSequence_MeshAsset_Lf::StaticClass()->GetPathName());
+	
 
 	if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.Num())
 	{
 		RepairMeshAssetAsync();
 	}
 }
-
-// void FTurboSequence_Editor_LfModule::OnFilesLoadedUpdate(const float DeltaTime)
-// {
-// 	OnFilesLoaded();
-// }
 
 #undef LOCTEXT_NAMESPACE
 

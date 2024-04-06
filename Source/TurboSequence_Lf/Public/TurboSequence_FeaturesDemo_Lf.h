@@ -1,4 +1,4 @@
-﻿// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+﻿// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -140,27 +140,6 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoBlendSpace_Lf : public FFeatureDemoBase_
 	float RandomTimer = 0;
 };
 
-// USTRUCT()
-// struct TURBOSEQUENCE_LF_API FFeatureDemoAdditiveAnimLf : public FFeatureDemoBase_Lf
-// {
-// 	GENERATED_BODY()
-//
-// 	UPROPERTY(EditAnywhere)
-// 	FTurboSequence_AnimMinimalCollection_Lf AdditiveAnimationData;
-//
-// 	UPROPERTY(EditAnywhere)
-// 	FTurboSequence_AnimMinimalCollection_Lf DemoAnimationData;
-//
-// 	float RandomTimer = 0;
-// 	float RandomAnimationData = 0;
-//
-// 	UPROPERTY(EditAnywhere)
-// 	TObjectPtr<UAnimSequence> DemoAnimation;
-//
-// 	UPROPERTY(EditAnywhere)
-// 	TObjectPtr<UAnimSequence> AdditiveAnimation;
-// };
-
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FFeatureDemoCurves_Lf : public FFeatureDemoBase_Lf
 {
@@ -255,9 +234,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bUpdateManager = false;
 
-	//UPROPERTY(EditAnywhere)
-	//bool bCollectGarbageThisFrame = false;
-
+	
 	UPROPERTY(EditAnywhere)
 	TArray<EFeatureDemoEnableFeature_Lf> EnableFlags;
 
@@ -316,9 +293,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FVector3f GetFeatureDemoBlendSpacePosition_TurboSequence_Lf();
-
-	//UPROPERTY(EditAnywhere)
-	//FFeatureDemoAdditiveAnimLf AdditiveAnimationDemo = FFeatureDemoAdditiveAnimLf();
 
 	UPROPERTY(EditAnywhere)
 	FFeatureDemoCurves_Lf CurveDemo = FFeatureDemoCurves_Lf();

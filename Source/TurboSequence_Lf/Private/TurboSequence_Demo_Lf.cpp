@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 
 #include "TurboSequence_Demo_Lf.h"
@@ -25,7 +25,6 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 
 	if (AssetData.Num())
 	{
-		//ATurboSequence_Manager_Lf::InitializeManager_GameThread();
 
 		UpdateGroupIndex = QualityGroupIndex + 1;
 
@@ -37,7 +36,6 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 			{
 				if (IsValid(RootAsset.Asset))
 				{
-					//RootAsset.Asset->bExcludeFromSystem = Asset.bExcludeFromSystem || RootAsset.bExclude;
 					if (!Asset.bExcludeFromSystem && !RootAsset.bExclude)
 					{
 						Asset.CategorizedRootData.CategorizedData.Add(RootAsset);
@@ -49,7 +47,6 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 			{
 				if (IsValid(CustomizableAsset.Asset))
 				{
-					//CustomizableAsset.Asset->bExcludeFromSystem = Asset.bExcludeFromSystem || CustomizableAsset.bExclude;
 					if (!Asset.bExcludeFromSystem && !CustomizableAsset.bExclude)
 					{
 						if (!Asset.CategorizeCustomizableData.Contains(CustomizableAsset.CategoryName))
@@ -189,24 +186,6 @@ void ATurboSequence_Demo_Lf::Tick(float DeltaTime)
 void ATurboSequence_Demo_Lf::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	// for (FDemoAssetData_Lf& Asset : AssetData)
-	// {
-	// 	for (const FDemoMeshSpawnData_Lf& RootAsset : Asset.RootAssets)
-	// 	{
-	// 		if (IsValid(RootAsset.Asset))
-	// 		{
-	// 			RootAsset.Asset->bExcludeFromSystem = true;
-	// 		}
-	// 	}
-	// 	for (FDemoMeshSpawnData_Lf& CustomizableAsset : Asset.CustomizableAssets)
-	// 	{
-	// 		if (IsValid(CustomizableAsset.Asset))
-	// 		{
-	// 			CustomizableAsset.Asset->bExcludeFromSystem = true;
-	// 		}
-	// 	}
-	// }
 }
 
 void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
@@ -318,22 +297,6 @@ void ATurboSequence_Demo_Lf::BindToInput()
 void ATurboSequence_Demo_Lf::LeftMouseButtonPressed()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Pressed"));
-
-	// for (FDemoMeshWrapper_Lf& Mesh : Meshes)
-	// {
-	// 	const FDemoAssetData_Lf* AssetCustomData = AssetDataRuntime[Mesh.AssetDataIndex];
-	//
-	// 	FTurboSequence_MeshSpawnData_Lf CustomizableData;
-	// 	GetRandomMeshSpawnData(CustomizableData, AssetCustomData->CategorizedRootData,
-	// 	                       AssetCustomData->CategorizeCustomizableData);
-	//
-	// 	ATurboSequence_Manager_Lf::CustomizeMesh_RawID_GameThread(Mesh.MeshData, CustomizableData);
-	// }
-
-	// if (IsValid(AssetDataRuntime[0]->RootAssets[0].Asset->DefaultHybridMeshInstanceAsset))
-	// {
-	// 	GetWorld()->SpawnActor(AssetDataRuntime[0]->RootAssets[0].Asset->DefaultHybridMeshInstanceAsset->UnrealEngineMeshInstance);
-	// }
 }
 
 void ATurboSequence_Demo_Lf::SolveGroup(const int32& GroupIndex,
@@ -468,30 +431,6 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 							}
 						}
 						FTurboSequence_AnimPlaySettings_Lf PlaySettings = FTurboSequence_AnimPlaySettings_Lf();
-						//PlaySettings.Animation = MeshAsset->AnimationLibrary->Animations[RandomAnimation];
-						//PlaySetting.StartTransitionTimeInSeconds = 2;
-						//PlaySetting.EndTransitionTimeInSeconds = 2;
-						//PlaySetting.RootMotionMode = ETurboSequence_RootMotionMode_Lf::OnRootBoneAnimated;
-						//PlaySetting.GPUDataManagementMode = ETurboSequence_ManagementMode_Lf::SelfManaged;
-						// if (IsValid(TestBlendSpace))
-						// {
-						// 	if (!Mesh.CurrentBlendSpace.IsAnimCollectionValid())
-						// 	{
-						// 		Mesh.CurrentBlendSpace =
-						// 			ATurboSequence_Manager_Lf::PlayBlendSpace_Concurrent(
-						// 				Mesh.MeshData, TestBlendSpace, PlaySettings);
-						// 	}
-						//
-						//
-						// 	Mesh.RandomBlendSpacePosition = FVector3f(
-						// 		FMath::Clamp(FMath::RandRange(-100, 100), -100, 100), 0, 0);
-						// }
-						// else
-						// {
-						// 	Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-						// 		Mesh.MeshData, MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
-						// 		PlaySettings);
-						// }
 						Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
 								Mesh.MeshData, MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
 								PlaySettings);
@@ -538,61 +477,6 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 					ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(Mesh.MeshData, 6, RandomColor.B);
 				}
 			}
-
-			// if (AssetCustomData->bUseTweaks)
-			// {
-			// 	Mesh.CurrentAnimation_0.RootMotionMesh.Settings.AnimationSpeed = FMath::Lerp(
-			// 		Mesh.CurrentAnimation_0.RootMotionMesh.Settings.AnimationSpeed,
-			// 		Mesh.RandomAnimationData_0, 1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 	Mesh.CurrentAnimation_0.RootMotionMesh.Settings.AnimationWeight = FMath::Lerp(
-			// 		Mesh.CurrentAnimation_0.RootMotionMesh.Settings.AnimationWeight,
-			// 		FMath::Frac(Mesh.RandomAnimationData_0 * 7.0f) * 0.25f + 0.5f,
-			// 		1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 	for (FTurboSequence_AnimMinimalData_Lf& Anim : Mesh.CurrentAnimation_0.CustomizableMeshes)
-			// 	{
-			// 		Anim.Settings.AnimationSpeed = FMath::Lerp(
-			// 			Anim.Settings.AnimationSpeed, Mesh.RandomAnimationData_0,
-			// 			1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 		Anim.Settings.AnimationWeight = FMath::Lerp(
-			// 			Anim.Settings.AnimationWeight,
-			// 			FMath::Frac(Mesh.RandomAnimationData_0 * 7.0f) * 0.25f + 0.5f,
-			// 			1.25f * Mesh.DeltaTimeAccumulator);
-			// 	}
-			// 	ATurboSequence_Manager_Lf::TweakAnimationCollection_Concurrent(
-			// 		Mesh.MeshData, Mesh.CurrentAnimation_0, CriticalSection);
-			//
-			// 	if (AssetCustomData->bUseLayer)
-			// 	{
-			// 		Mesh.CurrentAnimation_1.RootMotionMesh.Settings.AnimationSpeed = FMath::Lerp(
-			// 			Mesh.CurrentAnimation_1.RootMotionMesh.Settings.AnimationSpeed,
-			// 			Mesh.RandomAnimationData_1, 1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 		Mesh.CurrentAnimation_1.RootMotionMesh.Settings.AnimationWeight = FMath::Lerp(
-			// 			Mesh.CurrentAnimation_1.RootMotionMesh.Settings.AnimationWeight,
-			// 			FMath::Frac(Mesh.RandomAnimationData_1 * 7.0f) * 0.25f + 0.5f,
-			// 			1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 		for (FTurboSequence_AnimMinimalData_Lf& Anim : Mesh.CurrentAnimation_1.
-			// 		     CustomizableMeshes)
-			// 		{
-			// 			Anim.Settings.AnimationSpeed = FMath::Lerp(
-			// 				Anim.Settings.AnimationSpeed, Mesh.RandomAnimationData_1,
-			// 				1.25f * Mesh.DeltaTimeAccumulator);
-			//
-			// 			Anim.Settings.AnimationWeight = FMath::Lerp(
-			// 				Anim.Settings.AnimationWeight,
-			// 				FMath::Frac(Mesh.RandomAnimationData_1 * 7.0f) * 0.25f + 0.5f,
-			// 				1.25f * Mesh.DeltaTimeAccumulator);
-			// 		}
-			//
-			//
-			// 		ATurboSequence_Manager_Lf::TweakAnimationCollection_Concurrent(
-			// 			Mesh.MeshData, Mesh.CurrentAnimation_1, CriticalSection);
-			// 	}
-			// }
 		}
 
 		float HybridAnimationDistance = 0;
@@ -640,27 +524,7 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 			SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->HeadBone, CameraLocation, Mesh.IKWeight,
 			                  AssetCustomData->HeadIKStiffness, DeltaTime,
 			                  OffsetTransform);
-
-			// 				FTransform IKTransform;
-			// ATurboSequence_Manager_Lf::GetIKTransform_RawID_Concurrent(IKTransform, Mesh.MeshData, AssetCustomData->HeadBone, DeltaTime, CriticalSection, EBoneSpaces::WorldSpace);
-			//
-			// DrawDebugBox(GetWorld(), IKTransform.GetLocation(), FVector::OneVector * 20, FColor::Green);
-
-
-			// if (FTransform WorldSpaceSocketTransform; ATurboSequence_Manager_Lf::GetSocketTransform_RawID_Concurrent(WorldSpaceSocketTransform, Mesh.MeshData, TestSocketName, DeltaTime, CriticalSection) && IsValid(TestCube))
-			// {
-			// 	WorldSpaceSocketTransform.SetScale3D(TestCube->GetComponentScale());
-			// 	TestCube->SetWorldTransform(WorldSpaceSocketTransform);
-			// }
 		}
-
-		// if (bUseTestRotationTransform)
-		// {
-		// 	FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(MeshID);
-		// 	const FVector& MeshLocation = MeshTransform.GetLocation();
-		// 	MeshTransform.SetLocation(FVector(MeshLocation.X, MeshLocation.Y, 200));
-		// 	ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshID, MeshTransform.GetLocation(), TestRotationTransform.GetRotation(), TestRotationTransform.GetScale3D());
-		// }
 
 		if (CameraDistance < RadiusOfHighQualitySolving)
 		{
@@ -669,12 +533,6 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 				CriticalSection.Lock();
 				SwitchingGroups.Add(Mesh.MeshData.RootMotionMeshID, true);
 				CriticalSection.Unlock();
-
-				//Mesh.CurrentUpdateGroupIndex = QualityGroupIndex;
-
-				// ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(Mesh.CurrentUpdateGroupIndex, Mesh.MeshData, CriticalSection);
-				// Mesh.CurrentUpdateGroupIndex = 0;
-				// ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(0, Mesh.MeshData, CriticalSection);
 			}
 		}
 		else
@@ -684,12 +542,6 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 				CriticalSection.Lock();
 				SwitchingGroups.Add(Mesh.MeshData.RootMotionMeshID, false);
 				CriticalSection.Unlock();
-
-				//Mesh.CurrentUpdateGroupIndex = Mesh.DefaultUpdateGroupIndex;
-
-				// ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(0, Mesh.MeshData, CriticalSection);
-				// Mesh.CurrentUpdateGroupIndex = Mesh.DefaultUpdateGroupIndex;
-				// ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(Mesh.CurrentUpdateGroupIndex, Mesh.MeshData, CriticalSection);
 			}
 		}
 

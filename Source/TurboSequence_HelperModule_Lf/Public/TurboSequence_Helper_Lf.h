@@ -1,4 +1,4 @@
-// Copyright Lukas Fratzl, 2022-2023. All Rights Reserved.
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #pragma once
 
@@ -27,21 +27,6 @@
 #include "UObject/SavePackage.h"
 
 #include "TurboSequence_Helper_Lf.generated.h"
-
-// struct TURBOSEQUENCE_HELPERMODULE_LF_API FVector4Half_Lf
-// {
-// 	FFloat16 X;
-// 	FFloat16 Y;
-// 	FFloat16 Z;
-// 	FFloat16 W;
-// };
-//
-// struct TURBOSEQUENCE_HELPERMODULE_LF_API FVector3Half_Lf
-// {
-// 	FFloat16 X;
-// 	FFloat16 Y;
-// 	FFloat16 Z;
-// };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTurboSequence_Lf, Log, All);
 
@@ -125,95 +110,6 @@ inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 //         creates -135 AS 2 Byte value
 #define GET135_NEGATIVE_NUMBER ( static_cast<int16>(-135) )
 
-
-// template <typename T>
-// struct TArray2D_Lf
-// {
-// 	//GENERATED_BODY()
-//
-// 	TArray<T> Data;
-// 	TArray<int32> NumCol;
-//
-// 	TArray2D_Lf()
-// 	{
-// 		Data.Reset();
-// 		NumCol.Reset();
-// 	}
-//
-// 	FORCEINLINE_DEBUGGABLE void AddColum(const TArray<T>& InitialData)
-// 	{
-// 		const int32& NumData = InitialData.Num();
-// 		NumCol.Add(NumData);
-// 		Data.Append(InitialData);
-// 	}
-//
-// 	FORCEINLINE_DEBUGGABLE void RemoveColum(const int32& ColIdx)
-// 	{
-// 		const int32& Min = Get1DIndex(ColIdx, GET0_NUMBER);
-// 		const int32& Max = Min + NumCol[ColIdx];
-// 		for (int32 i = Max - GET1_NUMBER; i >= Min; --i)
-// 		{
-// 			Data.RemoveAt(i);
-// 		}
-// 		NumCol.RemoveAt(ColIdx);
-// 	}
-//
-// 	void Add(const T& Item, const int32& ColIdx, const bool& bResizeCols)
-// 	{
-// 		if (bResizeCols && !NumCol.IsValidIndex(ColIdx))
-// 		{
-// 			for (int32 i = GET0_NUMBER; i <= ColIdx; ++i)
-// 			{
-// 				if (!NumCol.IsValidIndex(i))
-// 				{
-// 					NumCol.Add(GET0_NUMBER);
-// 				}
-// 			}
-// 		}
-// 		const int32& Index = Get1DIndex(ColIdx, NumCol[ColIdx] - GET1_NUMBER);
-// 		if (const int32& NumData = Data.Num(); !NumData || NumData - GET1_NUMBER == Index)
-// 		{
-// 			Data.Add(Item);
-// 		}
-// 		else
-// 		{
-// 			if (Data.IsValidIndex(Index))
-// 			{
-// 				UE_LOG(LogTemp, Warning, TEXT("Index %d | Num %d | Col %d"), Index, NumData, ColIdx )
-// 				T& BlankItem = Data.InsertZeroed_GetRef(Index);
-// 				BlankItem = Item;	
-// 			}
-// 			else
-// 			{
-// 				UE_LOG(LogTemp, Warning, TEXT("Wrong Index -> Index %d | Num %d | Col %d"), Index, NumData, ColIdx )
-// 			}
-// 		}
-// 		NumCol[ColIdx]++;
-// 	}
-//
-// 	FORCEINLINE_DEBUGGABLE void RemoveAt(const int32& ColIdx, const int32& RowIdx, const bool& bRemoveColWhenEmpty)
-// 	{
-// 		if (NumCol[ColIdx] > GET0_NUMBER)
-// 		{
-// 			Data.RemoveAt(Get1DIndex(ColIdx, RowIdx));
-// 			NumCol[ColIdx]--;
-// 			if (bRemoveColWhenEmpty && NumCol[ColIdx] <= GET0_NUMBER)
-// 			{
-// 				NumCol.RemoveAt(ColIdx);
-// 			}
-// 		}
-// 	}
-//
-// 	FORCEINLINE_DEBUGGABLE int32 Get1DIndex(const int32& ColIdx, const int32& RowIdx)
-// 	{
-// 		int32 Index = RowIdx * RowIdx > GET0_NUMBER;
-// 		for (int32 i = GET0_NUMBER; i < ColIdx; ++i)
-// 		{
-// 			Index += NumCol[i];
-// 		}
-// 		return Index;
-// 	}
-// };
 
 
 // -> Licence Start
@@ -1052,27 +948,6 @@ public:
 	}
 
 
-	// /**
-	//  * @brief Rotates an FVector with an FQuat4f just in case the rotation does not need to be a double quaternion but the FVector needs to be 
-	//  * @param Input The float quaternion input which rotates the vector
-	//  * @param Vector The FVector which needs to get rotated
-	//  * @return The vector which got rotated by the input FQuat4f
-	//  */
-	// static FORCEINLINE_DEBUGGABLE FVector RotateVector(const FQuat4f& Input, const FVector& Vector)
-	// {
-	// 	// http://people.csail.mit.edu/bkph/articles/Quaternions.pdf
-	// 	// V' = V + 2w(Q x V) + (2Q x (Q x V))
-	// 	// refactor:
-	// 	// V' = V + w(2(Q x V)) + (Q x (2(Q x V)))
-	// 	// T = 2(Q x V);
-	// 	// V' = V + w*(T) + (Q x T)
-	//
-	// 	const FVector Q(Input.X, Input.Y, Input.Z);
-	// 	const FVector& TT = GET2_NUMBER * FVector::CrossProduct(Q, Vector);
-	// 	return Vector + Input.W * TT + FVector::CrossProduct(Q, TT);
-	// }
-
-
 	template <typename TKey>
 	static FORCEINLINE_DEBUGGABLE TObjectPtr<UObject> SetOrAdd(TMap<TKey, TObjectPtr<UObject>>& Map,
 	                                                           const TObjectPtr<UObject>& Item, const TKey& Key)
@@ -1755,35 +1630,6 @@ public:
 		});
 	}
 
-	// static FORCEINLINE_DEBUGGABLE void SetNiagaraArrayVector4FValue(const TObjectPtr<UNiagaraComponent> NiagaraComponent, const FName& OverrideName, const int32& Index, const FVector4f& Value, const bool& bSizeToFit)
-	// {
-	// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4Value(NiagaraComponent, OverrideName, Index, ConvertVector4FToVector4(Value), bSizeToFit);
-	// }
-	//
-	// static FORCEINLINE_DEBUGGABLE void SetNiagaraArrayVector3FValue(const TObjectPtr<UNiagaraComponent> NiagaraComponent, const FName& OverrideName, const int32& Index, const FVector3f& Value, const bool& bSizeToFit)
-	// {
-	// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVectorValue(NiagaraComponent, OverrideName, Index, ConvertVector3FToVector(Value), bSizeToFit);
-	// }
-
-	// 	static FORCEINLINE_DEBUGGABLE void SetVariableTexture2DArrayRenderTarget(const TObjectPtr<UNiagaraComponent> Component, const FName& InVariableName, UTextureRenderTarget2DArray* TextureRenderTarget)
-	// 	{
-	// 		const FNiagaraVariable VariableDesc(FNiagaraTypeDefinition::GetUTextureRenderTargetDef(), InVariableName);
-	// 		if (Component->GetSystemInstanceController().IsMeshDataValid())
-	// 		{
-	// 			const TWeakObjectPtr<UTextureRenderTarget2DArray> ObjPtr = TextureRenderTarget;
-	// 			Component->GetSystemInstanceController()->SetVariable_Deferred(InVariableName, ObjPtr);
-	// 		}
-	// 		else
-	// 		{
-	// 			Component->GetOverrideParameters().SetUObject(TextureRenderTarget, VariableDesc);
-	// 		}
-	// #if WITH_EDITOR
-	// 		Component->SetParameterOverride(VariableDesc, FNiagaraVariant(TextureRenderTarget));
-	// #endif
-	// 	}
-
-	//static UStaticMesh* ConvertMeshesToStaticMesh(const TArray<UMeshComponent*>& InMeshComponents, const FTransform& InRootTransform, const FString& InPackageName);
-
 	// https://forums.unrealengine.com/t/get-assets-by-class-how-to-find-all-bp-assets-of-given-class/687899/6
 	static FORCEINLINE_DEBUGGABLE bool GetBlueprintsFromBaseClass(UClass* InBaseClass,
 	                                                              TArray<FAssetData>& FoundAssets)
@@ -1811,29 +1657,6 @@ public:
 
 		return AssetRegistryModule.Get().GetAssetsByTagValues(TagsValues, FoundAssets);
 	}
-
-	// static FORCEINLINE_DEBUGGABLE int32 GetStringSequentialMatchCount(const FString& A, const FString& B)
-	// {
-	// 	const int32& NumA = A.Len();
-	// 	const int32& NumB = B.Len();
-	//
-	// 	int32 NumMatch = GET0_NUMBER;
-	// 	
-	// 	for (int32 AIdx = GET0_NUMBER; AIdx < NumA; ++AIdx)
-	// 	{
-	// 		for (int32 BIdx = AIdx; BIdx < NumB; ++BIdx)
-	// 		{
-	// 			if (A[AIdx] == B[BIdx])
-	// 			{
-	// 				NumMatch++;
-	// 				AIdx = BIdx;
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	return NumMatch;
-	// }
 
 
 	static FORCEINLINE_DEBUGGABLE FString GetConfigPath()
