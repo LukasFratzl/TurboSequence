@@ -244,7 +244,10 @@ public:
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerLibrary_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_AnimationLibrary_InputTexture)
+	
+		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_BoneTransform_OutputTexture)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransform_OutputTexture)
+		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransformPrevious_OutputTexture)
 
 		SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<float>, DebugValue)
 

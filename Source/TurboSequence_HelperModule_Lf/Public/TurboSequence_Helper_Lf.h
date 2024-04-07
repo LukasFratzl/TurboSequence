@@ -1412,13 +1412,12 @@ public:
 	{
 		TRefCountPtr<IPooledRenderTarget> PooledRenderTarget;
 		FRDGTextureRef OutputTextureRef;
-		return CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef, Texture,
-		                                                    TextureName);
+		return CreateReadRenderTargetArrayTexture_Custom_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef,Texture,TextureName, EPixelFormat::PF_FloatRGBA);
 	}
 
-	static FORCEINLINE_DEBUGGABLE FRDGTextureSRVRef CreateReadRenderTargetArrayTexture_Half4_Out(
+	static FORCEINLINE_DEBUGGABLE FRDGTextureSRVRef CreateReadRenderTargetArrayTexture_Custom_Out(
 		FRDGBuilder& GraphBuilder, TRefCountPtr<IPooledRenderTarget>& PooledRenderTarget,
-		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName)
+		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName, const EPixelFormat& Format)
 	{
 		// Get the render target resource
 		const FRenderTarget* RenderTargetResource = Texture.GetRenderTargetResource();
@@ -1432,7 +1431,7 @@ public:
 
 		const FPooledRenderTargetDesc RenderTargetDescription = FPooledRenderTargetDesc::Create2DArrayDesc(
 			RenderTargetResource->GetSizeXY(),
-			PF_FloatRGBA,
+			Format,
 			FClearValueBinding::Transparent,
 			TexCreate_None,
 			TexCreateFlags,

@@ -71,13 +71,29 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		if (Params.bUse32BitTransformTexture)
 		{
 			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_A32B32G32R32F);
+
+			TRefCountPtr<IPooledRenderTarget> PooledRenderTarget;
+			FRDGTextureRef OutputTextureRef;
+			MeshUnitPassParameters->R_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Custom_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef, *AnimationOutputTextureCurrent, TEXT("TS_AnimationOutputTextureRead"), EPixelFormat::PF_A32B32G32R32F);
 		}
 		else
 		{
 			MeshUnitPassParameters->RW_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID), PF_FloatRGBA);
+
+			MeshUnitPassParameters->R_BoneTransform_OutputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *AnimationOutputTextureCurrent, TEXT("TS_AnimationOutputTextureRead"));
 		}
 
-		MeshUnitPassParameters->R_AnimationLibrary_InputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *Params.AnimationLibraryTexture, TEXT("AnimationLibrary"));
+		FRDGTextureRef AnimationOutputTexturePeviousRef;
+		if (Params.bUse32BitTransformTexture)
+		{
+			MeshUnitPassParameters->RW_BoneTransformPrevious_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTexturePeviousRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID + 1), PF_A32B32G32R32F);
+		}
+		else
+		{
+			MeshUnitPassParameters->RW_BoneTransformPrevious_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, AnimationOutputTexturePeviousRef, AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID + 1), PF_FloatRGBA);
+		}
+
+		MeshUnitPassParameters->R_AnimationLibrary_InputTexture = FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(GraphBuilder, *Params.AnimationLibraryTexture, TEXT("TS_AnimationLibrary"));
 
 		MeshUnitPassParameters->ReferencePose_StructuredBuffer = FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Params.CPUInverseReferencePose, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::RefPoseDebugName, Params.ShaderID), true);
 		MeshUnitPassParameters->ReferenceNumCPUBones_StructuredBuffer = FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(GraphBuilder, Params.ReferenceNumCPUBones_RenderThread, *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, Params.ShaderID), PF_R16_UINT, true);
@@ -134,15 +150,15 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->NumDebugBuffer = FMath::Max(Params.NumDebugData, 0);
 
 		const FRDGTextureRef RenderTargetAnimationOutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(AnimationOutputTextureCurrent->GetRenderTargetResource()->GetTexture2DArrayRHI(), *FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName, Params.ShaderID)));
+		
+		const FRDGTextureRef RenderTargetAnimationOutputPreviousFrameTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Params.AnimationOutputTexturePrevious->GetRenderTargetResource()->GetTextureRHI(), TEXT("TurboSequence_AnimationOutputRenderTargetTexturePreviousFrame")));
 
 		FRHICopyTextureInfo AnimationRenderTargetCopyInfo = FRHICopyTextureInfo();
 		AnimationRenderTargetCopyInfo.NumSlices = AnimationOutputTextureCurrent->Slices;
 
 		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputTexture, AnimationOutputTextureRef, AnimationRenderTargetCopyInfo);
 
-		const FRDGTextureRef RenderTargetAnimationOutputPreviousFrameTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Params.AnimationOutputTexturePrevious->GetRenderTargetResource()->GetTextureRHI(), TEXT("TurboSequence_AnimationOutputRenderTargetTexturePreviousFrame")));
-
-		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputTexture, RenderTargetAnimationOutputPreviousFrameTexture, AnimationRenderTargetCopyInfo);
+		AddCopyTexturePass(GraphBuilder, RenderTargetAnimationOutputPreviousFrameTexture, AnimationOutputTexturePeviousRef, AnimationRenderTargetCopyInfo);
 
 
 		GraphBuilder.AddPass(
@@ -156,6 +172,8 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 			});
 
 		AddCopyTexturePass(GraphBuilder, AnimationOutputTextureRef, RenderTargetAnimationOutputTexture, AnimationRenderTargetCopyInfo);
+		
+		AddCopyTexturePass(GraphBuilder, AnimationOutputTexturePeviousRef, RenderTargetAnimationOutputPreviousFrameTexture, AnimationRenderTargetCopyInfo);
 		
 		if (Params.NumDebugData > GET0_NUMBER)
 		{
