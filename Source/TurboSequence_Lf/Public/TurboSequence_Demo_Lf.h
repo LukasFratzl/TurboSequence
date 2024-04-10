@@ -251,7 +251,7 @@ public:
 			if (Customizable.Value.CategorizedData.Num())
 			{
 				const int32& RandomMesh = FMath::RandRange(0, Customizable.Value.CategorizedData.Num() - 1);
-				FMeshMetaData_Lf MeshData = FMeshMetaData_Lf();
+				FTurboSequence_MeshMetaData_Lf MeshData = FTurboSequence_MeshMetaData_Lf();
 				MeshData.Mesh = Customizable.Value.CategorizedData[RandomMesh].Asset;
 				MeshData.FootprintAsset = FootprintAsset;
 				if (Customizable.Value.CategorizedData[RandomMesh].Materials.Num())

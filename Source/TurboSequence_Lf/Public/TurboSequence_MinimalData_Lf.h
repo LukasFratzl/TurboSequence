@@ -264,7 +264,7 @@ public:
 
 
 USTRUCT(BlueprintType)
-struct TURBOSEQUENCE_LF_API FMeshMetaData_Lf
+struct TURBOSEQUENCE_LF_API FTurboSequence_MeshMetaData_Lf
 {
 	GENERATED_BODY()
 
@@ -284,10 +284,10 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSpawnData_Lf
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FMeshMetaData_Lf RootMotionMesh;
+	FTurboSequence_MeshMetaData_Lf RootMotionMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FMeshMetaData_Lf> CustomizableMeshes;
+	TArray<FTurboSequence_MeshMetaData_Lf> CustomizableMeshes;
 
 	uint32 GetHash() const // TODO: Make GET and SET to assign the the hash only when values are changing
 	{
@@ -300,7 +300,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSpawnData_Lf
 		}
 		Hash = HashCombineFast(GetTypeHash(RootMotionMesh.FootprintAsset), Hash);
 
-		for (const FMeshMetaData_Lf& CustomizableMeshMeta : CustomizableMeshes)
+		for (const FTurboSequence_MeshMetaData_Lf& CustomizableMeshMeta : CustomizableMeshes)
 		{
 			Hash = HashCombineFast(GetTypeHash(CustomizableMeshMeta.Mesh), Hash);
 			for (const TObjectPtr<UMaterialInterface>& OverrideMaterial : CustomizableMeshMeta.OverrideMaterials)

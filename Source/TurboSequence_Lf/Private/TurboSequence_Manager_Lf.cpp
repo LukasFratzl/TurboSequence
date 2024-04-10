@@ -179,7 +179,7 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInsta
 	FTurboSequence_MinimalMeshData_Lf Data = FTurboSequence_MinimalMeshData_Lf(true);
 	Data.RootMotionMeshID = RootMotionMeshID;
 
-	for (const FMeshMetaData_Lf& MeshData : FromSpawnData.CustomizableMeshes)
+	for (const FTurboSequence_MeshMetaData_Lf& MeshData : FromSpawnData.CustomizableMeshes)
 	{
 		if (const uint32 MeshID = AddSkinnedMeshInstance_GameThread(MeshData.Mesh, SpawnTransform, InWorld,
 		                                                            MeshData.OverrideMaterials,
