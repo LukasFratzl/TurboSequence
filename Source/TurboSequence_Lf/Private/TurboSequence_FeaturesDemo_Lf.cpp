@@ -387,8 +387,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(IKDemo.MeshData[0]) * OffsetTransform.
 			Inverse();
 
-		const float& Dot = FVector::DotProduct(CameraRotation.Vector(), MeshTransform.GetRotation().Vector());
-		const bool& bIsInView = Dot < 0;
+		float Dot = FVector::DotProduct(CameraRotation.Vector(), MeshTransform.GetRotation().Vector());
+		bool bIsInView = Dot < 0;
 		float WeightAlpha = 5.0f * DeltaTime;
 		if (bIsInView)
 		{
@@ -447,7 +447,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 		{
 			BlendSpaceDemo.RandomTimer = 3; //FMath::RandRange(3.0f, 3.0f);
 
-			const float& RandomX = FMath::Clamp(FMath::RandRange(-150.0f, 150.0f), -100.0f, 100.0f);
+			float RandomX = FMath::Clamp(FMath::RandRange(-150.0f, 150.0f), -100.0f, 100.0f);
 
 			const FVector3f& Position = FVector3f(RandomX, 0, 0);
 			LastDemoBlendSpacePosition = Position;
@@ -485,7 +485,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 
 		CurrentUpdateGroupIndex = FMath::Clamp(CurrentUpdateGroupIndex, 1, UpdateGroupsDemo.MeshData.Num());
 
-		const int32& DeltaTimeIndex = CurrentUpdateGroupIndex - 1;
+		int32 DeltaTimeIndex = CurrentUpdateGroupIndex - 1;
 
 		FTurboSequence_UpdateContext_Lf UpdateContext = FTurboSequence_UpdateContext_Lf();
 		UpdateContext.GroupIndex = CurrentUpdateGroupIndex;

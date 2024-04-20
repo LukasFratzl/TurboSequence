@@ -107,7 +107,7 @@ void FTurboSequence_Utility_Lf::CreateTurboSequenceReference(FSkinnedMeshGlobalL
 void FTurboSequence_Utility_Lf::CreateGPUBones(FSkinnedMeshReferenceLodElement_Lf& LodElement,
                                                FCriticalSection& CriticalSection,
                                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
-                                               const bool& bIsMeshDataEvaluation)
+                                               bool bIsMeshDataEvaluation)
 {
 	if (!LodElement.CPUBoneToGPUBoneIndicesMap.Num())
 	{
@@ -116,7 +116,7 @@ void FTurboSequence_Utility_Lf::CreateGPUBones(FSkinnedMeshReferenceLodElement_L
 			const FSkeletalMeshLODRenderData& RenderData = Asset->ReferenceMeshEdited->GetResourceForRendering()->
 			                                                      LODRenderData[LodElement.MeshIndex];
 			const FSkinWeightVertexBuffer* SkinWeightBuffer = RenderData.GetSkinWeightVertexBuffer();
-			const uint32& NumVertices = RenderData.GetNumVertices();
+			uint32 NumVertices = RenderData.GetNumVertices();
 			for (uint32 i = GET0_NUMBER; i < NumVertices; ++i)
 			{
 				int32 VertexIndexSection;
@@ -124,11 +124,11 @@ void FTurboSequence_Utility_Lf::CreateGPUBones(FSkinnedMeshReferenceLodElement_L
 				RenderData.GetSectionFromVertexIndex(i, SectionIndex, VertexIndexSection);
 
 				const FSkelMeshRenderSection& Section = RenderData.RenderSections[SectionIndex];
-				const uint32& VertIdx = Section.BaseVertexIndex + VertexIndexSection;
+				uint32 VertIdx = Section.BaseVertexIndex + VertexIndexSection;
 
 				for (uint16 InfluenceIdx = GET0_NUMBER; InfluenceIdx < GET12_NUMBER; ++InfluenceIdx)
 				{
-					if (const int32& BoneIndex =
+					if (int32 BoneIndex =
 							GetBoneMapIndex_CPU(Section.BoneMap, SkinWeightBuffer->GetBoneIndex(VertIdx, InfluenceIdx));
 						SkinWeightBuffer->GetBoneWeight(VertIdx, InfluenceIdx) && BoneIndex > INDEX_NONE && !LodElement.CPUBoneToGPUBoneIndicesMap.Contains(BoneIndex))
 					{
@@ -200,7 +200,7 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 				Library_RenderThread.BoneTransformParams.NumMaxCPUBones = MaxNumCPUBones;
 				Library_RenderThread.BoneTransformParams.NumMaxLevelOfDetails = MaxNumMeshLevelOfDetails;
 
-				const int32& NumReferences = Library_RenderThread.PerReferenceData.Num();
+				int32 NumReferences = Library_RenderThread.PerReferenceData.Num();
 				Library_RenderThread.BoneTransformParams.ReferenceNumCPUBones.SetNum(NumReferences);
 				for (int32 i = GET0_NUMBER; i < NumReferences; ++i)
 				{
@@ -208,15 +208,15 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 					FSkinnedMeshReference_RenderThread_Lf& Reference = Library_RenderThread.PerReferenceData[
 						Library_RenderThread.PerReferenceDataKeys[i]];
 
-					const int32& NumCpuBones = GetSkeletonNumBones(GetReferenceSkeleton(Reference.DataAsset));
+					int32 NumCpuBones = GetSkeletonNumBones(GetReferenceSkeleton(Reference.DataAsset));
 					Library_RenderThread.BoneTransformParams.ReferenceNumCPUBones[i] = NumCpuBones;
 				}
 			});
 
-		const int16& NumReferences = Library.PerReferenceData.Num();
+		int16 NumReferences = Library.PerReferenceData.Num();
 
 		TArray<FVector4f> CachedIndices;
-		const int32& NumBoneIndices = NumReferences * MaxNumCPUBones * MaxNumMeshLevelOfDetails;
+		int32 NumBoneIndices = NumReferences * MaxNumCPUBones * MaxNumMeshLevelOfDetails;
 		CachedIndices.AddUninitialized(NumBoneIndices);
 		for (int32 RefIdx = GET0_NUMBER; RefIdx < NumReferences; ++RefIdx)
 		{
@@ -226,10 +226,10 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 
 			const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Asset);
 			//FromAsset->ReferenceSkeleton->GetMeshBoneIndexFromSkeletonBoneIndex()
-			const uint8& NumLevelOfDetails = Reference.LevelOfDetails.Num();
+			uint8 NumLevelOfDetails = Reference.LevelOfDetails.Num();
 			int16 FirstGPULodCollectionIndex = NumLevelOfDetails - GET1_NUMBER;
 			bool bHasRenderState = false;
-			ParallelFor(NumLevelOfDetails, [&](const int32& LodIdx)
+			ParallelFor(NumLevelOfDetails, [&](int32 LodIdx)
 			{
 				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[LodIdx];
 				if (!LodElement.bIsRenderStateValid)
@@ -247,7 +247,7 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 
 				CreateGPUBones(LodElement, CriticalSection, Asset, false);
 
-				const int32& BaseIndex = RefIdx * MaxNumMeshLevelOfDetails * MaxNumCPUBones + LodElement.GPUMeshIndex *
+				int32 BaseIndex = RefIdx * MaxNumMeshLevelOfDetails * MaxNumCPUBones + LodElement.GPUMeshIndex *
 					MaxNumCPUBones;
 				for (uint16 i = GET0_NUMBER; i < MaxNumCPUBones; ++i)
 				{
@@ -295,7 +295,7 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 					});
 			}
 
-			if (const int32& NumBones = Reference.NumFirstLodGPUBones; MaxNumGPUBones <= NumBones)
+			if (int32 NumBones = Reference.NumFirstLodGPUBones; MaxNumGPUBones <= NumBones)
 			{
 				MaxNumGPUBones = NumBones;
 			}
@@ -376,14 +376,14 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 		const FSkeletalMeshLODRenderData& RenderData = FromAsset->ReferenceMeshEdited->GetResourceForRendering()->
 		                                                          LODRenderData[LevelOfDetail.Value.MeshIndex];
-		const uint32& NumVertices = RenderData.GetNumVertices();
+		uint32 NumVertices = RenderData.GetNumVertices();
 
 		NumPixels += NumVertices * FTurboSequence_Helper_Lf::NumSkinWeightPixels;
 	}
 	FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.AddUninitialized(NumPixels);
 
-	const uint8& NumLevelOfDetails = Reference.LevelOfDetails.Num();
-	ParallelFor(NumLevelOfDetails, [&](const int32& LodIdx)
+	uint8 NumLevelOfDetails = Reference.LevelOfDetails.Num();
+	ParallelFor(NumLevelOfDetails, [&](int32 LodIdx)
 	{
 		FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[LodIdx];
 		if (!LodElement.bIsRenderStateValid)
@@ -404,10 +404,10 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 		const TArray<int32>& VertexIndices = FromAsset->MeshDataOrderView[LodElement.MeshIndex].StaticMeshIndices;
 
-		const int32& NumVertices = VertexIndices.Num();
+		int32 NumVertices = VertexIndices.Num();
 		for (int32 VertIdx = GET0_NUMBER; VertIdx < NumVertices; ++VertIdx)
 		{
-			const int32& RealVertexIndex = VertexIndices[VertIdx];
+			int32 RealVertexIndex = VertexIndices[VertIdx];
 
 			int32 VertexIndexSection;
 			int32 SectionIndex;
@@ -419,23 +419,23 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			uint8 MaxSkinWeightVertex = GET0_NUMBER;
 			for (uint16 InfluenceChunkIdx = GET0_NUMBER; InfluenceChunkIdx < GET3_NUMBER; ++InfluenceChunkIdx)
 			{
-				const uint8& ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
+				uint8 ChunkIndex = InfluenceChunkIdx * GET4_NUMBER; // 12 SkinData
 
 				FVector4f Weights;
 				FVector4f Indices;
 				for (int32 WeightIdx = GET0_NUMBER; WeightIdx < GET4_NUMBER; ++WeightIdx)
 				{
-					const uint16& RawWeight = SkinWeightBuffer->GetBoneWeight(RealVertexIndex, ChunkIndex + WeightIdx);
+					uint16 RawWeight = SkinWeightBuffer->GetBoneWeight(RealVertexIndex, ChunkIndex + WeightIdx);
 
-					const float& WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
+					float WeightFloat = static_cast<float>(RawWeight) / static_cast<float>(0xFFFF);
 
-					const uint8& Weight = WeightFloat * 0xFF;
+					uint8 Weight = WeightFloat * 0xFF;
 
 					Weights[WeightIdx] = Weight;
 
-					const int32& RawBoneIndex = SkinWeightBuffer->GetBoneIndex(RealVertexIndex, ChunkIndex + WeightIdx);
+					int32 RawBoneIndex = SkinWeightBuffer->GetBoneIndex(RealVertexIndex, ChunkIndex + WeightIdx);
 
-					const int32& IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
+					int32 IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
 					                                                    Section.BoneMap, RawBoneIndex, Weight);
 					
 
@@ -644,7 +644,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 			for (uint16 b = GET0_NUMBER; b < LibraryAnimData.NumBones; ++b)
 			{
 				const FName& BoneName = GetSkeletonBoneName(ReferenceSkeleton, b);
-				if (const int32& BoneIndex = FTurboSequence_Helper_Lf::GetAnimationBonePoseIndex(AlphaPose, BoneName);
+				if (int32 BoneIndex = FTurboSequence_Helper_Lf::GetAnimationBonePoseIndex(AlphaPose, BoneName);
 					BoneIndex > INDEX_NONE)
 				{
 					LibraryAnimData.BoneNameToAnimationBoneIndex.FindOrAdd(BoneName, BoneIndex);
@@ -655,7 +655,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 
 		if (!LibraryAnimData.AnimPoses.Contains(Pose0))
 		{
-			const float& FrameTime0 = static_cast<float>(Pose0) / static_cast<float>(LibraryAnimData.MaxFrames -
+			float FrameTime0 = static_cast<float>(Pose0) / static_cast<float>(LibraryAnimData.MaxFrames -
 				GET1_NUMBER) * Animation.Animation->GetPlayLength();
 
 			FAnimPose_Lf PoseData_0;
@@ -670,7 +670,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 
 		uint32 AnimationDataIndex = Library.AnimationLibraryDataAllocatedThisFrame.Num();
 
-		const int32& NumAllocations = LibraryAnimData.NumBones * GET3_NUMBER;
+		int32 NumAllocations = LibraryAnimData.NumBones * GET3_NUMBER;
 		Library.AnimationLibraryMaxNum += NumAllocations;
 
 		Library.AnimationLibraryDataAllocatedThisFrame.AddUninitialized(NumAllocations);
@@ -723,7 +723,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 			LibraryAnimData.AnimPoses.Add(GET0_NUMBER, CPUPose_0);
 		}
 
-		const int32& NumAllocations = LibraryAnimData.NumBones * GET3_NUMBER;
+		int32 NumAllocations = LibraryAnimData.NumBones * GET3_NUMBER;
 		Library.AnimationLibraryMaxNum += NumAllocations;
 
 		uint32 AnimationDataIndex = Library.AnimationLibraryDataAllocatedThisFrame.Num();
@@ -782,7 +782,7 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 
 	TArray<TObjectPtr<UMaterialInterface>> Materials;
 	Materials.SetNum(TargetMaterials.Num());
-	const uint8& NumOverrideMaterials = TargetMaterials.Num();
+	uint8 NumOverrideMaterials = TargetMaterials.Num();
 	for (uint8 MaterialIdx = GET0_NUMBER; MaterialIdx < NumOverrideMaterials; ++MaterialIdx)
 	{
 		Materials[MaterialIdx] = TargetMaterials[MaterialIdx];
@@ -790,7 +790,7 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 	if (!Materials.Num() && IsValid(PostReference.FirstValidMeshLevelOfDetail))
 	{
 		const TArray<FStaticMaterial>& MeshMaterials = PostReference.FirstValidMeshLevelOfDetail->GetStaticMaterials();
-		const uint8& NumMeshMaterialsMaterials = MeshMaterials.Num();
+		uint8 NumMeshMaterialsMaterials = MeshMaterials.Num();
 		Materials.SetNum(NumMeshMaterialsMaterials);
 		for (uint8 MaterialIdx = GET0_NUMBER; MaterialIdx < NumMeshMaterialsMaterials; ++MaterialIdx)
 		{
@@ -798,7 +798,7 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 		}
 	}
 
-	const uint32& MaterialsHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
+	uint32 MaterialsHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
 	if (!NiagaraComponents.Contains(TargetMesh) || (NiagaraComponents.Contains(TargetMesh) && !
 		NiagaraComponents[TargetMesh].NiagaraRenderer.Contains(MaterialsHash)))
 	{

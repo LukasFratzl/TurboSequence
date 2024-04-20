@@ -130,7 +130,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalData_Lf
 	{
 	}
 
-	explicit FTurboSequence_AnimMinimalData_Lf(const bool& bValid)
+	explicit FTurboSequence_AnimMinimalData_Lf(bool bValid)
 	{
 		bIsValid = bValid;
 	}
@@ -166,7 +166,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalCollection_Lf
 	{
 	}
 
-	explicit FTurboSequence_AnimMinimalCollection_Lf(const bool& bValid)
+	explicit FTurboSequence_AnimMinimalCollection_Lf(bool bValid)
 	{
 		bIsValid = bValid;
 	}
@@ -182,7 +182,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	const bool& IsAnimCollectionValid() const
+	bool IsAnimCollectionValid() const
 	{
 		return bIsValid;
 	}
@@ -202,7 +202,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalBlendSpace_Lf
 	{
 	}
 
-	explicit FTurboSequence_AnimMinimalBlendSpace_Lf(const bool& bValid)
+	explicit FTurboSequence_AnimMinimalBlendSpace_Lf(bool bValid)
 	{
 		bIsValid = bValid;
 	}
@@ -221,7 +221,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	const bool& IsAnimBlendSpaceValid() const
+	bool IsAnimBlendSpaceValid() const
 	{
 		return bIsValid;
 	}
@@ -240,7 +240,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalBlendSpaceCollection_Lf
 	{
 	}
 
-	explicit FTurboSequence_AnimMinimalBlendSpaceCollection_Lf(const bool& bValid)
+	explicit FTurboSequence_AnimMinimalBlendSpaceCollection_Lf(bool bValid)
 	{
 		bIsValid = bValid;
 	}
@@ -256,7 +256,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	const bool& IsAnimCollectionValid() const
+	bool IsAnimCollectionValid() const
 	{
 		return bIsValid;
 	}
@@ -355,7 +355,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MinimalMeshData_Lf
 	{
 	}
 
-	explicit FTurboSequence_MinimalMeshData_Lf(const bool& bValid)
+	explicit FTurboSequence_MinimalMeshData_Lf(bool bValid)
 	{
 		bIsValid = bValid;
 	}
@@ -371,7 +371,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	const bool& IsMeshDataValid() const
+	bool IsMeshDataValid() const
 	{
 		return bIsValid;
 	}
@@ -394,7 +394,7 @@ public:
 	FString ToString() const
 	{
 		FString String = FString::Printf(TEXT("bIsValid -> %s | Root Mesh ID -> %lld"), IsMeshDataValid() ? TEXT("True") : TEXT("False"), RootMotionMeshID);
-		for (const int64& MeshID : CustomizableMeshIDs)
+		for (int64 MeshID : CustomizableMeshIDs)
 		{
 			String += FString::Printf(TEXT(" | Customizable ID -> %lld"), MeshID);
 		}
@@ -420,7 +420,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_PoseCurveData_Lf
 	{
 	}
 
-	FTurboSequence_PoseCurveData_Lf(const TObjectPtr<UAnimSequence>& CurveAnimation, const FName& CurveID, const float& CurveFrame0)
+	FTurboSequence_PoseCurveData_Lf(const TObjectPtr<UAnimSequence>& CurveAnimation, const FName& CurveID, float CurveFrame0)
 		: CurveAnimation(CurveAnimation),
 		  CurveName(CurveID),
 		  CurveFrame_0(CurveFrame0)

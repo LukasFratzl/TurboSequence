@@ -178,9 +178,9 @@ public:
 	void BindToInput();
 	void LeftMouseButtonPressed();
 
-	void SolveGroup(const int32& GroupIndex, const float& DeltaTime, const FRotator& CameraRotation, const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups);
+	void SolveGroup(int32 GroupIndex, float DeltaTime, const FRotator& CameraRotation, const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups);
 
-	void SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSection& CriticalSection, const FRotator& CameraRotation, const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups, const float& DeltaTime);
+	void SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSection& CriticalSection, const FRotator& CameraRotation, const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups, float DeltaTime);
 
 	const uint8 QualityGroupIndex = 10;
 
@@ -234,7 +234,7 @@ public:
 	{
 		Data = FTurboSequence_MeshSpawnData_Lf();
 
-		if (const int32& RandomRootMesh = FMath::RandRange(0, CategorizedRootData.CategorizedData.Num() - 1); CategorizedRootData.CategorizedData.IsValidIndex(RandomRootMesh))
+		if (int32 RandomRootMesh = FMath::RandRange(0, CategorizedRootData.CategorizedData.Num() - 1); CategorizedRootData.CategorizedData.IsValidIndex(RandomRootMesh))
 		{
 			Data.RootMotionMesh.Mesh = CategorizedRootData.CategorizedData[RandomRootMesh].Asset;
 			Data.RootMotionMesh.FootprintAsset = FootprintAsset;
@@ -242,7 +242,7 @@ public:
 			{
 				TArray<FName> Names;
 				CategorizedRootData.CategorizedData[RandomRootMesh].Materials.GetKeys(Names);
-				const int32& RandomRootMaterial = FMath::RandRange(0, CategorizedRootData.CategorizedData[RandomRootMesh].Materials.Num() - 1);
+				int32 RandomRootMaterial = FMath::RandRange(0, CategorizedRootData.CategorizedData[RandomRootMesh].Materials.Num() - 1);
 				Data.RootMotionMesh.OverrideMaterials = CategorizedRootData.CategorizedData[RandomRootMesh].Materials[Names[RandomRootMaterial]].Materials;
 			}
 		}
@@ -250,7 +250,7 @@ public:
 		{
 			if (Customizable.Value.CategorizedData.Num())
 			{
-				const int32& RandomMesh = FMath::RandRange(0, Customizable.Value.CategorizedData.Num() - 1);
+				int32 RandomMesh = FMath::RandRange(0, Customizable.Value.CategorizedData.Num() - 1);
 				FTurboSequence_MeshMetaData_Lf MeshData = FTurboSequence_MeshMetaData_Lf();
 				MeshData.Mesh = Customizable.Value.CategorizedData[RandomMesh].Asset;
 				MeshData.FootprintAsset = FootprintAsset;
@@ -258,7 +258,7 @@ public:
 				{
 					TArray<FName> Names;
 					Customizable.Value.CategorizedData[RandomMesh].Materials.GetKeys(Names);
-					const int32& RandomMaterial = FMath::RandRange(0, Customizable.Value.CategorizedData[RandomMesh].Materials.Num() - 1);
+					int32 RandomMaterial = FMath::RandRange(0, Customizable.Value.CategorizedData[RandomMesh].Materials.Num() - 1);
 					MeshData.OverrideMaterials = Customizable.Value.CategorizedData[RandomMesh].Materials[Names[RandomMaterial]].Materials;
 				}
 				Data.CustomizableMeshes.Add(MeshData);
@@ -266,7 +266,7 @@ public:
 		}
 	}
 
-	static FORCEINLINE_DEBUGGABLE void SolveLookAtIKBone(const FTurboSequence_MinimalMeshData_Lf& MeshData, const FName& BoneName, const FVector& TargetLocation, const float& Weight, const float& OffsetWeight, const float& AnimationDeltaTime, const FTransform& StartOffsetTransform)
+	static FORCEINLINE_DEBUGGABLE void SolveLookAtIKBone(const FTurboSequence_MinimalMeshData_Lf& MeshData, const FName& BoneName, const FVector& TargetLocation, float Weight, float OffsetWeight, float AnimationDeltaTime, const FTransform& StartOffsetTransform)
 	{
 		FTransform IKTransform;
 		ATurboSequence_Manager_Lf::GetIKTransform_Concurrent(IKTransform, MeshData, BoneName, AnimationDeltaTime, EBoneSpaces::WorldSpace);
@@ -285,7 +285,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void SolveBlueprintDemoMeshesInCpp(const TArray<FTurboSequence_MinimalMeshData_Lf>& MeshData, UPARAM(ref) TArray<FVector4>& AnimData, UAnimSequence* AnimA, UAnimSequence* AnimB, const FTurboSequence_AnimPlaySettings_Lf& AnimSettingsA, const FTurboSequence_AnimPlaySettings_Lf& AnimSettingsB, const float DeltaTime, const bool bMultiThreaded)
 	{
-		auto RunnerFunction = [&](const FTurboSequence_MinimalMeshData_Lf& MeshID, const int32& Index)
+		auto RunnerFunction = [&](const FTurboSequence_MinimalMeshData_Lf& MeshID, int32 Index)
 		{
 			FVector4& AnimDataOut = AnimData[Index];
 
@@ -331,10 +331,10 @@ public:
 
 		if (bMultiThreaded)
 		{
-			const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-			const int32& NumMeshesPerThread_Background = FMath::CeilToInt(
+			int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
+			int32 NumMeshesPerThread_Background = FMath::CeilToInt(
 				static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-			ParallelFor(NumThreads, [&](const int32& ThreadsIndex)
+			ParallelFor(NumThreads, [&](int32 ThreadsIndex)
 			{
 				const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread_Background;
 				const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread_Background;

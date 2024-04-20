@@ -131,7 +131,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				if (DebugValue.Num() && FMath::IsNearlyEqual(DebugValue[GET0_NUMBER], 777.0f, 0.1f))
 				{
 					UE_LOG(LogTurboSequence_Lf, Warning, TEXT(" ----- > Start Stack < -----"))
-					for (const float& Value : DebugValue)
+					for (float Value : DebugValue)
 					{
 						UE_LOG(LogTurboSequence_Lf, Warning, TEXT("%f"), Value);
 					}
@@ -189,7 +189,7 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInsta
 		}
 	}
 	GlobalLibrary.MeshIDToMinimalData.Add(RootMotionMeshID, Data);
-	for (const int64& MeshID : Data.CustomizableMeshIDs)
+	for (int64 MeshID : Data.CustomizableMeshIDs)
 	{
 		GlobalLibrary.MeshIDToMinimalData.Add(MeshID, Data);
 	}
@@ -211,7 +211,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurb
 		}
 	}
 
-	for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+	for (int64 MeshID : MeshData.CustomizableMeshIDs)
 	{
 		if (RemoveSkinnedMeshInstance_GameThread(MeshID, InWorld))
 		{
@@ -332,7 +332,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 
 		TArray<TObjectPtr<UMaterialInterface>> Materials;
 		Materials.SetNum(OverrideMaterials.Num());
-		const uint8& NumOverrideMaterials = OverrideMaterials.Num();
+		uint8 NumOverrideMaterials = OverrideMaterials.Num();
 		for (uint8 MaterialIdx = GET0_NUMBER; MaterialIdx < NumOverrideMaterials; ++MaterialIdx)
 		{
 			Materials[MaterialIdx] = OverrideMaterials[MaterialIdx];
@@ -340,7 +340,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 		if (!Materials.Num() && IsValid(Reference.FirstValidMeshLevelOfDetail))
 		{
 			const TArray<FStaticMaterial>& MeshMaterials = Reference.FirstValidMeshLevelOfDetail->GetStaticMaterials();
-			const uint8& NumMeshMaterialsMaterials = MeshMaterials.Num();
+			uint8 NumMeshMaterialsMaterials = MeshMaterials.Num();
 			Materials.SetNum(NumMeshMaterialsMaterials);
 			for (uint8 MaterialIdx = GET0_NUMBER; MaterialIdx < NumMeshMaterialsMaterials; ++MaterialIdx)
 			{
@@ -348,7 +348,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			}
 		}
 
-		const uint32& MaterialsHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
+		uint32 MaterialsHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
 		if (!Instance->NiagaraComponents.Contains(FromAsset) || (Instance->NiagaraComponents.Contains(FromAsset) && !
 			Instance->NiagaraComponents[FromAsset].NiagaraRenderer.Contains(MaterialsHash)))
 		{
@@ -433,7 +433,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 	}
 }
 
-bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const int64& MeshID,
+bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int64 MeshID,
                                                                      const TObjectPtr<UWorld> InWorld)
 {
 	if (!IsValid(InWorld))
@@ -553,7 +553,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const int64
  * @param InWorld The world, we need it for the cameras and culling
  * @param UpdateContext The Update Context for useful stuff like the Group Index
  */
-void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, UWorld* InWorld, FTurboSequence_UpdateContext_Lf UpdateContext)
+void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* InWorld, FTurboSequence_UpdateContext_Lf UpdateContext)
 {
 	SCOPE_CYCLE_COUNTER(STAT_Solve_TurboSequenceMeshes_Lf);
 	{
@@ -584,7 +584,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 			return;
 		}
 
-		const int64& CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
+		int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
 
 		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 
@@ -593,10 +593,10 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 		bool bMeshIsVisible = false;
 		//TArray<FInstanceQueue_Lf> QueuedMeshes;
 		const int32 NumMeshes = GlobalLibrary.UpdateGroups[UpdateContext.GroupIndex].RawIDs.Num();
-		const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-		const int32& NumMeshesPerThread = FMath::CeilToInt(
+		int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
+		int32 NumMeshesPerThread = FMath::CeilToInt(
 			static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-		ParallelFor(NumThreads, [&](const int32& ThreadsIndex)
+		ParallelFor(NumThreads, [&](int32 ThreadsIndex)
 		{
 			const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread;
 			const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread;
@@ -651,7 +651,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(const float& DeltaTime, U
 						Runtime, GlobalLibrary);
 				}
 
-				const bool& bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
+				bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
 					(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
 
 				if (!LodElement.bIsFrustumCullingEnabled && bIsInTSMeshDrawRange)
@@ -820,13 +820,13 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 
 	FCriticalSection CriticalSection;
 	const int32 NumMeshes = GlobalLibrary_RenderThread.RuntimeSkinnedMeshesHashMap.Num();
-	const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-	const int32& NumMeshesPerThread = FMath::CeilToInt(static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
+	int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
+	int32 NumMeshesPerThread = FMath::CeilToInt(static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
 
 	FTurboSequence_Utility_Lf::ResizeBuffers(GlobalLibrary_RenderThread, NumMeshes);
 
 
-	ParallelFor(NumThreads, [&](const int32& ThreadsIndex)
+	ParallelFor(NumThreads, [&](int32 ThreadsIndex)
 	{
 		const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread;
 		const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread;
@@ -925,10 +925,10 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	GlobalLibrary_RenderThread.NumIKPixelCurrentFrame = GET0_NUMBER;
 
 
-	const int32& NumMeshes_RenderThread = MeshParams.NumMeshes;
-	const int32& NumAnimations_RenderThread = FMath::Max(MeshParams.NumAnimations, 1);
-	const int32& NumIKData_RenderThread = FMath::Max(MeshParams.NumIKData, 1);
-	const int32& NumReferences_RenderThread = MeshParams.ReferenceNumCPUBones.Num();
+	int32 NumMeshes_RenderThread = MeshParams.NumMeshes;
+	int32 NumAnimations_RenderThread = FMath::Max(MeshParams.NumAnimations, 1);
+	int32 NumIKData_RenderThread = FMath::Max(MeshParams.NumIKData, 1);
+	int32 NumReferences_RenderThread = MeshParams.ReferenceNumCPUBones.Num();
 
 	MeshParams.ReferenceNumCPUBones_RenderThread.SetNumUninitialized(NumReferences_RenderThread);
 	MeshParams.PerMeshCustomDataIndex_Global_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
@@ -976,13 +976,13 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationScaleWeights_RenderThread, 25);
 
 	constexpr uint8 NumOperations = GET4_NUMBER;
-	ParallelFor(NumOperations, [&](const int32& ThreadsIndex)
+	ParallelFor(NumOperations, [&](int32 ThreadsIndex)
 	{
 		if (ThreadsIndex == GET0_NUMBER)
 		{
 			for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
 			{
-				const int32& CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
+				int32 CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
 				MeshParams.PerMeshCustomDataIndex_Global_RenderThread[i] = CPUIndex;
 
 				const FSkinnedMeshRuntime_RenderThread_Lf& Runtime = GlobalLibrary_RenderThread.RuntimeSkinnedMeshes[
@@ -1002,7 +1002,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 				//int32 CurrentPerBoneWeightIndex = GET0_NUMBER;
 				for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
 				{
-					const int32& CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
+					int32 CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
 					const int32 LastAnimationIndex = CurrentAnimationIndex;
 
 					MeshParams.AnimationStartIndex_RenderThread[i] = LastAnimationIndex;
@@ -1011,14 +1011,14 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 						[GlobalLibrary_RenderThread.RuntimeSkinnedMeshesHashMap[CPUIndex]];
 					//const FSkinnedMeshReference_RenderThread_Lf& Reference = GlobalLibrary_RenderThread.PerReferenceData[Runtime.DataAsset];
 
-					const int32& NumAnimations = Runtime.AnimationMetaData_RenderThread.Num();
+					int32 NumAnimations = Runtime.AnimationMetaData_RenderThread.Num();
 					//UE_LOG(LogTemp, Warning, TEXT("%d | %d"), Runtime.GetMeshID(), NumAnimations);
 					for (int32 AnimIdx = GET0_NUMBER; AnimIdx < NumAnimations; ++AnimIdx)
 					{
 						const FAnimationMetaData_RenderThread_Lf& Animation = Runtime.AnimationMetaData_RenderThread[
 							AnimIdx];
 
-						const int32& BufferIndex = CurrentAnimationIndex;
+						int32 BufferIndex = CurrentAnimationIndex;
 						
 						MeshParams.AnimationFramePose0_RenderThread[BufferIndex] = Animation.GPUAnimationIndex_0;
 						MeshParams.AnimationWeights_RenderThread[BufferIndex] = Animation.FinalAnimationWeight;
@@ -1047,14 +1047,14 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 				int32 CurrentIKDataIndex = GET0_NUMBER;
 				for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
 				{
-					const int32& CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
+					int32 CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
 					const int32 LastIKDataIndex = CurrentIKDataIndex;
 
 					int16 NumIKBones = GET0_NUMBER;
 
 					// Really important to keep it INDEX_NONE otherwise it goes out of bounds when index
 					// smoothing is activated
-					if (const int32& IKIndex = MeshParams.BoneSpaceAnimationIKIndex_RenderThread[CPUIndex]; IKIndex >
+					if (int32 IKIndex = MeshParams.BoneSpaceAnimationIKIndex_RenderThread[CPUIndex]; IKIndex >
 						INDEX_NONE)
 					{
 						FSkinnedMeshRuntime_RenderThread_Lf& Runtime = GlobalLibrary_RenderThread.RuntimeSkinnedMeshes[
@@ -1122,7 +1122,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	}, EParallelForFlags::BackgroundPriority);
 }
 
-void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, const int64& MeshID)
+void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID)
 {
 	{
 		FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
@@ -1170,7 +1170,7 @@ void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(const int32 
 			Group.RawIDs.Add(MeshData.RootMotionMeshID);
 			Group.MeshIDToMinimal.Add(MeshData, FIntVector2(GET1_NUMBER, Group.MeshIDToMinimal.Num()));
 			Group.RawMinimalData.Add(MeshData);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (!Group.RawIDData.Contains(MeshID))
 				{
@@ -1183,7 +1183,7 @@ void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(const int32 
 	}
 }
 
-void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, const int64& MeshID)
+void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID)
 {
 	//int32 RawIndexToRemove = INDEX_NONE;
 	{
@@ -1236,7 +1236,7 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(const i
                                                                          const FTurboSequence_MinimalMeshData_Lf& MeshData)
 {
 	RemoveInstanceFromUpdateGroup_RawID_Concurrent(GroupIndex, MeshData.RootMotionMeshID);
-	for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+	for (int64 MeshID : MeshData.CustomizableMeshIDs)
 	{
 		RemoveInstanceFromUpdateGroup_RawID_Concurrent(GroupIndex, MeshID);
 	}
@@ -1270,7 +1270,7 @@ int32 ATurboSequence_Manager_Lf::GetNumMeshIDsInUpdateGroup_RawID_Concurrent(con
 	}
 }
 
-void ATurboSequence_Manager_Lf::CleanManager_GameThread(const bool& bIsEndPlay)
+void ATurboSequence_Manager_Lf::CleanManager_GameThread(bool bIsEndPlay)
 {
 	if (bIsEndPlay && IsValid(Instance))
 	{

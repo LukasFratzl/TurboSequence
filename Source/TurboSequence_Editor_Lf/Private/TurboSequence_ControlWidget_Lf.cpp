@@ -21,7 +21,7 @@ UTurboSequence_ControlWidget_Lf::~UTurboSequence_ControlWidget_Lf()
 {
 }
 
-void UTurboSequence_ControlWidget_Lf::OnTick(const float& DeltaTime)
+void UTurboSequence_ControlWidget_Lf::OnTick(float DeltaTime)
 {
 
 	if (bNeedSaveMainAsset)
@@ -302,14 +302,14 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 		if (MaxNumberOfLODs > 0)
 		{
 			TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(Main_Asset_To_Edit->ReferenceMeshNative, FName(FString::Format(TEXT("{0}_Reference"), {*WantedMeshName})), true);
-			const uint8& NumIterations = MaxNumberOfLODs / GET5_NUMBER + GET1_NUMBER;
+			uint8 NumIterations = MaxNumberOfLODs / GET5_NUMBER + GET1_NUMBER;
 			for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
 			{
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Running Mesh Reduction Iteration %d"), i);
 
-				const int32& MaxIterationNum = i * GET5_NUMBER;
+				int32 MaxIterationNum = i * GET5_NUMBER;
 
-				const int32& ReductionLOD = FMath::Min(MaxIterationNum, MaxNumberOfLODs);
+				int32 ReductionLOD = FMath::Min(MaxIterationNum, MaxNumberOfLODs);
 				GenerateSkeletalMeshLevelOfDetails(NewMesh, ReductionLOD);
 			}
 
@@ -397,11 +397,11 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 	{
 		constexpr uint16 Resolution = GET512_NUMBER;
 
-		const uint32& PowXY = Resolution * Resolution;
+		uint32 PowXY = Resolution * Resolution;
 
-		const uint64& MaxMeshes = MaxNumMeshes * MaxNumBones * FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer + GET2_NUMBER;
+		uint64 MaxMeshes = MaxNumMeshes * MaxNumBones * FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer + GET2_NUMBER;
 
-		const uint16& NumSlicesTransformTexture = FMath::Min(FMath::CeilToInt(static_cast<float>(MaxMeshes / PowXY)) + GET1_NUMBER, 1023);
+		uint16 NumSlicesTransformTexture = FMath::Min(FMath::CeilToInt(static_cast<float>(MaxMeshes / PowXY)) + GET1_NUMBER, 1023);
 
 		uint8 TextureByteType = GET8_NUMBER;
 		// if (bUseHighPrecisionAnimationMode)
@@ -409,11 +409,11 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 		// 	TextureByteType = GET16_NUMBER;
 		// }
 
-		const uint64& MaxNumTransformByte = PowXY * NumSlicesTransformTexture * TextureByteType;
+		uint64 MaxNumTransformByte = PowXY * NumSlicesTransformTexture * TextureByteType;
 
-		const uint64& MaxBytes = MaxNumTransformByte;
+		uint64 MaxBytes = MaxNumTransformByte;
 
-		const uint64& MaxMegaByte = MaxBytes / GET1024_NUMBER / GET1024_NUMBER;
+		uint64 MaxMegaByte = MaxBytes / GET1024_NUMBER / GET1024_NUMBER;
 
 		AverageAllocatedMemory = MaxMegaByte;
 

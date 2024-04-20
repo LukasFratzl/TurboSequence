@@ -117,7 +117,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 		if (TurboSequence_Asset->InstancedMeshes.Num())
 		{
 			bool bHasAnyMesh = false;
-			const int32& NumLOD = TurboSequence_Asset->InstancedMeshes.Num();
+			int32 NumLOD = TurboSequence_Asset->InstancedMeshes.Num();
 			for (int32 MeshIdx = GET0_NUMBER; MeshIdx < NumLOD; ++MeshIdx)
 			{
 				if (IsValid(TurboSequence_Asset->InstancedMeshes[MeshIdx].StaticMesh))
@@ -138,7 +138,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 				FString WantedMeshName = FString(FString::Format(
 					TEXT("{0}_TurboSequence_Instance"), {*TurboSequence_Asset->ReferenceMeshNative->GetName()}));
 
-				//const int32& NumLOD = CPAsset->InstancedMeshes.Num();
+				//int32 NumLOD = CPAsset->InstancedMeshes.Num();
 				for (int32 MeshIdx = GET0_NUMBER; MeshIdx < NumLOD; ++MeshIdx)
 				{
 					if (IsValid(TurboSequence_Asset->InstancedMeshes[MeshIdx].StaticMesh))

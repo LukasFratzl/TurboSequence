@@ -35,7 +35,7 @@ public:
 	                                  FRenderingMaterialMap_Lf>& RenderComponents,
 	                             const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
 	                             const TArray<TObjectPtr<UMaterialInterface>>& Materials,
-	                             const uint32& MaterialsHash)
+	                             uint32 MaterialsHash)
 	{
 
 		if (RenderComponents.Contains(FromAsset) && RenderComponents[FromAsset].NiagaraRenderer.Contains(MaterialsHash))
@@ -120,7 +120,7 @@ public:
 		}
 
 		// Set the Materials
-		const int32& NumMaterials = Materials.Num();
+		int32 NumMaterials = Materials.Num();
 		for (int32 MaterialIdx = GET0_NUMBER; MaterialIdx < NumMaterials; ++MaterialIdx)
 		{
 			const FName& WantedMaterialName = FName(FString::Format(
@@ -149,7 +149,7 @@ public:
 		}
 
 		// Set Bounds
-		const uint8& NumLevelOfDetails = LevelOfDetails.Num();
+		uint8 NumLevelOfDetails = LevelOfDetails.Num();
 		for (int16 i = NumLevelOfDetails - GET1_NUMBER; i >= GET0_NUMBER; --i)
 		{
 			if (LevelOfDetails[i].bIsRenderStateValid)
@@ -229,16 +229,16 @@ public:
 
 	static void UpdateCameras_1(TArray<FCameraView_Lf>& OutViews,
 	                            const TMap<uint8, FTransform>& LastFrameCameraTransforms,
-	                            const UWorld* InWorld, const float& DeltaTime)
+	                            const UWorld* InWorld, float DeltaTime)
 	{
 		UpdateCameras(OutViews, InWorld);
-		const float& Interpolation = GET1_NUMBER; //GET2_NUMBER + DeltaTime * GET4_NUMBER;
-		const uint8& NumCameraViews = OutViews.Num();
+		float Interpolation = GET1_NUMBER; //GET2_NUMBER + DeltaTime * GET4_NUMBER;
+		uint8 NumCameraViews = OutViews.Num();
 		for (uint8 i = GET0_NUMBER; i < NumCameraViews; ++i)
 		{
 			FCameraView_Lf& View = OutViews[i];
 
-			const float& InterpolatedFov = View.Fov; // + GET5_NUMBER * DeltaTime;
+			float InterpolatedFov = View.Fov; // + GET5_NUMBER * DeltaTime;
 			FTurboSequence_Helper_Lf::GetCameraFrustumPlanes_ObjectSpace(
 				View.Planes_Internal, InterpolatedFov, View.ViewportSize, View.AspectRatioAxisConstraint, View.NearClipPlane, View.FarClipPlane,
 				!View.bIsPerspective, View.OrthoWidth);
@@ -262,7 +262,7 @@ public:
 	static void UpdateCameras_2(TMap<uint8, FTransform>& OutLastFrameCameraTransforms,
 	                            const TArray<FCameraView_Lf>& CameraViews)
 	{
-		const uint8& MaxNumberLastFrameCameras = FMath::Max(OutLastFrameCameraTransforms.Num(), CameraViews.Num());
+		uint8 MaxNumberLastFrameCameras = FMath::Max(OutLastFrameCameraTransforms.Num(), CameraViews.Num());
 		for (uint8 i = GET0_NUMBER; i < MaxNumberLastFrameCameras; ++i)
 		{
 			if (OutLastFrameCameraTransforms.Contains(i))
@@ -307,7 +307,7 @@ public:
 	}
 
 	static int32 GetBoneMapIndex_CPU(const TArray<FBoneIndexType>& FromSection,
-	                                 const int32& RawIndex
+	                                 int32 RawIndex
 	                                 /*, const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset*/)
 	{
 		if (!FromSection.IsValidIndex(RawIndex))
@@ -315,16 +315,16 @@ public:
 			return INDEX_NONE;
 		}
 
-		const int32& MeshIndex = FromSection[RawIndex];
+		int32 MeshIndex = FromSection[RawIndex];
 
 		return MeshIndex;
 	}
 
 	static int32 GetBoneMapIndex_GPU(const TMap<uint16, uint16>& FromMap,
 	                                 const TArray<FBoneIndexType>& FromSection,
-	                                 const int32& RawIndex, const uint8& Weight)
+	                                 int32 RawIndex, uint8 Weight)
 	{
-		if (const int32& ReferenceIndex = GetBoneMapIndex_CPU(FromSection, RawIndex); Weight && FromMap.Contains(
+		if (int32 ReferenceIndex = GetBoneMapIndex_CPU(FromSection, RawIndex); Weight && FromMap.Contains(
 			ReferenceIndex))
 		{
 			return FromMap[ReferenceIndex];
@@ -332,8 +332,8 @@ public:
 		return GET0_NUMBER;
 	}
 
-	static int32 GetValidBoneData(const int32& FromData, const uint8& CurrentInfluenceIndex,
-	                              const uint8& MaxInfluenceIndex)
+	static int32 GetValidBoneData(int32 FromData, uint8 CurrentInfluenceIndex,
+	                              uint8 MaxInfluenceIndex)
 	{
 		if (CurrentInfluenceIndex <= MaxInfluenceIndex)
 		{
@@ -352,7 +352,7 @@ public:
 		AssetRegistry.Get().GetAssetsByClass(
 			FTopLevelAssetPath(UTurboSequence_MeshAsset_Lf::StaticClass()->GetPathName()), AssetClasses);
 
-		const int32& NumAssets = AssetClasses.Num();
+		int32 NumAssets = AssetClasses.Num();
 		FTurboSequence_Helper_Lf::SortAssetsByPathName(AssetClasses);
 
 		for (int32 AssetIdx = GET0_NUMBER; AssetIdx < NumAssets; ++AssetIdx)
@@ -386,15 +386,15 @@ public:
 	                                 FSkinnedMeshReference_RenderThread_Lf&
 	                                 Reference_RenderThread, FCriticalSection& CriticalSection,
 	                                 const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
-	                                 const bool& bIsMeshDataEvaluationFunction = false)
+	                                 bool bIsMeshDataEvaluationFunction = false)
 	{
 		if (bIsMeshDataEvaluationFunction)
 		{
 			FromAsset->MeshData.Empty();
 		}
 
-		const uint8& MaxNumLevelOfDetails = FromAsset->InstancedMeshes.Num();
-		const int32& MaxLevelOfDetailRange = FromAsset->AutoLodRatio;
+		uint8 MaxNumLevelOfDetails = FromAsset->InstancedMeshes.Num();
+		int32 MaxLevelOfDetailRange = FromAsset->AutoLodRatio;
 		uint32 SkinWightOffsetIndex = GET0_NUMBER; //FTurboSequence_Helper_Lf::NumCustomStates; Refactor to Manager
 		//uint8 GPUIndex = GET0_NUMBER;
 		uint8 MeshIndex = GET0_NUMBER;
@@ -428,10 +428,10 @@ public:
 
 			LodElement.bIsFrustumCullingEnabled = FromAsset->InstancedMeshes[i].bIsFrustumCullingEnabled;
 
-			const bool& bIsIncluded = !FromAsset->InstancedMeshes[i].bExcludeLodFromSystem ||
+			bool bIsIncluded = !FromAsset->InstancedMeshes[i].bExcludeLodFromSystem ||
 				bIsMeshDataEvaluationFunction;
 
-			const bool& bIsMeshVisible = IsValid(FromAsset->InstancedMeshes[i].StaticMesh) && FromAsset->InstancedMeshes
+			bool bIsMeshVisible = IsValid(FromAsset->InstancedMeshes[i].StaticMesh) && FromAsset->InstancedMeshes
 				[i].bShowMesh;
 
 			if (bIsMeshVisible && bIsIncluded)
@@ -442,7 +442,7 @@ public:
 				{
 					NumLevelOfDetails = FromAsset->ReferenceMeshEdited->GetLODNum();
 				}
-				const uint32& NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(
+				uint32 NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(
 					GET0_NUMBER);
 				bool bLodValid = false;
 				//uint32 GPUSkinWeightOffset = GET0_NUMBER;
@@ -520,12 +520,12 @@ public:
 		for (const TTuple<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf>& ReferenceOther : Library.
 		     PerReferenceData)
 		{
-			if (const int32& NumBones = GetSkeletonNumBones(GetReferenceSkeleton(ReferenceOther.Key)); Library.
+			if (int32 NumBones = GetSkeletonNumBones(GetReferenceSkeleton(ReferenceOther.Key)); Library.
 				MaxNumCPUBones < NumBones)
 			{
 				Library.MaxNumCPUBones = NumBones;
 			}
-			if (const int32& NumLevelOfDetails = ReferenceOther.Value.NumLevelOfDetailsWithMesh; Library.
+			if (int32 NumLevelOfDetails = ReferenceOther.Value.NumLevelOfDetailsWithMesh; Library.
 				MaxNumLevelOfDetailsWithMesh < NumLevelOfDetails)
 			{
 				Library.MaxNumLevelOfDetailsWithMesh = NumLevelOfDetails;
@@ -534,7 +534,7 @@ public:
 	}
 
 	static void CreateGPUBones(FSkinnedMeshReferenceLodElement_Lf& LodElement, FCriticalSection& CriticalSection,
-	                           const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset, const bool& bIsMeshDataEvaluation);
+	                           const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset, bool bIsMeshDataEvaluation);
 
 	static void CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Library,
 	                           FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
@@ -550,28 +550,28 @@ public:
 	                                       Library_RenderThread,
 	                                       FCriticalSection& CriticalSection)
 	{
-		const int32& NumReferences = Library.PerReferenceData.Num();
+		int32 NumReferences = Library.PerReferenceData.Num();
 		TArray<FVector4f> InvRefPoseData;
 
-		if (const int32& RestPoseBufferAddition = NumReferences * Library.MaxNumCPUBones * GET3_NUMBER)
+		if (int32 RestPoseBufferAddition = NumReferences * Library.MaxNumCPUBones * GET3_NUMBER)
 		{
 			CriticalSection.Lock();
 			InvRefPoseData.AddUninitialized(RestPoseBufferAddition);
 			CriticalSection.Unlock();
 
 			//FCriticalSection Mutex;
-			ParallelFor(NumReferences, [&](const int32& Index)
+			ParallelFor(NumReferences, [&](int32 Index)
 			{
 				const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = Library.PerReferenceDataKeys[Index];
 				FSkinnedMeshReference_Lf& Reference = Library.PerReferenceData[Asset];
 
-				const uint16& NumBones = Reference.NumCPUBones;
+				uint16 NumBones = Reference.NumCPUBones;
 				CriticalSection.Lock();
 				Reference.ComponentSpaceRestPose.AddUninitialized(NumBones);
 				CriticalSection.Unlock();
 				const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Asset);
 				const TArray<FTransform>& ReferencePose = GetSkeletonRefPose(ReferenceSkeleton);
-				const int32& InvRestPoseBaseIndex = Index * Library.MaxNumCPUBones * GET3_NUMBER;
+				int32 InvRestPoseBaseIndex = Index * Library.MaxNumCPUBones * GET3_NUMBER;
 				for (uint16 BoneIdx = GET0_NUMBER; BoneIdx < NumBones; ++BoneIdx)
 				{
 					int32 RuntimeIndex = BoneIdx;
@@ -605,7 +605,7 @@ public:
 	}
 
 	static void ResizeBuffers(FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library,
-	                          const int32& Num)
+	                          int32 Num)
 	{
 		// Use this fast first for the bounce check on the render thread
 		Library.BoneTransformParams.PerMeshCustomDataIndex_RenderThread.SetNum(Num);
@@ -615,7 +615,7 @@ public:
 	}
 
 	static bool IsValidBufferIndex(const FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library,
-	                               const int32& Index)
+	                               int32 Index)
 	{
 		if (!(Library.BoneTransformParams.PerMeshCustomDataIndex_RenderThread.IsValidIndex(Index) && Library.BoneTransformParams.BoneSpaceAnimationIKIndex_RenderThread.IsValidIndex(Index)))
 		{
@@ -758,7 +758,7 @@ public:
 
 		for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
 		{
-			const int32& CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
+			int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
 			RenderData.ParticleCustomData.RemoveAt(CustomDataIndex);
 		}
 		//CriticalSection.Unlock();
@@ -766,7 +766,7 @@ public:
 
 	static void UpdateRenderInstanceLod_Concurrent(
 		FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime,
-		const FSkinnedMeshReferenceLodElement_Lf& LodElement, const bool& bIsVisible)
+		const FSkinnedMeshReferenceLodElement_Lf& LodElement, bool bIsVisible)
 	{
 		FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
@@ -779,7 +779,7 @@ public:
 	}
 
 	static void SetCustomDataForInstance(FSkinnedMeshReference_Lf& Reference,
-	                                     const int32& CPUIndex, const int32& SkinWeightOffset,
+	                                     int32 CPUIndex, int32 SkinWeightOffset,
 	                                     const FSkinnedMeshRuntime_Lf& Runtime,
 	                                     const FSkinnedMeshGlobalLibrary_Lf&
 	                                     Library)
@@ -804,7 +804,7 @@ public:
 		RenderData.ParticleCustomData[CustomDataBaseIndex + GET3_NUMBER] = BitValuesTransformIndex.Y;
 	}
 
-	static bool SetCustomDataForInstance_User(FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime, const int16& CustomDataFractionIndex, const float& CustomDataValue)
+	static bool SetCustomDataForInstance_User(FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime, int16 CustomDataFractionIndex, float CustomDataValue)
 	{
 		if (CustomDataFractionIndex < GET4_NUMBER || CustomDataFractionIndex > FTurboSequence_Helper_Lf::NumInstanceCustomData)
 		{
@@ -838,14 +838,14 @@ public:
 	                                          FSkinnedMeshReference_Lf& Reference,
 	                                          const TArray<FCameraView_Lf>& CameraViews,
 	                                          TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext,
-	                                          const bool& bVisibleLastFrame,
+	                                          bool bVisibleLastFrame,
 	                                          FSkinnedMeshGlobalLibrary_Lf& Library)
 	{
 		float ClosestCameraDistance = GET_INFINITY;
 		const FVector& ComponentLocation = GetWorldSpaceTransformIncludingOffsets(Runtime).GetLocation();
 		for (const FCameraView_Lf& CameraView : CameraViews)
 		{
-			if (const float& Distance = FVector::Distance(ComponentLocation, CameraView.CameraTransform.GetLocation());
+			if (float Distance = FVector::Distance(ComponentLocation, CameraView.CameraTransform.GetLocation());
 				Distance < ClosestCameraDistance)
 			{
 				ClosestCameraDistance = Distance;
@@ -853,10 +853,10 @@ public:
 		}
 		Runtime.ClosestCameraDistance = ClosestCameraDistance;
 
-		const bool& bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
+		bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
 		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
 
-		const bool& bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
+		bool bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
 		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
 
 		if (bIsInTSMeshDrawRange)
@@ -874,7 +874,7 @@ public:
 		}
 
 
-		const uint8& MaxNumLevelOfDetails = Reference.LevelOfDetails.Num();
+		uint8 MaxNumLevelOfDetails = Reference.LevelOfDetails.Num();
 		uint8 ClosestLevelOfDetailIndex = MaxNumLevelOfDetails - GET1_NUMBER;
 		for (uint8 i = GET0_NUMBER; i < MaxNumLevelOfDetails; ++i)
 		{
@@ -895,11 +895,11 @@ public:
 		Runtime.LodIndex = ClosestLevelOfDetailIndex;
 	}
 
-	static void UpdateDistanceUpdating(FSkinnedMeshRuntime_Lf& Runtime, const float& DeltaTime)
+	static void UpdateDistanceUpdating(FSkinnedMeshRuntime_Lf& Runtime, float DeltaTime)
 	{
 		if (Runtime.DataAsset->bUseDistanceUpdating)
 		{
-			const float& DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->DistanceUpdatingRatio;
+			float DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->DistanceUpdatingRatio;
 			Runtime.DeltaTimeAccumulator -= DeltaTime;
 			if (Runtime.DeltaTimeAccumulator < DistanceRatioSeconds)
 			{
@@ -948,7 +948,7 @@ public:
 
 	static void UpdateCameraRendererBounds(FRenderData_Lf& RenderData,
 	                                       const TArray<FCameraView_Lf>& CameraViews,
-	                                       const int32& Extend)
+	                                       int32 Extend)
 	{
 		RenderData.MinBounds = FVector::ZeroVector;
 		RenderData.MaxBounds = FVector::ZeroVector;
@@ -1009,7 +1009,7 @@ public:
 		const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Runtime.DataAsset);
 		for (const FTurboSequence_BoneLayer_Lf& Layer : Collection)
 		{
-			if (const int32& BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Layer.BoneLayerName); BoneIndex ==
+			if (int32 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Layer.BoneLayerName); BoneIndex ==
 				GET0_NUMBER)
 			{
 				return true;
@@ -1023,9 +1023,9 @@ public:
 	                                         FCriticalSection& CriticalSection,
 	                                         const FSkinnedMeshRuntime_Lf& Runtime,
 	                                         const FSkinnedMeshReference_Lf& Reference,
-	                                         const bool& bGenerateLayers)
+	                                         bool bGenerateLayers)
 	{
-		const int16& NumCPUBones = Reference.NumCPUBones;
+		int16 NumCPUBones = Reference.NumCPUBones;
 
 		if (bGenerateLayers)
 		{
@@ -1045,12 +1045,12 @@ public:
 			bool bFoundBones = false;
 			for (const FTurboSequence_BoneLayer_Lf& Bone : Animation.Settings.BoneLayerMasks)
 			{
-				if (const int16& BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
+				if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
 					GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 				{
 					bFoundBones = true;
 
-					if (const int32& Depth = ReferenceSkeleton.GetDepthBetweenBones(i, BoneIndex); (ShortestDepth ==
+					if (int32 Depth = ReferenceSkeleton.GetDepthBetweenBones(i, BoneIndex); (ShortestDepth ==
 						INDEX_NONE || ShortestDepth > Depth) && Depth != INDEX_NONE)
 					{
 						ShortestDepth = Depth;
@@ -1060,7 +1060,7 @@ public:
 			}
 			if (!bFoundBones)
 			{
-				if (const int32& Depth = ReferenceSkeleton.GetDepthBetweenBones(i, GET0_NUMBER); (ShortestDepth ==
+				if (int32 Depth = ReferenceSkeleton.GetDepthBetweenBones(i, GET0_NUMBER); (ShortestDepth ==
 					INDEX_NONE || ShortestDepth > Depth) && Depth != INDEX_NONE)
 				{
 					ShortestDepth = Depth;
@@ -1085,12 +1085,12 @@ public:
 
 					for (const FTurboSequence_BoneLayer_Lf& Bone : AnimationFrame.Settings.BoneLayerMasks)
 					{
-						if (const int16& BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
+						if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
 							GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 						{
 							bFoundBones = true;
 
-							if (const int32& Depth = ReferenceSkeleton.GetDepthBetweenBones(i, BoneIndex); (
+							if (int32 Depth = ReferenceSkeleton.GetDepthBetweenBones(i, BoneIndex); (
 									ShortestDepth_Other == INDEX_NONE || ShortestDepth_Other > Depth) && Depth !=
 								INDEX_NONE)
 							{
@@ -1102,7 +1102,7 @@ public:
 
 					if (!bFoundBones)
 					{
-						if (const int32& Depth = ReferenceSkeleton.GetDepthBetweenBones(i, GET0_NUMBER); (
+						if (int32 Depth = ReferenceSkeleton.GetDepthBetweenBones(i, GET0_NUMBER); (
 							ShortestDepth_Other == INDEX_NONE || ShortestDepth_Other > Depth) && Depth != INDEX_NONE)
 						{
 							ShortestDepth_Other = Depth;
@@ -1114,14 +1114,14 @@ public:
 				float Percentage_Other = GET0_NUMBER;
 				if (ShortestDepth_Other > INDEX_NONE)
 				{
-					const float& ClampedCurrent = FMath::Clamp(ShortestDepth_Other, GET0_NUMBER, DepthAmount_Other);
+					float ClampedCurrent = FMath::Clamp(ShortestDepth_Other, GET0_NUMBER, DepthAmount_Other);
 
 					Percentage_Other = FTurboSequence_Helper_Lf::GetPercentageBetweenMinMax(
 						ClampedCurrent, GET0_NUMBER, DepthAmount_Other);
 				}
 
-				const float& ClampedCurrent = FMath::Clamp(ShortestDepth, GET0_NUMBER, DepthAmount);
-				const float& RawPercentage = FTurboSequence_Helper_Lf::GetPercentageBetweenMinMax(
+				float ClampedCurrent = FMath::Clamp(ShortestDepth, GET0_NUMBER, DepthAmount);
+				float RawPercentage = FTurboSequence_Helper_Lf::GetPercentageBetweenMinMax(
 					ClampedCurrent, GET0_NUMBER, DepthAmount);
 
 				float Percentage = GET0_NUMBER;
@@ -1156,9 +1156,9 @@ public:
 		return Hash;
 	}
 
-	static bool MergeAnimationLayerMask(const TArray<uint16>& AnimationLayers, const uint32& AnimationLayerHash,
+	static bool MergeAnimationLayerMask(const TArray<uint16>& AnimationLayers, uint32 AnimationLayerHash,
 	                                    FCriticalSection& CriticalSection, FSkinnedMeshGlobalLibrary_Lf& Library,
-	                                    const bool& bIsAdd)
+	                                    bool bIsAdd)
 	{
 		FScopeLock Lock(&CriticalSection);
 		
@@ -1237,7 +1237,7 @@ public:
 	                                           Library_RenderThread)
 	{
 
-		const int16& NumOperations = Library.AnimationBlendLayerMasks.Num();
+		int16 NumOperations = Library.AnimationBlendLayerMasks.Num();
 
 		int16 MatchingPatternIndex = INDEX_NONE;
 		for (int16 OpIdx = GET0_NUMBER; OpIdx < NumOperations; ++OpIdx)
@@ -1270,7 +1270,7 @@ public:
 		if (Library.AnimationBlendLayerMasksRuntimeDirty.Num())
 		{
 
-			const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
+			int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
 
 			// TODO: Multi-Thread that, it's having somewhere a logic error when using parallelism here ... 
 			// for (int32 Index = GET0_NUMBER; Index < NumDirtyMeshes; ++Index)
@@ -1290,7 +1290,7 @@ public:
 						TArray<uint16> Layers;
 
 						CriticalSection.Lock();
-						const int16& NumOperations = Library.AnimationBlendLayerMasks.Num();
+						int16 NumOperations = Library.AnimationBlendLayerMasks.Num();
 						CriticalSection.Unlock();
 						bool bNeedLayers = true;
 						for (int16 OpIdx = GET0_NUMBER; OpIdx < NumOperations; ++OpIdx)
@@ -1335,14 +1335,14 @@ public:
 					[&Library_RenderThread, Masks, NumOperations_RenderThread, NumCPUBones](
 					FRHICommandListImmediate& RHICmdList)
 					{
-						const uint32& NumLayers = NumOperations_RenderThread * NumCPUBones;
+						uint32 NumLayers = NumOperations_RenderThread * NumCPUBones;
 						Library_RenderThread.BoneTransformParams.AnimationLayers_RenderThread.SetNumUninitialized(
 							NumLayers);
 
-						ParallelFor(NumOperations_RenderThread, [&](const int32& Index)
+						ParallelFor(NumOperations_RenderThread, [&](int32 Index)
 						{
-							const uint32& BaseIndex = Index * NumCPUBones;
-							const uint32& MaxIndex = BaseIndex + NumCPUBones;
+							uint32 BaseIndex = Index * NumCPUBones;
+							uint32 MaxIndex = BaseIndex + NumCPUBones;
 							int16 LayerIndex = GET0_NUMBER;
 							for (uint32 i = BaseIndex; i < MaxIndex; ++i)
 							{
@@ -1362,9 +1362,9 @@ public:
 					});
 
 				const int32 NumMeshes = Library.RuntimeSkinnedMeshesHashMap.Num();
-				const int32& NumMeshesPerThread = FMath::CeilToInt(
+				int32 NumMeshesPerThread = FMath::CeilToInt(
 					static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-				ParallelFor(NumThreads, [&](const int32& ThreadsIndex)
+				ParallelFor(NumThreads, [&](int32 ThreadsIndex)
 				{
 					const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread;
 					const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread;
@@ -1420,14 +1420,14 @@ public:
 				[&Library_RenderThread, Masks, NumOperations_RenderThread, NumCPUBones](
 				FRHICommandListImmediate& RHICmdList)
 				{
-					const uint32& NumLayers = NumOperations_RenderThread * NumCPUBones;
+					uint32 NumLayers = NumOperations_RenderThread * NumCPUBones;
 					Library_RenderThread.BoneTransformParams.AnimationLayers_RenderThread.
 					                     SetNumUninitialized(NumLayers);
 
-					ParallelFor(NumOperations_RenderThread, [&](const int32& Index)
+					ParallelFor(NumOperations_RenderThread, [&](int32 Index)
 					{
-						const uint32& BaseIndex = Index * NumCPUBones;
-						const uint32& MaxIndex = BaseIndex + NumCPUBones;
+						uint32 BaseIndex = Index * NumCPUBones;
+						uint32 MaxIndex = BaseIndex + NumCPUBones;
 						int16 LayerIndex = GET0_NUMBER;
 						for (uint32 i = BaseIndex; i < MaxIndex; ++i)
 						{
@@ -1477,7 +1477,7 @@ public:
 			
 			Library.AnimationBlendLayerMasksRuntimeDirty.FindOrAdd(FUintVector2(Runtime.GetMeshID(), Animation.AnimationID), true);
 
-			const int16& NumAnimations = Runtime.AnimationMetaData.Num();
+			int16 NumAnimations = Runtime.AnimationMetaData.Num();
 			for (int16 AnimIdx = GET0_NUMBER; AnimIdx < NumAnimations; ++AnimIdx)
 			{
 				FAnimationMetaData_Lf& AnimationMeta = Runtime.AnimationMetaData[AnimIdx];
@@ -1507,7 +1507,7 @@ public:
 	                            FCriticalSection& CriticalSection,
 	                            FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                            const int32& Index)
+	                            int32 Index)
 	{
 		FScopeLock Lock(&CriticalSection);
 		{
@@ -1532,7 +1532,7 @@ public:
 			Runtime.AnimationMetaData.RemoveAt(Index);
 			Runtime.AnimationMetaData_RenderThread.RemoveAt(Index);
 
-			const int16& NumAnimations = Runtime.AnimationMetaData.Num();
+			int16 NumAnimations = Runtime.AnimationMetaData.Num();
 			for (int16 AnimIdx = NumAnimations - GET1_NUMBER; AnimIdx >= GET1_NUMBER; --AnimIdx)
 			{
 				FAnimationMetaData_Lf& AnimationMeta = Runtime.AnimationMetaData[AnimIdx];
@@ -1550,11 +1550,11 @@ public:
 	                            FSkinnedMeshRuntime_Lf& Runtime,
 	                            FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                            const ETurboSequence_AnimationForceMode_Lf& ForceMode,
+	                            ETurboSequence_AnimationForceMode_Lf ForceMode,
 	                            const TArray<FTurboSequence_BoneLayer_Lf>& CurrentLayers,
 	                            const Function& Condition)
 	{
-		const int16& NumAnimations = Runtime.AnimationMetaData.Num();
+		int16 NumAnimations = Runtime.AnimationMetaData.Num();
 		for (int32 i = NumAnimations - GET1_NUMBER; i >= GET1_NUMBER; --i) // First Anim -> Rest Pose, so we keep it
 		{
 			if (::Invoke(Condition, Runtime.AnimationMetaData[i]))
@@ -1578,7 +1578,7 @@ public:
 	}
 
 	static bool RefreshBlendSpaceState(const TObjectPtr<UBlendSpace> BlendSpace, FAnimationBlendSpaceData_Lf& Data,
-	                                   const float& DeltaTime, FCriticalSection& CriticalSection)
+	                                   float DeltaTime, FCriticalSection& CriticalSection)
 	{
 
 
@@ -1610,9 +1610,9 @@ public:
 		const FSkinnedMeshReference_Lf& Reference, FSkinnedMeshGlobalLibrary_Lf& Library,
 		FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread, FSkinnedMeshRuntime_Lf& Runtime,
 		const TObjectPtr<UBlendSpace> BlendSpace, FCriticalSection& CriticalSection,
-		const FTurboSequence_AnimPlaySettings_Lf& AnimSettings, const float& OverrideWeight = INDEX_NONE,
-		const float& OverrideStartTime = INDEX_NONE,
-		const float& OverrideEndTime = INDEX_NONE)
+		const FTurboSequence_AnimPlaySettings_Lf& AnimSettings, float OverrideWeight = INDEX_NONE,
+		float OverrideStartTime = INDEX_NONE,
+		float OverrideEndTime = INDEX_NONE)
 	{
 		FAnimationBlendSpaceData_Lf Data = FAnimationBlendSpaceData_Lf();
 		FTurboSequence_AnimMinimalBlendSpace_Lf BlendSpaceData = FTurboSequence_AnimMinimalBlendSpace_Lf(true);
@@ -1620,7 +1620,7 @@ public:
 		BlendSpaceData.BelongsToMeshID = Runtime.GetMeshID();
 		BlendSpace->InitializeFilter(&Data.BlendFilter);
 
-		const int16& NumSamples = BlendSpace->GetBlendSamples().Num();
+		int16 NumSamples = BlendSpace->GetBlendSamples().Num();
 
 		RefreshBlendSpaceState(BlendSpace, Data, GET0_NUMBER, CriticalSection);
 
@@ -1631,11 +1631,11 @@ public:
 		for (int32 i = GET0_NUMBER; i < NumSamples; ++i)
 		{
 
-			const float& PlayLength = BlendSpace->GetBlendSample(i).Animation->GetPlayLength();
+			float PlayLength = BlendSpace->GetBlendSample(i).Animation->GetPlayLength();
 
 			Data.LongestPlayLength = FMath::Max(Data.LongestPlayLength, PlayLength);
 
-			const uint32& AnimID = PlayAnimation(Reference, Library, Library_RenderThread, Runtime, CriticalSection,
+			uint32 AnimID = PlayAnimation(Reference, Library, Library_RenderThread, Runtime, CriticalSection,
 			                                     BlendSpace->GetBlendSample(i).Animation, Settings, BlendSpace->bLoop,
 			                                     OverrideWeight, OverrideStartTime, OverrideEndTime);
 
@@ -1659,7 +1659,7 @@ public:
 			CriticalSection.Unlock();
 		}
 
-		const int32& NumBlendSpaces = Runtime.AnimationBlendSpaceMetaData.Num();
+		int32 NumBlendSpaces = Runtime.AnimationBlendSpaceMetaData.Num();
 		TArray<TObjectPtr<UBlendSpace>> BlendSpaceKeys;
 		CriticalSection.Lock();
 		Runtime.AnimationBlendSpaceMetaData.GetKeys(BlendSpaceKeys);
@@ -1719,9 +1719,9 @@ public:
 	                            FCriticalSection& CriticalSection,
 	                            UAnimSequence* Animation,
 	                            const FTurboSequence_AnimPlaySettings_Lf& AnimSettings,
-	                            const bool bIsLoop, const float& OverrideWeight = INDEX_NONE,
-	                            const float& OverrideStartTime = INDEX_NONE,
-	                            const float& OverrideEndTime = INDEX_NONE)
+	                            const bool bIsLoop, float OverrideWeight = INDEX_NONE,
+	                            float OverrideStartTime = INDEX_NONE,
+	                            float OverrideEndTime = INDEX_NONE)
 	{
 		const FUintVector& AnimationHash = GetAnimationLibraryKey(Reference.DataAsset->GetSkeleton(),
 		                                                          Reference.DataAsset, Animation);
@@ -1804,7 +1804,7 @@ public:
 		Frame.SetAnimationID(Runtime.AnimationIDs, Runtime.GetMeshID());
 		Frame.Settings = AnimSettings;
 		
-		const uint16& NumAnimationsPreAdd = Runtime.AnimationMetaData.Num();
+		uint16 NumAnimationsPreAdd = Runtime.AnimationMetaData.Num();
 		for (int32 AnimIdx = NumAnimationsPreAdd - GET1_NUMBER; AnimIdx >= GET1_NUMBER; --AnimIdx)
 		{
 			FAnimationMetaData_Lf& AnimationFrame = Runtime.AnimationMetaData[AnimIdx];
@@ -1844,7 +1844,7 @@ public:
 	}
 
 	static void UpdateBlendSpaces(FSkinnedMeshRuntime_Lf& Runtime, FCriticalSection& CriticalSection,
-	                              const float& DeltaTime, FSkinnedMeshGlobalLibrary_Lf& Library,
+	                              float DeltaTime, FSkinnedMeshGlobalLibrary_Lf& Library,
 	                              FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                              const FSkinnedMeshReference_Lf& Reference)
 	{
@@ -1875,7 +1875,7 @@ public:
 						Time = Sample->Time;
 					}
 
-					const float& AnimLength = AnimationFrame.Animation->GetPlayLength();
+					float AnimLength = AnimationFrame.Animation->GetPlayLength();
 					Settings.AnimationWeight = Weight;
 					//Settings.Settings.AnimationSpeed = AnimLength / Data.LongestPlayLength;
 					AnimationFrame.AnimationTime = FMath::Clamp(Time, 0.0f, AnimLength);
@@ -1906,7 +1906,7 @@ public:
 	                           FSkinnedMeshGlobalLibrary_Lf& Library,
 	                           FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                           const FTurboSequence_AnimPlaySettings_Lf& Settings,
-	                           const uint32& AnimationID,
+	                           uint32 AnimationID,
 	                           const FSkinnedMeshReference_Lf& Reference)
 	{
 		if (!Runtime.AnimationIDs.Contains(AnimationID))
@@ -1938,8 +1938,8 @@ public:
 
 	static void SolveAnimations(FSkinnedMeshRuntime_Lf& Runtime, FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                            const FSkinnedMeshReference_Lf& Reference, const float& DeltaTime,
-	                            const int64& CurrentFrameCount, FCriticalSection& CriticalSection)
+	                            const FSkinnedMeshReference_Lf& Reference, float DeltaTime,
+	                            int64 CurrentFrameCount, FCriticalSection& CriticalSection)
 	{
 		if (CurrentFrameCount == Runtime.LastFrameAnimationSolved)
 		{
@@ -1955,7 +1955,7 @@ public:
 			Group.Value.TotalAnimWeightRuntime = GET0_NUMBER;
 		}
 
-		const uint16& NumAnimations = Runtime.AnimationMetaData.Num();
+		uint16 NumAnimations = Runtime.AnimationMetaData.Num();
 		for (int32 AnimIdx = NumAnimations - GET1_NUMBER; AnimIdx >= GET0_NUMBER; --AnimIdx)
 		{
 			FAnimationMetaData_Lf& Animation = Runtime.AnimationMetaData[AnimIdx];
@@ -2000,7 +2000,7 @@ public:
 			// Removal
 			if (AnimIdx && Animation.bIsOldAnimation)
 			{
-				const float& Time = FMath::Min(Animation.AnimationRemoveTime, Animation.AnimationWeightTime);
+				float Time = FMath::Min(Animation.AnimationRemoveTime, Animation.AnimationWeightTime);
 				Animation.AnimationRemoveTime =
 					FMath::Clamp(Time + DeltaTime, 0.0f, Animation.AnimationRemoveStartTime);
 				AnimationWeight = GET1_NUMBER - FTurboSequence_Helper_Lf::Clamp01(
@@ -2029,7 +2029,7 @@ public:
 			}
 
 			int32 CPUPoses;
-			const int32& GPUPoses = AddAnimationToLibraryChunked(Library, CriticalSection, CPUPoses,
+			int32 GPUPoses = AddAnimationToLibraryChunked(Library, CriticalSection, CPUPoses,
 			                                                     Runtime, Animation);
 
 			FAnimationMetaData_RenderThread_Lf& RenderData = Runtime.AnimationMetaData_RenderThread[AnimIdx];
@@ -2039,7 +2039,7 @@ public:
 			Animation.CPUAnimationIndex_0 = CPUPoses;
 		}
 
-		const uint16& NumAnimationsPostRemove = Runtime.AnimationMetaData.Num();
+		uint16 NumAnimationsPostRemove = Runtime.AnimationMetaData.Num();
 		float BaseLayerWeight = GET1_NUMBER;
 		for (int32 AnimIdx = NumAnimationsPostRemove - GET1_NUMBER; AnimIdx >= GET0_NUMBER; --AnimIdx)
 		{
@@ -2202,7 +2202,7 @@ public:
 	}
 
 	static const FReferenceSkeleton& GetReferenceSkeleton(
-		const TObjectPtr<UTurboSequence_MeshAsset_Lf>& Asset, const bool& bIsMeshDataEvaluation = false)
+		const TObjectPtr<UTurboSequence_MeshAsset_Lf>& Asset, bool bIsMeshDataEvaluation = false)
 	{
 		if (bIsMeshDataEvaluation)
 		{
@@ -2219,7 +2219,7 @@ public:
 	}
 
 	static int32 GetSkeletonParentIndex(const FReferenceSkeleton& ReferenceSkeleton,
-	                                    const int32& Index)
+	                                    int32 Index)
 	{
 		return ReferenceSkeleton.GetParentIndex(Index);
 	}
@@ -2236,18 +2236,18 @@ public:
 	}
 
 	static FName GetSkeletonBoneName(const FReferenceSkeleton& ReferenceSkeleton,
-	                                 const int32& BoneIndex)
+	                                 int32 BoneIndex)
 	{
 		return ReferenceSkeleton.GetBoneName(BoneIndex);
 	}
 
 	static bool GetSkeletonIsValidIndex(const FReferenceSkeleton& ReferenceSkeleton,
-	                                    const int32& BoneIndex)
+	                                    int32 BoneIndex)
 	{
 		return ReferenceSkeleton.IsValidIndex(BoneIndex);
 	}
 
-	static FTurboSequence_TransposeMatrix_Lf GetBoneTransformFromLocalPoses(const int16& BoneIndex,
+	static FTurboSequence_TransposeMatrix_Lf GetBoneTransformFromLocalPoses(int16 BoneIndex,
 	                                                                        const FAnimationLibraryData_Lf& LibraryData,
 	                                                                        const FReferenceSkeleton& ReferenceSkeleton,
 	                                                                        const FReferenceSkeleton& AnimationSkeleton,
@@ -2301,7 +2301,7 @@ public:
 		else
 		{
 			const FName& BoneName = GetSkeletonBoneName(ReferenceSkeleton, BoneIndex);
-			if (const int32& BoneIdx = GetSkeletonBoneIndex(AnimationSkeleton, BoneName); BoneIdx > INDEX_NONE)
+			if (int32 BoneIdx = GetSkeletonBoneIndex(AnimationSkeleton, BoneName); BoneIdx > INDEX_NONE)
 			{
 				BoneSpaceTransform = Pose.LocalSpacePoses[LibraryData.BoneNameToAnimationBoneIndex[BoneName]];
 			}
@@ -2323,7 +2323,7 @@ public:
 	}
 
 	static void GetBoneTransformFromAnimationSafe(
-		FMatrix& OutAtom, const FAnimationMetaData_Lf& Animation, const uint16& SkeletonBoneIndex,
+		FMatrix& OutAtom, const FAnimationMetaData_Lf& Animation, uint16 SkeletonBoneIndex,
 		const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset, const FSkinnedMeshGlobalLibrary_Lf& Library,
 		const FReferenceSkeleton& ReferenceSkeleton)
 	{
@@ -2389,7 +2389,7 @@ public:
 	}
 
 
-	static FTransform BendBoneFromAnimations(const uint16& BoneIndex,
+	static FTransform BendBoneFromAnimations(uint16 BoneIndex,
 	                                         const FSkinnedMeshRuntime_Lf& Runtime,
 	                                         const FSkinnedMeshReference_Lf& Reference,
 	                                         const FSkinnedMeshGlobalLibrary_Lf& Library)
@@ -2468,12 +2468,12 @@ public:
 	static void ExtractRootMotionFromAnimations(FTransform& OutAtom,
 	                                            const FSkinnedMeshRuntime_Lf& Runtime,
 	                                            const FSkinnedMeshReference_Lf& Reference,
-	                                            const float& DeltaTime)
+	                                            float DeltaTime)
 	{
 		FMatrix OutputTransform = FMatrix::Identity;
 		for (const FAnimationMetaData_Lf& Animation : Runtime.AnimationMetaData)
 		{
-			if (const ETurboSequence_RootMotionMode_Lf& Mode = Animation.Settings.RootMotionMode;
+			if (ETurboSequence_RootMotionMode_Lf Mode = Animation.Settings.RootMotionMode;
 				IsValid(Animation.Animation) && Animation.Animation->HasRootMotion() && (Mode ==
 					ETurboSequence_RootMotionMode_Lf::Force || (Mode ==
 						ETurboSequence_RootMotionMode_Lf::OnRootBoneAnimated && Animation.bIsRootBoneAnimation)))
@@ -2481,7 +2481,7 @@ public:
 				FTransform RootMotion_Transform = Animation.Animation->ExtractRootMotion(
 					Animation.AnimationTime, DeltaTime, Animation.bIsLoop);
 
-				const float& Scalar = Animation.FinalAnimationWeight * Animation.Settings.AnimationSpeed;
+				float Scalar = Animation.FinalAnimationWeight * Animation.Settings.AnimationSpeed;
 
 				OutputTransform = OutputTransform * (GET1_NUMBER - Scalar) + RootMotion_Transform.ToMatrixWithScale() *
 					Scalar;
@@ -2491,13 +2491,13 @@ public:
 	}
 
 
-	static void GetIKTransform(FTransform& OutAtom, const uint16& BoneIndex,
+	static void GetIKTransform(FTransform& OutAtom, uint16 BoneIndex,
 	                           FSkinnedMeshRuntime_Lf& Runtime,
 	                           const FSkinnedMeshReference_Lf& Reference,
 	                           FSkinnedMeshGlobalLibrary_Lf& Library,
 	                           FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                           const EBoneSpaces::Type& Space, const float& AnimationDeltaTime,
-	                           const int64& CurrentFrameCount, FCriticalSection& CriticalSection)
+	                           const EBoneSpaces::Type& Space, float AnimationDeltaTime,
+	                           int64 CurrentFrameCount, FCriticalSection& CriticalSection)
 	{
 		SolveAnimations(Runtime, Library, Library_RenderThread, Reference, AnimationDeltaTime, CurrentFrameCount,
 		                CriticalSection);
@@ -2524,7 +2524,7 @@ public:
 		}
 	}
 
-	static bool SetIKTransform(const FTransform& Atom, const uint16& BoneIndex,
+	static bool SetIKTransform(const FTransform& Atom, uint16 BoneIndex,
 	                           FSkinnedMeshRuntime_Lf& Runtime,
 	                           const FSkinnedMeshReference_Lf& Reference,
 	                           FCriticalSection& CriticalSection,
@@ -2580,7 +2580,7 @@ public:
 			}
 		}
 		Runtime.bIKDataInUse = false;
-		for (const uint16& Remove : ToRemove)
+		for (uint16 Remove : ToRemove)
 		{
 			CriticalSection.Lock();
 			Runtime.IKData.Remove(Remove);
@@ -2598,7 +2598,7 @@ public:
 
 			if (LibraryData.AnimPoses.Contains(Animation.CPUAnimationIndex_0))
 			{
-				const float& PoseCurve0 = FTurboSequence_Helper_Lf::GetAnimationCurveWeight(
+				float PoseCurve0 = FTurboSequence_Helper_Lf::GetAnimationCurveWeight(
 					LibraryData.AnimPoses[Animation.CPUAnimationIndex_0].Pose, CurveName);
 
 				return FTurboSequence_PoseCurveData_Lf(Animation.Animation, CurveName, PoseCurve0);
@@ -2635,12 +2635,12 @@ public:
 	                               FSkinnedMeshGlobalLibrary_Lf& Library,
 	                               FSkinnedMeshGlobalLibrary_RenderThread_Lf&
 	                               Library_RenderThread, const EBoneSpaces::Type& Space,
-	                               const float& AnimationDeltaTime,
-	                               const int64& CurrentFrameCount,
+	                               float AnimationDeltaTime,
+	                               int64 CurrentFrameCount,
 	                               FCriticalSection& CriticalSection)
 	{
 		const USkeletalMeshSocket* Socket = Runtime.DataAsset->ReferenceMeshNative->FindSocket(SocketName);
-		const int32& BoneIndex = GetSkeletonBoneIndex(GetReferenceSkeleton(Runtime.DataAsset), Socket->BoneName);
+		int32 BoneIndex = GetSkeletonBoneIndex(GetReferenceSkeleton(Runtime.DataAsset), Socket->BoneName);
 
 		GetIKTransform(OutTransform, BoneIndex, Runtime, Reference, Library, Library_RenderThread, Space,
 		               AnimationDeltaTime, CurrentFrameCount, CriticalSection);

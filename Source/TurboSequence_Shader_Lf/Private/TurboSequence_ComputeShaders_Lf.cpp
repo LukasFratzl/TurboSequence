@@ -53,7 +53,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 	SCOPED_DRAW_EVENT(RHICmdList, TurboSequence_Animation_ComputeShader);
 	SCOPED_GPU_STAT(RHICmdList, TurboSequence_Animation_ComputeShader);
 	{
-		const int32& NumDebugData = FMath::Max(Params.NumDebugData, 1);
+		int32 NumDebugData = FMath::Max(Params.NumDebugData, 1);
 		DebugData.SetNum(NumDebugData);
 
 		
@@ -109,7 +109,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->NumLevelOfDetails = Params.NumMaxLevelOfDetails;
 		MeshUnitPassParameters->NumCPUBones = Params.NumMaxCPUBones;
 		MeshUnitPassParameters->NumFirstGPUBones = Params.NumMaxGPUBones;
-		const int32& NumMeshesPerThread = FMath::CeilToInt32(static_cast<float>(Params.NumMeshes) / static_cast<float>(FTurboSequence_BoneTransform_CS_Lf::NumThreads.X * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Y * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Z));
+		int32 NumMeshesPerThread = FMath::CeilToInt32(static_cast<float>(Params.NumMeshes) / static_cast<float>(FTurboSequence_BoneTransform_CS_Lf::NumThreads.X * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Y * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Z));
 		MeshUnitPassParameters->NumMeshesPerThread = NumMeshesPerThread;
 		MeshUnitPassParameters->NumMeshesPerFrame = Params.NumMeshes;
 		MeshUnitPassParameters->NumPixelBuffer = FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer;
@@ -235,14 +235,14 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 
 	PassParameters->TextureDimensionX = OutputTexture->SizeX;
 	PassParameters->TextureDimensionY = OutputTexture->SizeY;
-	const int32& NumThreads = FTurboSequence_Settings_CS_Lf::NumThreads.X * FTurboSequence_Settings_CS_Lf::NumThreads.Y;
-	const int32& NumPixelsPerThread = FMath::CeilToInt32(static_cast<float>(Params.SettingsInput.Num()) / static_cast<float>(NumThreads));
+	int32 NumThreads = FTurboSequence_Settings_CS_Lf::NumThreads.X * FTurboSequence_Settings_CS_Lf::NumThreads.Y;
+	int32 NumPixelsPerThread = FMath::CeilToInt32(static_cast<float>(Params.SettingsInput.Num()) / static_cast<float>(NumThreads));
 	PassParameters->NumPixelPerThread = NumPixelsPerThread;
 	if (Params.bIsAdditiveWrite)
 	{
 		PassParameters->BaseIndex = Params.AdditiveWriteBaseIndex;
 
-		const uint16& NumSlicesWritten = FMath::Min(FMath::CeilToInt(static_cast<float>((Params.AdditiveWriteBaseIndex + Params.SettingsInput.Num()) / (OutputTexture->SizeX * OutputTexture->SizeY))) + GET1_NUMBER, 1024);
+		uint16 NumSlicesWritten = FMath::Min(FMath::CeilToInt(static_cast<float>((Params.AdditiveWriteBaseIndex + Params.SettingsInput.Num()) / (OutputTexture->SizeX * OutputTexture->SizeY))) + GET1_NUMBER, 1024);
 
 		if (NumSlicesWritten >= OutputTexture->Slices)
 		{

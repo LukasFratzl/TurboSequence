@@ -511,7 +511,7 @@ public:
 	static float GetAnimationCurveWeight(const FAnimPose_Lf& Pose, const FName& CurveName)
 	{
 		float CurveValue = 0.0f;
-		if (const int32& CurveIndex = Pose.CurveNames.IndexOfByKey(CurveName); CurveIndex != INDEX_NONE)
+		if (int32 CurveIndex = Pose.CurveNames.IndexOfByKey(CurveName); CurveIndex != INDEX_NONE)
 		{
 			CurveValue = Pose.CurveValues[CurveIndex];
 		}
@@ -519,7 +519,7 @@ public:
 		return CurveValue;
 	}
 
-	static FORCEINLINE_DEBUGGABLE void GetPoseInfo(const float& FrameTime,
+	static FORCEINLINE_DEBUGGABLE void GetPoseInfo(float FrameTime,
 	                                               const UAnimSequenceBase* AnimationSequenceBase,
 	                                               const FAnimPoseEvaluationOptions_Lf& EvaluationOptions,
 	                                               FAnimPose_Lf& OutPose, FCriticalSection& CriticalSection)
@@ -648,7 +648,7 @@ public:
 	}
 
 	template <typename TValue>
-	static FORCEINLINE_DEBUGGABLE void CheckArrayHasSize(const TArray<TValue>& Array, const uint8& Id)
+	static FORCEINLINE_DEBUGGABLE void CheckArrayHasSize(const TArray<TValue>& Array, uint8 Id)
 	{
 		if (!Array.Num())
 		{
@@ -666,7 +666,7 @@ public:
 	 * @param Input The input value which needs to get clamped between 0...1
 	 * @return The clamped input vector in a range between 0...1
 	 */
-	static FORCEINLINE_DEBUGGABLE float Clamp01(const float& Input)
+	static FORCEINLINE_DEBUGGABLE float Clamp01(float Input)
 	{
 		return FMath::Clamp(Input, GET0_NUMBER, GET1_NUMBER);
 	}
@@ -678,8 +678,8 @@ public:
 	 * @param Max The max value which needs to be greater than the min value
 	 * @return A percentage between 0 ... 1
 	 */
-	static constexpr FORCEINLINE_DEBUGGABLE float GetPercentageBetweenMinMax(const float& Current, const float& Min,
-	                                                                         const float& Max)
+	static constexpr FORCEINLINE_DEBUGGABLE float GetPercentageBetweenMinMax(float Current, float Min,
+	                                                                         float Max)
 	{
 		if (Min == Max)
 		{
@@ -708,7 +708,7 @@ public:
 	 * @param Point The point which is the location of an FVector in world space
 	 * @return The result as a bool which returns true when the point is inside the sphere otherwise false when the point is outside the sphere
 	 */
-	static FORCEINLINE_DEBUGGABLE bool IsPointInsideSphere(const FVector& SphereLocation, const float& SphereRadius,
+	static FORCEINLINE_DEBUGGABLE bool IsPointInsideSphere(const FVector& SphereLocation, float SphereRadius,
 	                                                       const FVector& Point)
 	{
 		return SubtractVector(Point, SphereLocation).Length() <= SphereRadius;
@@ -716,12 +716,12 @@ public:
 
 
 	static FORCEINLINE_DEBUGGABLE void GetCameraFrustumPlanes_ObjectSpace(FPlane (&Out_ObjectSpace_Planes)[GET6_NUMBER],
-	                                                                      const float& Fov, const FVector2f ViewportSize,
+	                                                                      float Fov, const FVector2f ViewportSize,
 	                                                                      const TOptional<EAspectRatioAxisConstraint> InAspectRatioAxisConstraint,
-	                                                                      const float& NearClippingPlane,
-	                                                                      const float& FarClippingPlane,
-	                                                                      const bool& bOrthographicModeEnabled,
-	                                                                      const float& OrthographicWidth)
+	                                                                      float NearClippingPlane,
+	                                                                      float FarClippingPlane,
+	                                                                      bool bOrthographicModeEnabled,
+	                                                                      float OrthographicWidth)
 	{
 		// Object space is better so we can hardcode a lot more
 		const FVector Direction = FVector::ForwardVector;
@@ -854,7 +854,7 @@ public:
 	static FORCEINLINE_DEBUGGABLE bool Box_Intersects_With_Frustum(const FBox& Box,
 	                                                               const FPlane (&ObjectSpace_PlanesInput)[GET6_NUMBER],
 	                                                               const FTransform& CameraTransform,
-	                                                               const float& IntersectionToleranceRadius =
+	                                                               float IntersectionToleranceRadius =
 		                                                               GET0_NUMBER)
 	{
 		const FVector& CameraLocation = CameraTransform.GetLocation();
@@ -942,7 +942,7 @@ public:
 		return A + sign * B;
 	}
 
-	static FORCEINLINE FQuat Scale_Quaternion(const FQuat& Q1, const FQuat& Q2, const float& T)
+	static FORCEINLINE FQuat Scale_Quaternion(const FQuat& Q1, const FQuat& Q2, float T)
 	{
 		const FQuat& QScaled = Q2 * T;
 
@@ -980,7 +980,7 @@ public:
 		return (Color.R << GET24_NUMBER) | (Color.G << GET16_NUMBER) | (Color.B << GET8_NUMBER) | Color.A;
 	}
 
-	static FORCEINLINE_DEBUGGABLE FColor DecodeUInt32ToColor(const uint32& Number)
+	static FORCEINLINE_DEBUGGABLE FColor DecodeUInt32ToColor(uint32 Number)
 	{
 		FColor Color;
 
@@ -997,7 +997,7 @@ public:
 		return (Int8Vector.Y << GET8_NUMBER) | Int8Vector.X;
 	}
 
-	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt16ToUInt8Vector2(const uint16& Number)
+	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt16ToUInt8Vector2(uint16 Number)
 	{
 		FIntVector2 Vector;
 		
@@ -1007,14 +1007,14 @@ public:
 		return Vector;
 	}
 
-	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt32ToUInt16(const int32& PackedValue)
+	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt32ToUInt16(int32 PackedValue)
 	{
 		// X, Y
 		return FIntVector2(PackedValue % 0xFFFF,
 		                   PackedValue / 0xFFFF);
 	}
 
-	static FORCEINLINE_DEBUGGABLE uint32 EncodeUInt16ToUInt32(const uint16& XValue, const uint16& YValue)
+	static FORCEINLINE_DEBUGGABLE uint32 EncodeUInt16ToUInt32(uint16 XValue, uint16 YValue)
 	{
 		return YValue * 0xFFFF + XValue;
 	}
@@ -1153,7 +1153,7 @@ public:
  * @return returns the final pass parameter to use it for your shader allocation as unordered access view
  */
 	template <class T>
-	static FORCEINLINE_DEBUGGABLE FRDGBufferUAVRef TCreateWriteBuffer(FRDGBuilder& GraphBuilder, const int32& Size,
+	static FORCEINLINE_DEBUGGABLE FRDGBufferUAVRef TCreateWriteBuffer(FRDGBuilder& GraphBuilder, int32 Size,
 	                                                                  const TCHAR* BufferName,
 	                                                                  const EPixelFormat& Format,
 	                                                                  FRDGBufferRef& OutputBuffer)
@@ -1176,7 +1176,7 @@ public:
 	 * @return returns the final pass parameter to use it for your shader allocation as unordered access view
 	 */
 	template <class T>
-	static FORCEINLINE_DEBUGGABLE FRDGBufferUAVRef TCreateWriteBuffer(FRDGBuilder& GraphBuilder, const int32& Size,
+	static FORCEINLINE_DEBUGGABLE FRDGBufferUAVRef TCreateWriteBuffer(FRDGBuilder& GraphBuilder, int32 Size,
 	                                                                  const TCHAR* BufferName,
 	                                                                  const EPixelFormat& Format)
 	{
@@ -1196,7 +1196,7 @@ public:
 	 */
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTexture_Half4_Out(FRDGBuilder& GraphBuilder,
 	                                                                             FRDGTextureRef& OutputTextureRef,
-	                                                                             const int32& SizeX, const int32& SizeY,
+	                                                                             int32 SizeX, int32 SizeY,
 	                                                                             const TCHAR* TextureName, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		return CreateWriteTexture_Custom_Out(GraphBuilder, OutputTextureRef, SizeX, SizeY, TextureName, PF_FloatRGBA,
@@ -1205,7 +1205,7 @@ public:
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTexture_Custom_Out(FRDGBuilder& GraphBuilder,
 	                                                                              FRDGTextureRef& OutputTextureRef,
-	                                                                              const int32& SizeX, const int32& SizeY,
+	                                                                              int32 SizeX, int32 SizeY,
 	                                                                              const TCHAR* TextureName,
 	                                                                              const EPixelFormat& Format, const FStaticShaderPlatform& ShaderPlatform)
 	{
@@ -1236,8 +1236,8 @@ public:
 	 * @return returns the final pass parameter to use it for your shader allocation as unordered access view
 	 */
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTexture_Half4_Out(
-		FRDGBuilder& GraphBuilder, const int32& SizeX,
-		const int32& SizeY, const TCHAR* TextureName, const FStaticShaderPlatform& ShaderPlatform)
+		FRDGBuilder& GraphBuilder, int32 SizeX,
+		int32 SizeY, const TCHAR* TextureName, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		FRDGTextureRef OutputTextureRef;
 		return CreateWriteTexture_Half4_Out(GraphBuilder, OutputTextureRef, SizeX, SizeY, TextureName, ShaderPlatform);
@@ -1245,8 +1245,8 @@ public:
 
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTextureArray_Custom_Out(
-		FRDGBuilder& GraphBuilder, FRDGTextureRef& OutputTextureRef, const int32& SizeX, const int32& SizeY,
-		const int32& Slice, const TCHAR* TextureName, const EPixelFormat& Format)
+		FRDGBuilder& GraphBuilder, FRDGTextureRef& OutputTextureRef, int32 SizeX, int32 SizeY,
+		int32 Slice, const TCHAR* TextureName, const EPixelFormat& Format)
 	{
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
 
@@ -1268,7 +1268,7 @@ public:
 		return GraphBuilder.CreateUAV(FRDGTextureUAVDesc(OutputTextureRef));
 	}
 
-	// static FORCEINLINE_DEBUGGABLE auto CreateWriteTextureArray_Half4_Out(FRDGBuilder& GraphBuilder, const int32& SizeX, const int32& SizeY, const int32& Slice, const TCHAR* TextureName)
+	// static FORCEINLINE_DEBUGGABLE auto CreateWriteTextureArray_Half4_Out(FRDGBuilder& GraphBuilder, int32 SizeX, int32 SizeY, int32 Slice, const TCHAR* TextureName)
 	// {
 	// 	FRDGTextureRef OutputTextureRef;
 	// 	return CreateWriteTextureArray_Custom_Out(GraphBuilder, OutputTextureRef, SizeX, SizeY, Slice, TextureName, PF_FloatRGBA);
@@ -1288,7 +1288,7 @@ public:
 	template <class T>
 	static FORCEINLINE_DEBUGGABLE FRDGBufferSRVRef TCreateStructuredReadBufferFromTArray_Custom_Out(
 		FRDGBuilder& GraphBuilder, const TArray<T>& Array, const TCHAR* BufferName, const EPixelFormat& Format,
-		const bool& NoCopy = false)
+		bool NoCopy = false)
 	{
 		FRDGBufferRef OutputBuffer;
 		return TCreateStructuredReadBufferFromTArray_Custom_Out(GraphBuilder, Array, OutputBuffer, BufferName, Format,
@@ -1310,7 +1310,7 @@ public:
 	template <class T>
 	static FORCEINLINE_DEBUGGABLE FRDGBufferSRVRef TCreateStructuredReadBufferFromTArray_Custom_Out(
 		FRDGBuilder& GraphBuilder, const TArray<T>& Array, FRDGBufferRef& OutputBuffer, const TCHAR* BufferName,
-		const EPixelFormat& Format, const bool& NoCopy = false)
+		const EPixelFormat& Format, bool NoCopy = false)
 	{
 		// Get the number of inputs from the array
 		const int32 NumInputs = Array.Num();
@@ -1338,7 +1338,7 @@ public:
 	*/
 	static FORCEINLINE_DEBUGGABLE FRDGBufferSRVRef CreateStructuredReadBufferFromTArray_Half4_Out(
 		FRDGBuilder& GraphBuilder, const TArray<FVector4f>& Array, FRDGBufferRef& OutputBuffer, const TCHAR* BufferName,
-		const bool& NoCopy = false)
+		bool NoCopy = false)
 	{
 		return TCreateStructuredReadBufferFromTArray_Custom_Out<FVector4f>(
 			GraphBuilder, Array, OutputBuffer, BufferName, PF_FloatRGBA, NoCopy); // PF_FloatRGBA -> 16 bit
@@ -1354,7 +1354,7 @@ public:
 	 * @return returns the final pass parameter to use it for your shader allocation as shader resource view
 	*/
 	static FORCEINLINE_DEBUGGABLE FRDGBufferSRVRef CreateStructuredReadBufferFromTArray_Half4_Out(
-		FRDGBuilder& GraphBuilder, const TArray<FVector4f>& Array, const TCHAR* BufferName, const bool& NoCopy = false)
+		FRDGBuilder& GraphBuilder, const TArray<FVector4f>& Array, const TCHAR* BufferName, bool NoCopy = false)
 	{
 		FRDGBufferRef OutputBuffer;
 		return CreateStructuredReadBufferFromTArray_Half4_Out(GraphBuilder, Array, OutputBuffer, BufferName, NoCopy);
@@ -1453,7 +1453,7 @@ public:
 	}
 
 	static FORCEINLINE_DEBUGGABLE TRefCountPtr<IPooledRenderTarget> CreateRenderTarget2DArray(
-		FRHITexture* Texture, const TCHAR* Name, const uint16& Slice, const FStaticShaderPlatform& ShaderPlatform)
+		FRHITexture* Texture, const TCHAR* Name, uint16 Slice, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		check(Texture);
 
@@ -1610,7 +1610,7 @@ public:
 				const float* Buffer = static_cast<float*>(GPUBufferReadbackBuffer->
 					Lock(DataInput.Num() * sizeof(float)));
 
-				const int32& NumData = DataInput.Num();
+				int32 NumData = DataInput.Num();
 				for (int32 i = GET0_NUMBER; i < NumData; ++i)
 				{
 					DataInput[i] = Buffer[i];
@@ -1706,7 +1706,7 @@ public:
 			GetConfigPath());
 	}
 
-	static FORCEINLINE_DEBUGGABLE FString FormatDebugName(const FString& String, const uint32& ID)
+	static FORCEINLINE_DEBUGGABLE FString FormatDebugName(const FString& String, uint32 ID)
 	{
 		return FString::Format(*String, {*FString::FormatAsNumber(ID)});
 	}
@@ -1822,7 +1822,7 @@ public:
 	}
 
 	static FORCEINLINE_DEBUGGABLE TObjectPtr<UTextureRenderTarget2DArray> GenerateBlankRenderTargetArray(
-		const FString& InPath, const FString& InName, const uint16& SizeXY, const uint8& SizeZ,
+		const FString& InPath, const FString& InName, uint16 SizeXY, uint8 SizeZ,
 		const EPixelFormat& Format)
 	{
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
@@ -1856,8 +1856,8 @@ public:
 
 	static TObjectPtr<UTexture2DArray> GenerateTexture2DArrayFromRenderTarget2DArray(
 		const TObjectPtr<UTextureRenderTarget2DArray> FromRenderTarget, const FString& InPath,
-		const FString& TextureName, const bool& bSave, const bool& bCheckIfTextureIsFilled,
-		const float& FillTolerance, bool& OutIsFilled)
+		const FString& TextureName, bool bSave, bool bCheckIfTextureIsFilled,
+		float FillTolerance, bool& OutIsFilled)
 	{
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
@@ -1896,7 +1896,7 @@ public:
 					Texture->Source.UnlockMip(GET0_NUMBER);
 
 					bool bValidPixels = false;
-					const int32& NumData = DestinationArray.Num();
+					int32 NumData = DestinationArray.Num();
 					for (int32 i = GET0_NUMBER; i < NumData; ++i)
 					{
 						const FFloat16Color& Color = DestinationArray[i];

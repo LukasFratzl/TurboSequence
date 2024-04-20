@@ -299,7 +299,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 
 	uint32 AnimationID = GET0_NUMBER;
 
-	uint32 SetHash(const uint32& SecurityIndex) const
+	uint32 SetHash(uint32 SecurityIndex) const
 	{
 		uint32 Hash = GET0_NUMBER;
 		Hash = HashCombine(Hash, GetTypeHash(FGuid::NewGuid()));
@@ -307,7 +307,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 		return Hash;
 	}
 
-	void SetAnimationID(const TMap<uint32, int32>& InputCollection, const uint32& BelongsToMeshID)
+	void SetAnimationID(const TMap<uint32, int32>& InputCollection, uint32 BelongsToMeshID)
 	{
 		uint32 SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
 		// Set the hash
@@ -458,7 +458,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_RenderThread_Lf
 	TArray<FVector4f> LocalMeshSkinWeights;
 };
 
-
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshReference_RenderThread_Lf
 {
@@ -530,7 +529,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 	{
 	}
 
-	explicit FSkinnedMeshRuntime_RenderThread_Lf(const uint32& WantedMeshID,
+	explicit FSkinnedMeshRuntime_RenderThread_Lf(uint32 WantedMeshID,
 	                                             const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset)
 	{
 		MeshID = WantedMeshID;
@@ -552,7 +551,7 @@ protected:
 	uint32 MeshID = GET0_NUMBER;
 
 public:
-	FORCEINLINE_DEBUGGABLE const uint32& GetMeshID() const
+	FORCEINLINE_DEBUGGABLE uint32 GetMeshID() const
 	{
 		return MeshID;
 	}
@@ -591,7 +590,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	}
 
 private:
-	uint32 SetHash(const uint32& SecurityIndex) const
+	uint32 SetHash(uint32 SecurityIndex) const
 	{
 		uint32 Hash = GET0_NUMBER;
 		Hash = HashCombine(Hash, GetTypeHash(FGuid::NewGuid()));
@@ -680,12 +679,12 @@ struct TURBOSEQUENCE_LF_API FAsyncTextureGenerationChunk_Lf
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 
-	FORCEINLINE void Init(const TObjectPtr<UTextureRenderTarget2DArray> Tex, const int32& MaxPixelIndex,
-	                      const int16& NumRowsFree, const int16& Index)
+	FORCEINLINE void Init(const TObjectPtr<UTextureRenderTarget2DArray> Tex, int32 MaxPixelIndex,
+	                      int16 NumRowsFree, int16 Index)
 	{
-		const int32& CeilRows = FMath::CeilToInt(
+		int32 CeilRows = FMath::CeilToInt(
 			static_cast<float>(LodDimensions[Index].X + MaxPixelIndex) / static_cast<float>(Tex->SizeY)) + NumRowsFree;
-		const int32& ChunkSizeY = CeilRows * Tex->SizeX;
+		int32 ChunkSizeY = CeilRows * Tex->SizeX;
 
 		LodDimensions[Index].Z = CeilRows;
 

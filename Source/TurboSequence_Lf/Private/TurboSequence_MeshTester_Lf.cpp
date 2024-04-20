@@ -27,7 +27,7 @@ void ATurboSequence_MeshTester_Lf::Tick(float DeltaTime)
 	TestMesh(DeltaTime);
 }
 
-void ATurboSequence_MeshTester_Lf::TestMesh(const float& DeltaTime)
+void ATurboSequence_MeshTester_Lf::TestMesh(float DeltaTime)
 {
 	if (SpawnData.GetHash() != LastSpawnData.GetHash())
 	{

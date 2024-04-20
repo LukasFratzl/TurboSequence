@@ -220,7 +220,7 @@ void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
 			FTransform Transform = FTransform(Location);
 
 			FTurboSequence_MeshSpawnData_Lf SpawnData;
-			const int32& AssetIndex = FMath::RandRange(0, AssetDataRuntime.Num() - 1);
+			int32 AssetIndex = FMath::RandRange(0, AssetDataRuntime.Num() - 1);
 
 			FDemoAssetData_Lf* Asset = AssetDataRuntime[AssetIndex];
 
@@ -258,7 +258,7 @@ void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
 	}
 	else
 	{
-		const uint32& NumMeshes = ATurboSequence_Manager_Lf::GetNumOfAllMeshes_Concurrent();
+		uint32 NumMeshes = ATurboSequence_Manager_Lf::GetNumOfAllMeshes_Concurrent();
 
 		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Spawning -> %d Meshes"), NumMeshes);
 
@@ -299,8 +299,8 @@ void ATurboSequence_Demo_Lf::LeftMouseButtonPressed()
 	UE_LOG(LogTemp, Warning, TEXT("Pressed"));
 }
 
-void ATurboSequence_Demo_Lf::SolveGroup(const int32& GroupIndex,
-                                        const float& DeltaTime, const FRotator& CameraRotation,
+void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
+                                        float DeltaTime, const FRotator& CameraRotation,
                                         const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups)
 {
 	const int32 NumMeshes = ATurboSequence_Manager_Lf::GetNumMeshCollectionsInUpdateGroup_Concurrent(GroupIndex);
@@ -310,10 +310,10 @@ void ATurboSequence_Demo_Lf::SolveGroup(const int32& GroupIndex,
 	}
 	FCriticalSection CriticalSection;
 
-	const int16& NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-	const int32& NumMeshesPerThread_Background = FMath::CeilToInt(
+	int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
+	int32 NumMeshesPerThread_Background = FMath::CeilToInt(
 		static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-	ParallelFor(NumThreads, [&](const int32& ThreadsIndex)
+	ParallelFor(NumThreads, [&](int32 ThreadsIndex)
 	{
 		const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread_Background;
 		const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread_Background;
@@ -339,7 +339,7 @@ void ATurboSequence_Demo_Lf::SolveGroup(const int32& GroupIndex,
 
 void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSection& CriticalSection,
                                        const FRotator& CameraRotation, const FVector& CameraLocation,
-                                       TMap<uint32, bool>& SwitchingGroups, const float& DeltaTime)
+                                       TMap<uint32, bool>& SwitchingGroups, float DeltaTime)
 {
 	const FDemoAssetData_Lf* AssetCustomData = AssetDataRuntime[Mesh.AssetDataIndex];
 	const TObjectPtr<UTurboSequence_MeshAsset_Lf> MeshAsset = ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(
@@ -348,9 +348,9 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 	// Here we make a simple Distance Updating in seconds, if DeltaTimeAccumulator is accumulated
 	// higher than DistanceRatioSeconds we update the Mesh
 	// this is truly optional and only here for optimization
-	const float& CameraDistance = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_Concurrent(
+	float CameraDistance = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_Concurrent(
 		Mesh.MeshData);
-	const float& DistanceRatioSeconds = MeshAsset->bUseDistanceUpdating
+	float DistanceRatioSeconds = MeshAsset->bUseDistanceUpdating
 		                                    ? CameraDistance / 250000 * MeshAsset->DistanceUpdatingRatio
 		                                    : 0;
 
@@ -419,7 +419,7 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 			{
 				if (IsValid(MeshAsset->AnimationLibrary)) // TODO: Remove
 				{
-					if (const int32& NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
+					if (int32 NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
 					{
 						int32 RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
 						if (NumAnimations > 1)
@@ -498,9 +498,9 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 				ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData) *
 				OffsetTransform.Inverse();
 
-			const float& Dot = FVector::DotProduct(CameraRotation.Vector(),
+			float Dot = FVector::DotProduct(CameraRotation.Vector(),
 			                                       MeshTransform.GetRotation().Vector());
-			const bool& bIsInView = Dot < 0;
+			bool bIsInView = Dot < 0;
 
 			Mesh.IKWeight = FTurboSequence_Helper_Lf::Clamp01(FMath::Lerp(
 				Mesh.IKWeight, static_cast<float>(bIsInView),

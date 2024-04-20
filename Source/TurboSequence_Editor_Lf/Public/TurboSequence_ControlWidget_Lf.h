@@ -123,7 +123,7 @@ public:
 
 	TMap<EShow_ControlPanel_Objects_Lf, TObjectPtr<UObject>> EditorObjects;
 
-	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object, const EShow_ControlPanel_Objects_Lf& Category, const bool& SuppressInfo = false)
+	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object, const EShow_ControlPanel_Objects_Lf& Category, bool SuppressInfo = false)
 	{
 		if (!Object && !SuppressInfo)
 		{
@@ -133,7 +133,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable)
-	void OnTick(const float& DeltaTime);
+	void OnTick(float DeltaTime);
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -162,7 +162,7 @@ public:
 		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Trying to set %s without having the Main Asset Assigned ( This one in the Reference Section ), the progress won't save, please assign the Main Asset and set the %s again..."), *ItemName.ToString(), *ItemType.ToString());
 	}
 
-	static FORCEINLINE_DEBUGGABLE void SaveAssetByTimer(const float& TimeInSeconds)
+	static FORCEINLINE_DEBUGGABLE void SaveAssetByTimer(float TimeInSeconds)
 	{
 		bNeedSaveMainAsset = true;
 		SaveTimerMainAsset = TimeInSeconds;
@@ -328,7 +328,7 @@ public:
 	===========================================================================================================	*/
 
 	// TODO: move in helpers
-	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> DuplicateSkeletalMesh(const TObjectPtr<USkeletalMesh> FromMesh, const FName& AssetName, const bool& bRemoveLODs)
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> DuplicateSkeletalMesh(const TObjectPtr<USkeletalMesh> FromMesh, const FName& AssetName, bool bRemoveLODs)
 	{
 		const TObjectPtr<USkeletalMesh> DuplicatedMesh = DuplicateObject(FromMesh, FromMesh->GetOuter(), AssetName);
 
@@ -341,7 +341,7 @@ public:
 	}
 
 	// TODO: move in helpers
-	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> GenerateSkeletalMeshLevelOfDetails(const TObjectPtr<USkeletalMesh> FromMesh, const int32& NewLODCount)
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> GenerateSkeletalMeshLevelOfDetails(const TObjectPtr<USkeletalMesh> FromMesh, int32 NewLODCount)
 	{
 		UE_LOG(LogTurboSequence_Lf, Display, TEXT("Reducing Mesh for Platform -> %s"), *GetTargetPlatformManagerRef().GetRunningTargetPlatform()->DisplayName().ToString());
 
@@ -352,7 +352,7 @@ public:
 
 
 	// TODO: move in helpers
-	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, const int32& LodIndex, const FString& InPath, const FString& InAssetName, TArray<int32>& OutMeshIndicesOrder)
+	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, int32 LodIndex, const FString& InPath, const FString& InAssetName, TArray<int32>& OutMeshIndicesOrder)
 	{
 		
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
@@ -378,7 +378,7 @@ public:
 
 
 			const FSkeletalMeshLODModel& LodModel = SkeletalMesh->GetImportedModel()->LODModels[LodIndex];
-			const uint32& SkinnedMeshVertices = LodModel.NumVertices;
+			uint32 SkinnedMeshVertices = LodModel.NumVertices;
 		
 			FMeshDescription MeshDescription;
 			LodModel.GetMeshDescription(SkeletalMesh, LodIndex, MeshDescription);
@@ -394,7 +394,7 @@ public:
 			
 			VertexInstanceUVs.InsertChannel(MaxNumTextCoord);
 
-			const int32& NumIndices = LodModel.IndexBuffer.Num();
+			int32 NumIndices = LodModel.IndexBuffer.Num();
 			for (int32 Idx = GET0_NUMBER; Idx < NumIndices; ++Idx)
 			{
 				const int32 VertexID = LodModel.IndexBuffer[Idx];
@@ -469,7 +469,7 @@ public:
 			
 			 FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
 			 const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
-			 const float& WantedZ = MinMax.Z;
+			 float WantedZ = MinMax.Z;
 			 Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
 			
 			 StaticMesh->GetRenderData()->Bounds = Bounds;

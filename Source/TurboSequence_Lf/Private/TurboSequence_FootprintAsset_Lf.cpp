@@ -9,16 +9,16 @@ UTurboSequence_FootprintAsset_Lf::UTurboSequence_FootprintAsset_Lf()
 {
 }
 
-void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(const int64& MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
+void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
 {
 	if (MeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 	{
 		const FSkinnedMeshRuntime_Lf& Runtime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 
-		const bool& bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
+		bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
 			(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
 
-		const bool& bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
+		bool bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
 			(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
 
 
@@ -77,7 +77,7 @@ AActor* UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInst
 		MeshData.RootMotionMeshID))
 	{
 		DefaultAnimationTransitions.FindOrAdd(MeshData.RootMotionMeshID, GET0_NUMBER);
-		for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+		for (int64 MeshID : MeshData.CustomizableMeshIDs)
 		{
 			DefaultAnimationTransitions.FindOrAdd(MeshID, GET0_NUMBER);
 		}
@@ -112,7 +112,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 		{
 			DefaultAnimationTransitions.Remove(MeshData.RootMotionMeshID);
 		}
-		for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+		for (int64 MeshID : MeshData.CustomizableMeshIDs)
 		{
 			if (DefaultAnimationTransitions.Contains(MeshID))
 			{
@@ -147,7 +147,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 }
 
 void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceTick_GameThread_Lf(
-	const FTurboSequence_MinimalMeshData_Lf& MeshData, const float& DeltaTime)
+	const FTurboSequence_MinimalMeshData_Lf& MeshData, float DeltaTime)
 {
 	if (MeshData.RootMotionMeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(
 		MeshData.RootMotionMeshID))
@@ -177,10 +177,10 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 			}
 
 
-			const bool& bIsInUEMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
+			bool bIsInUEMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
 				(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
 
-			const bool& bIsInUEAnimationRange = !IsValid(Runtime.FootprintAsset) || (IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
+			bool bIsInUEAnimationRange = !IsValid(Runtime.FootprintAsset) || (IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
 
 			FTransform SpawnTransform;
 			if (IsValid(RootComponent))
@@ -250,7 +250,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 							FTurboSequence_Utility_Lf::GetReferenceSkeleton_Raw(
 								SkinnedMeshComponent->GetSkinnedAsset());
 
-						const int32& NumBones = ReferenceSkeleton.GetNum();
+						int32 NumBones = ReferenceSkeleton.GetNum();
 						for (int32 BoneIdx = GET0_NUMBER; BoneIdx < NumBones; ++BoneIdx)
 						{
 							const FName& BoneName = SkinnedMeshComponent->GetBoneName(BoneIdx);
@@ -281,7 +281,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 
 			RunnerFunction(RootComponent, MeshData.RootMotionMeshID);
 
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				const FSkinnedMeshRuntime_Lf& RuntimeOther = ATurboSequence_Manager_Lf::GlobalLibrary.
 					RuntimeSkinnedMeshes[

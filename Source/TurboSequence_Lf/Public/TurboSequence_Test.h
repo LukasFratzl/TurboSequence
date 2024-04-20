@@ -92,9 +92,9 @@ public:
 	// TObjectPtr<UPoseableMeshComponent> Poser;
 	//
 	//
-	// static FORCEINLINE_DEBUGGABLE void GetBoneTransformFromAnimationSafe(FTransform& OutAtom, const TObjectPtr<UAnimSequence> Animation, const uint16& SkeletonBoneIndex, const TMap<int32, int32>& SkeletonBoneMap, const float& AnimationTime, const FReferenceSkeleton& ReferenceSkeleton)
+	// static FORCEINLINE_DEBUGGABLE void GetBoneTransformFromAnimationSafe(FTransform& OutAtom, const TObjectPtr<UAnimSequence> Animation, uint16 SkeletonBoneIndex, const TMap<int32, int32>& SkeletonBoneMap, float AnimationTime, const FReferenceSkeleton& ReferenceSkeleton)
 	// {
-	// 	// if (const int32& TrackIndex = SkeletonBoneMap.Contains(SkeletonBoneIndex) ? SkeletonBoneMap[SkeletonBoneIndex] : INDEX_NONE; TrackIndex != INDEX_NONE)
+	// 	// if (int32 TrackIndex = SkeletonBoneMap.Contains(SkeletonBoneIndex) ? SkeletonBoneMap[SkeletonBoneIndex] : INDEX_NONE; TrackIndex != INDEX_NONE)
 	// 	// {
 	// 	// 	Animation->GetBoneTransform(OutAtom, TrackIndex, AnimationTime, !Animation->IsCompressedDataValid());
 	// 	// }
@@ -105,7 +105,7 @@ public:
 	// }
 	//
 	//
-	// static void AnimateTestMesh(const TObjectPtr<UPoseableMeshComponent> Poser, const TObjectPtr<UAnimSequence> Animation, float& AnimTime, const float& DeltaTime)
+	// static void AnimateTestMesh(const TObjectPtr<UPoseableMeshComponent> Poser, const TObjectPtr<UAnimSequence> Animation, float& AnimTime, float DeltaTime)
 	// {
 	// 	AnimTime += DeltaTime;
 	// 	AnimTime = FMath::Fmod(AnimTime, Animation->GetPlayLength());
@@ -131,7 +131,7 @@ public:
 	// }
 
 
-	// static FORCEINLINE_DEBUGGABLE uint32 BoneIndexToWeightIndex(const TMap<uint16, FBone>& FromBones, const int32& FromIndex)
+	// static FORCEINLINE_DEBUGGABLE uint32 BoneIndexToWeightIndex(const TMap<uint16, FBone>& FromBones, int32 FromIndex)
 	// {
 	// 	if (FromBones.Contains(FromIndex))
 	// 	{

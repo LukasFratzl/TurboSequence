@@ -128,7 +128,7 @@ protected:
 		                                                TArray<TObjectPtr<UMaterialInterface>>(),
 	                                                const TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset = nullptr);
 
-	static bool RemoveSkinnedMeshInstance_GameThread(const int64& MeshID, const TObjectPtr<UWorld> InWorld);
+	static bool RemoveSkinnedMeshInstance_GameThread(int64 MeshID, const TObjectPtr<UWorld> InWorld);
 
 public:
 	/**
@@ -138,14 +138,14 @@ public:
 	 * @param UpdateContext The Update Context to have info like which update group etc.
 	 */
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Animation, Mesh, Motion, Transform, Solve, Update, Render, Animate"))
-	static void SolveMeshes_GameThread(const float& DeltaTime, UWorld* InWorld, FTurboSequence_UpdateContext_Lf UpdateContext);
+	static void SolveMeshes_GameThread(float DeltaTime, UWorld* InWorld, FTurboSequence_UpdateContext_Lf UpdateContext);
 
 protected:
 	static void SolveMeshes_RenderThread(FRHICommandListImmediate& RHICmdList);
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Add, Update, Mesh, Group"))
-	static void AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, const int64& MeshID);
+	static void AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID);
 
 	/**
 	 * Adds an Mesh to the Update Group with the given Index
@@ -156,7 +156,7 @@ public:
 	static void AddInstanceToUpdateGroup_Concurrent(const int32 GroupIndex, const FTurboSequence_MinimalMeshData_Lf& MeshData);
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Remove, Update, Mesh, Group"))
-	static void RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, const int64& MeshID);
+	static void RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID);
 
 
 	/**
@@ -188,7 +188,7 @@ public:
 	 * Clean the Manager, NOTE: The manager is auto manage itself, you don't need to implement this function
 	 * @param bIsEndPlay Is end of the play session or map change
 	 */
-	static void CleanManager_GameThread(const bool& bIsEndPlay);
+	static void CleanManager_GameThread(bool bIsEndPlay);
 
 	/*
     < - - - - - - - - - - - - - - - - - - - - >
@@ -218,7 +218,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="World Space Transform", Keywords="Turbo, Sequence, TS, Get, Transform, World, Mesh"))
-	static FTransform GetMeshWorldSpaceTransform_RawID_Concurrent(const int64& MeshID)
+	static FTransform GetMeshWorldSpaceTransform_RawID_Concurrent(int64 MeshID)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -243,7 +243,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="Camera Distance", Keywords="Turbo, Sequence, TS, Get, Distance, Camera, Mesh"))
-	static float GetMeshClosestCameraDistance_RawID_Concurrent(const int64& MeshID)
+	static float GetMeshClosestCameraDistance_RawID_Concurrent(int64 MeshID)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -265,7 +265,7 @@ public:
 		if (MeshData.IsMeshDataValid())
 		{
 			SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshData.RootMotionMeshID, Location, Rotation, Scale);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshID, Location, Rotation, Scale);
 			}
@@ -273,7 +273,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
-	static void SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(const int64& MeshID, const FVector Location, const FQuat Rotation, const FVector Scale)
+	static void SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(int64 MeshID, const FVector Location, const FQuat Rotation, const FVector Scale)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -302,7 +302,7 @@ public:
 		if (MeshData.IsMeshDataValid())
 		{
 			SetMeshWorldSpaceTransform_RawID_Concurrent(MeshData.RootMotionMeshID, Transform);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				SetMeshWorldSpaceTransform_RawID_Concurrent(MeshID, Transform);
 			}
@@ -310,7 +310,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
-	static void SetMeshWorldSpaceTransform_RawID_Concurrent(const int64& MeshID, const FTransform Transform)
+	static void SetMeshWorldSpaceTransform_RawID_Concurrent(int64 MeshID, const FTransform Transform)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -337,7 +337,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Animation, Root, Motion, Transform"))
 	static bool GetRootMotionTransform_Concurrent(FTransform& OutRootMotion,
 	                                              const FTurboSequence_MinimalMeshData_Lf& MeshData,
-	                                              const float& DeltaTime,
+	                                              float DeltaTime,
 	                                              const EBoneSpaces::Type Space = EBoneSpaces::WorldSpace)
 	{
 		if (MeshData.IsMeshDataValid())
@@ -349,8 +349,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Animation, Root, Motion, Transform"))
 	static bool GetRootMotionTransform_RawID_Concurrent(FTransform& OutRootMotion,
-	                                                    const int64& MeshID,
-	                                                    const float& DeltaTime,
+	                                                    int64 MeshID,
+	                                                    float DeltaTime,
 	                                                    const EBoneSpaces::Type& Space = EBoneSpaces::WorldSpace)
 	{
 		if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
@@ -381,7 +381,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Root, Motion, Transform"))
 	static void MoveMeshWithRootMotion_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
-	                                              const float& DeltaTime,
+	                                              float DeltaTime,
 	                                              const bool bZeroZAxis = false,
 	                                              const bool bIncludeScale = false)
 	{
@@ -389,7 +389,7 @@ public:
 		{
 			MoveMeshWithRootMotion_RawID_Concurrent(MeshData.RootMotionMeshID, DeltaTime, bZeroZAxis, bIncludeScale);
 			const FTransform& MeshTransform = GetMeshWorldSpaceTransform_RawID_Concurrent(MeshData.RootMotionMeshID);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				SetMeshWorldSpaceTransform_RawID_Concurrent(MeshID, MeshTransform);
 			}
@@ -397,10 +397,10 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Root, Motion, Transform"))
-	static void MoveMeshWithRootMotion_RawID_Concurrent(const int64& MeshID,
-	                                                    const float& DeltaTime,
-	                                                    const bool& ZeroZAxis = false,
-	                                                    const bool& bIncludeScale = false)
+	static void MoveMeshWithRootMotion_RawID_Concurrent(int64 MeshID,
+	                                                    float DeltaTime,
+	                                                    bool ZeroZAxis = false,
+	                                                    bool bIncludeScale = false)
 	{
 		if (FTransform Atom; GetRootMotionTransform_RawID_Concurrent(Atom, MeshID, DeltaTime, EBoneSpaces::ComponentSpace))
 		{
@@ -457,7 +457,7 @@ public:
 		{
 			FTurboSequence_AnimMinimalCollection_Lf Data = FTurboSequence_AnimMinimalCollection_Lf(true);
 			Data.RootMotionMesh = PlayAnimation_RawID_Concurrent(MeshData.RootMotionMeshID, Animation, AnimSettings);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				Data.CustomizableMeshes.Add(PlayAnimation_RawID_Concurrent(MeshID, Animation, AnimSettings));
 			}
@@ -467,7 +467,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Animation Data", Keywords="Turbo, Sequence, TS, Set, Animation, PLay"))
-	static FTurboSequence_AnimMinimalData_Lf PlayAnimation_RawID_Concurrent(const int64& MeshID,
+	static FTurboSequence_AnimMinimalData_Lf PlayAnimation_RawID_Concurrent(int64 MeshID,
 	                                                                        UAnimSequence* Animation,
 	                                                                        const FTurboSequence_AnimPlaySettings_Lf& AnimSettings
 	)
@@ -509,7 +509,7 @@ public:
 		{
 			FTurboSequence_AnimMinimalBlendSpaceCollection_Lf Data = FTurboSequence_AnimMinimalBlendSpaceCollection_Lf(true);
 			Data.RootMotionMesh = PlayBlendSpace_RawID_Concurrent(MeshData.RootMotionMeshID, BlendSpace, AnimSettings);
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				Data.CustomizableMeshes.Add(PlayBlendSpace_RawID_Concurrent(MeshID, BlendSpace, AnimSettings));
 			}
@@ -519,7 +519,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Blend Space Data", Keywords="Turbo, Sequence, TS, Set, Animation, PLay, Blend Space, Blend"))
-	static FTurboSequence_AnimMinimalBlendSpace_Lf PlayBlendSpace_RawID_Concurrent(const int64& MeshID,
+	static FTurboSequence_AnimMinimalBlendSpace_Lf PlayBlendSpace_RawID_Concurrent(int64 MeshID,
 	                                                                               UBlendSpace* BlendSpace,
 	                                                                               const FTurboSequence_AnimPlaySettings_Lf& AnimSettings
 	)
@@ -557,7 +557,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="Animation Sequence", Keywords="Turbo, Sequence, TS, Get, Animation, Play, Priority"))
-	static UAnimSequence* GetHighestPriorityPlayingAnimation_RawID_Concurrent(const int64& MeshID)
+	static UAnimSequence* GetHighestPriorityPlayingAnimation_RawID_Concurrent(int64 MeshID)
 	{
 		if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -612,7 +612,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Animation, Settings, Tweaks, Blend"))
-	static bool TweakBlendSpace_RawID_Concurrent(const int64& MeshID, const FTurboSequence_AnimMinimalBlendSpace_Lf& BlendSpaceData, const FVector3f& WantedPosition)
+	static bool TweakBlendSpace_RawID_Concurrent(int64 MeshID, const FTurboSequence_AnimMinimalBlendSpace_Lf& BlendSpaceData, const FVector3f& WantedPosition)
 	{
 		if (!BlendSpaceData.IsAnimBlendSpaceValid())
 		{
@@ -727,7 +727,7 @@ public:
 				return true;
 			}
 
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (GetIKTransform_RawID_Concurrent(OutIKTransform, MeshID, BoneName, AnimationDeltaTime, Space))
 				{
@@ -740,9 +740,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Get, Transform, IK, Bone"))
 	static bool GetIKTransform_RawID_Concurrent(FTransform& OutIKTransform,
-	                                            const int64& MeshID,
+	                                            int64 MeshID,
 	                                            const FName& BoneName,
-	                                            const float& AnimationDeltaTime,
+	                                            float AnimationDeltaTime,
 	                                            const EBoneSpaces::Type& Space = EBoneSpaces::WorldSpace)
 	{
 		OutIKTransform = FTransform::Identity;
@@ -755,9 +755,9 @@ public:
 		const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 
 		const FReferenceSkeleton& ReferenceSkeleton = FTurboSequence_Utility_Lf::GetReferenceSkeleton(Runtime.DataAsset);
-		if (const int32& BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
+		if (int32 BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
 		{
-			const int64& CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
+			int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
 
 			FTurboSequence_Utility_Lf::GetIKTransform(OutIKTransform, BoneIndexFromName, Runtime, Reference,
 			                                          GlobalLibrary, GlobalLibrary_RenderThread, Space, AnimationDeltaTime, CurrentFrameCount,
@@ -790,7 +790,7 @@ public:
 				return true;
 			}
 
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (SetIKTransform_RawID_Concurrent(MeshID, BoneName, IKTransform, Space))
 				{
@@ -802,7 +802,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Transform, IK, Bone"))
-	static bool SetIKTransform_RawID_Concurrent(const int64& MeshID,
+	static bool SetIKTransform_RawID_Concurrent(int64 MeshID,
 	                                            const FName& BoneName,
 	                                            const FTransform& IKTransform,
 	                                            const EBoneSpaces::Type& Space = EBoneSpaces::WorldSpace)
@@ -819,7 +819,7 @@ public:
 		const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 
 		const FReferenceSkeleton& ReferenceSkeleton = FTurboSequence_Utility_Lf::GetReferenceSkeleton(Runtime.DataAsset);
-		if (const int32& BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
+		if (int32 BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
 		{
 			return FTurboSequence_Utility_Lf::SetIKTransform(IKTransform, BoneIndexFromName, Runtime, Reference, Instance->GetThreadContext()->CriticalSection, Space);
 		}
@@ -851,7 +851,7 @@ public:
 				return true;
 			}
 
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (GetSocketTransform_RawID_Concurrent(OutSocketTransform, MeshID, SocketName, AnimationDeltaTime, Space))
 				{
@@ -864,9 +864,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Get, Socket, Transform, IK, Item"))
 	static bool GetSocketTransform_RawID_Concurrent(FTransform& OutSocketTransform,
-	                                                const int64& MeshID,
+	                                                int64 MeshID,
 	                                                const FName& SocketName,
-	                                                const float& AnimationDeltaTime,
+	                                                float AnimationDeltaTime,
 	                                                const EBoneSpaces::Type& Space = EBoneSpaces::WorldSpace)
 	{
 		OutSocketTransform = FTransform::Identity;
@@ -884,7 +884,7 @@ public:
 
 		if (IsValid(Runtime.DataAsset) && IsValid(Runtime.DataAsset->ReferenceMeshNative) && Runtime.DataAsset->ReferenceMeshNative->FindSocket(SocketName))
 		{
-			const int64& CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
+			int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
 
 			FTurboSequence_Utility_Lf::GetSocketTransform(OutSocketTransform, SocketName, Runtime, Reference,
 			                                              GlobalLibrary, GlobalLibrary_RenderThread, Space, AnimationDeltaTime, CurrentFrameCount,
@@ -910,7 +910,7 @@ public:
 			{
 				return true;
 			}
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(MeshID))
 				{
@@ -922,7 +922,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="Is Visisble", Keywords="Turbo, Sequence, TS, Get, Visible, Camera, Frustum"))
-	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(const int64& MeshID)
+	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int64 MeshID)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -951,7 +951,7 @@ public:
 			{
 				return true;
 			}
-			for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+			for (int64 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (GetReferencePoseTransform_RawID_Concurrent(OutRefPoseTransform, MeshID, BoneName, MeshTransformSpace))
 				{
@@ -964,7 +964,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Get, Animation, Reference, Pose, Transform"))
 	static bool GetReferencePoseTransform_RawID_Concurrent(FTransform& OutRefPoseTransform,
-	                                                       const int64& MeshID,
+	                                                       int64 MeshID,
 	                                                       const FName& BoneName,
 	                                                       const ETurboSequence_TransformSpace_Lf& MeshTransformSpace = ETurboSequence_TransformSpace_Lf::WorldSpace)
 	{
@@ -973,7 +973,7 @@ public:
 			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 			const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 			const FReferenceSkeleton& ReferenceSkeleton = FTurboSequence_Utility_Lf::GetReferenceSkeleton(Reference.DataAsset);
-			if (const int32& BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
+			if (int32 BoneIndexFromName = FTurboSequence_Utility_Lf::GetSkeletonBoneIndex(ReferenceSkeleton, BoneName); FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
 			{
 				switch (MeshTransformSpace)
 				{
@@ -1019,7 +1019,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="Mesh Asset", Keywords="Turbo, Sequence, TS, Get, Mesh, Asset"))
-	static UTurboSequence_MeshAsset_Lf* GetMeshAsset_RawID_Concurrent(const int64& MeshID)
+	static UTurboSequence_MeshAsset_Lf* GetMeshAsset_RawID_Concurrent(int64 MeshID)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -1029,7 +1029,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Customize, Change, Mesh, Material"))
-	static bool CustomizeMesh_RawID_GameThread(const int64& MeshID,
+	static bool CustomizeMesh_RawID_GameThread(int64 MeshID,
 	                                           UTurboSequence_MeshAsset_Lf* TargetMesh,
 	                                           const TArray<UMaterialInterface*>& TargetMaterials)
 	{
@@ -1048,13 +1048,13 @@ public:
 		TArray<TObjectPtr<UMaterialInterface>> Materials;
 		Materials.Append(TargetMaterials);
 
-		const uint32& MaterialHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
+		uint32 MaterialHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
 		if (Runtime.DataAsset == TargetMesh && Runtime.MaterialsHash == MaterialHash) // It's the same
 		{
 			return false;
 		}
 
-		if (const bool& bMaterialChangeValid = Materials.Num() && Runtime.MaterialsHash != MaterialHash; !bMaterialChangeValid)
+		if (bool bMaterialChangeValid = Materials.Num() && Runtime.MaterialsHash != MaterialHash; !bMaterialChangeValid)
 		{
 			if (!TargetMesh->IsMeshAssetValid())
 			{
@@ -1099,7 +1099,7 @@ public:
 
 		bool bFinished = CustomizeMesh_RawID_GameThread(MeshData.RootMotionMeshID, TargetMesh.RootMotionMesh.Mesh, TargetMesh.RootMotionMesh.OverrideMaterials);
 
-		const int16& NumCustomizable = TargetMesh.CustomizableMeshes.Num();
+		int16 NumCustomizable = TargetMesh.CustomizableMeshes.Num();
 		for (int16 i = GET0_NUMBER; i < NumCustomizable; ++i)
 		{
 			if (CustomizeMesh_RawID_GameThread(MeshData.CustomizableMeshIDs[i], TargetMesh.CustomizableMeshes[i].Mesh, TargetMesh.CustomizableMeshes[i].OverrideMaterials))
@@ -1112,7 +1112,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Curve", Keywords="Turbo, Sequence, TS, Get, Animation, Curve"))
-	static FTurboSequence_PoseCurveData_Lf GetAnimationCurveValue_RawID_Concurrent(const int64& MeshID,
+	static FTurboSequence_PoseCurveData_Lf GetAnimationCurveValue_RawID_Concurrent(int64 MeshID,
 	                                                                               const FName& CurveName,
 	                                                                               UAnimSequence* Animation)
 	{
@@ -1169,7 +1169,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence", meta=(ReturnDisplayName="Footprint Asset", Keywords="Turbo, Sequence, TS, Get, Footpint, Asset"))
-	static UTurboSequence_FootprintAsset_Lf* GetFootprintAsset_RawID_Concurrent(const int64& MeshID)
+	static UTurboSequence_FootprintAsset_Lf* GetFootprintAsset_RawID_Concurrent(int64 MeshID)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -1205,7 +1205,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence", meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Custom, Data, Rendering, Per Instance") )
-	static bool SetCustomDataToInstance_RawID_Concurrent(const int64& MeshID, const uint8& CustomDataFractionIndex, const float& CustomDataValue)
+	static bool SetCustomDataToInstance_RawID_Concurrent(int64 MeshID, uint8 CustomDataFractionIndex, float CustomDataValue)
 	{
 		if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
@@ -1234,7 +1234,7 @@ public:
 		}
 
 		bool bSuccess = SetCustomDataToInstance_RawID_Concurrent(MeshData.RootMotionMeshID, CustomDataFractionIndex, CustomDataValue);
-		for (const int64& MeshID : MeshData.CustomizableMeshIDs)
+		for (int64 MeshID : MeshData.CustomizableMeshIDs)
 		{
 			SetCustomDataToInstance_RawID_Concurrent(MeshID, CustomDataFractionIndex, CustomDataValue);
 		}
