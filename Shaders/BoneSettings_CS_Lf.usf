@@ -31,6 +31,7 @@ void Main(
 	{
 		uint TextureIndex = BaseIndex + Index;
 
-		RW_Settings_OutputTexture[GetDimensionsFromIndex3D(TextureIndex, TextureDimensionX, TextureDimensionY)] = BoneWeights_StructuredBuffer[Index];
+		RW_Settings_OutputTexture[GetDimensionsFromIndex3D(TextureIndex, TextureDimensionX, TextureDimensionY)] =
+			BoneWeights_StructuredBuffer[Index];
 	}
 }

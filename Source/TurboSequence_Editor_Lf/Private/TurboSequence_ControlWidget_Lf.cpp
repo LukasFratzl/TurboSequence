@@ -23,7 +23,6 @@ UTurboSequence_ControlWidget_Lf::~UTurboSequence_ControlWidget_Lf()
 
 void UTurboSequence_ControlWidget_Lf::OnTick(float DeltaTime)
 {
-
 	if (bNeedSaveMainAsset)
 	{
 		SaveTimerMainAsset -= DeltaTime;
@@ -47,22 +46,29 @@ void UTurboSequence_ControlWidget_Lf::OnAssignMainAsset()
 {
 	if (Main_Asset_To_Edit)
 	{
-		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Main_Asset_To_Edit, EShow_ControlPanel_Objects_Lf::Asset_Object);
+		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Main_Asset_To_Edit,
+		                                   EShow_ControlPanel_Objects_Lf::Asset_Object);
 
-		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Main_Asset_To_Edit->ReferenceMeshNative, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
+		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(
+			EditorObjects, Main_Asset_To_Edit->ReferenceMeshNative, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
 
-		Current_SkeletalMesh_Reference = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Main_Asset_To_Edit->ReferenceMeshEdited, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
-		
+		Current_SkeletalMesh_Reference = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(
+			EditorObjects, Main_Asset_To_Edit->ReferenceMeshEdited,
+			EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
+
 		LevelOfDetails = Main_Asset_To_Edit->InstancedMeshes;
 
 		MaxNumberOfLODs = Main_Asset_To_Edit->MaxLevelOfDetails;
 	}
 	else // Reset the values that way
 	{
+		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(
+			FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr,
+			                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
 
-		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
-
-		Current_SkeletalMesh_Reference = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
+		Current_SkeletalMesh_Reference = Cast<USkeletalMesh>(
+			FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr,
+			                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
 	}
 }
 
@@ -70,20 +76,24 @@ void UTurboSequence_ControlWidget_Lf::OnAssignLodZeroMeshAsset()
 {
 	if (Main_Asset_To_Edit)
 	{
-		Main_Asset_To_Edit->ReferenceMeshNative = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Current_SkeletalMesh_Reference_NoEdit, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
+		Main_Asset_To_Edit->ReferenceMeshNative = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(
+			EditorObjects, Current_SkeletalMesh_Reference_NoEdit, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
 
 		// Save
 		FTurboSequence_Helper_Lf::SaveAsset(Main_Asset_To_Edit);
 	}
 	else
 	{
-		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
+		Current_SkeletalMesh_Reference_NoEdit = Cast<USkeletalMesh>(
+			FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, nullptr,
+			                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh));
 
 		PrintMainAssetMissingWarning(TEXT("Skeletal Mesh Lod Zero"), TEXT("SkeletalMesh"));
 	}
 }
 
-void UTurboSequence_ControlWidget_Lf::CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox, UScrollBox* GenerateScrollBox, UScrollBox* TweaksScrollBox)
+void UTurboSequence_ControlWidget_Lf::CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox,
+                                                    UScrollBox* GenerateScrollBox, UScrollBox* TweaksScrollBox)
 {
 	AddSection(WelcomeScrollBox, EShow_ControlPanel_Section_Lf::Welcome);
 	AddSection(ReferenceScrollBox, EShow_ControlPanel_Section_Lf::Reference);
@@ -91,7 +101,11 @@ void UTurboSequence_ControlWidget_Lf::CacheSections(UScrollBox* WelcomeScrollBox
 	AddSection(TweaksScrollBox, EShow_ControlPanel_Section_Lf::Tweaks);
 }
 
-void UTurboSequence_ControlWidget_Lf::CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton, UButton* GenerateButton, UButton* TweaksButton, UButton* DocsButton, UButton* DiscordButton, TArray<UButton*> PreviousSectionButtons, TArray<UButton*> NextSectionButtons, UButton* CreateLodButton, UButton* CreateGlobalTextureButton)
+void UTurboSequence_ControlWidget_Lf::CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton,
+                                                   UButton* GenerateButton, UButton* TweaksButton, UButton* DocsButton,
+                                                   UButton* DiscordButton, TArray<UButton*> PreviousSectionButtons,
+                                                   TArray<UButton*> NextSectionButtons, UButton* CreateLodButton,
+                                                   UButton* CreateGlobalTextureButton)
 {
 	for (UButton* Button : WelcomeButton)
 	{
@@ -101,7 +115,7 @@ void UTurboSequence_ControlWidget_Lf::CacheButtons(TArray<UButton*> WelcomeButto
 	AddButton(ReferenceButton, EShow_ControlPanel_Buttons_Lf::Reference);
 	AddButton(GenerateButton, EShow_ControlPanel_Buttons_Lf::Generate);
 	AddButton(TweaksButton, EShow_ControlPanel_Buttons_Lf::Tweaks);
-	
+
 	AddButton(DocsButton, EShow_ControlPanel_Buttons_Lf::Docs);
 	AddButton(DiscordButton, EShow_ControlPanel_Buttons_Lf::Discord);
 
@@ -120,7 +134,10 @@ void UTurboSequence_ControlWidget_Lf::CacheButtons(TArray<UButton*> WelcomeButto
 	AddButton(CreateGlobalTextureButton, EShow_ControlPanel_Buttons_Lf::TweakGlobalTexture);
 }
 
-void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh, UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* TweakGlobalTextures)
+void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAsset,
+                                                      UPropertyViewBase* LodZeroSkeletalMesh,
+                                                      UPropertyViewBase* MaxLevelOfDetailsToGenerate,
+                                                      UPropertyViewBase* TweakGlobalTextures)
 {
 	AddPropertyToArray(MainAsset, EShow_ControlPanel_Properties_Lf::Main_Asset);
 	AddPropertyToArray(LodZeroSkeletalMesh, EShow_ControlPanel_Properties_Lf::Skeletal_Mesh);
@@ -132,7 +149,8 @@ void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAss
 
 void UTurboSequence_ControlWidget_Lf::CreateProperties()
 {
-	for (const TTuple<EShow_ControlPanel_Properties_Lf, TArray<TObjectPtr<UPropertyViewBase>>>& EditorProperties : Properties)
+	for (const TTuple<EShow_ControlPanel_Properties_Lf, TArray<TObjectPtr<UPropertyViewBase>>>& EditorProperties :
+	     Properties)
 	{
 		for (const TObjectPtr<UPropertyViewBase>& Property : EditorProperties.Value)
 		{
@@ -270,8 +288,10 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 			DirectorySelected = FPaths::ConvertRelativePathToFull(DirectorySelected);
 
 			WantedMeshPath = FPaths::Combine(DirectorySelected, Main_Asset_To_Edit->ReferenceMeshNative->GetName());
-			WantedMeshPath = FString::Format(TEXT("{0}_TurboSequence_Instance{1}"), {*WantedMeshPath, *FPackageName::GetAssetPackageExtension()});
-			WantedMeshName = FString(FString::Format(TEXT("{0}_TurboSequence_Instance"), {*Main_Asset_To_Edit->ReferenceMeshNative->GetName()}));
+			WantedMeshPath = FString::Format(
+				TEXT("{0}_TurboSequence_Instance{1}"), {*WantedMeshPath, *FPackageName::GetAssetPackageExtension()});
+			WantedMeshName = FString(FString::Format(
+				TEXT("{0}_TurboSequence_Instance"), {*Main_Asset_To_Edit->ReferenceMeshNative->GetName()}));
 
 
 			if (FPaths::FileExists(WantedMeshPath))
@@ -279,7 +299,8 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 				// Create a confirmation dialog with "OK" and "Cancel" buttons
 				const FText MessageText = FText::FromString(TEXT("Mesh Already Exists, do you want override it?"));
 				const FText TitleText = FText::FromString(TEXT("Confirmation"));
-				const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(EAppMsgType::OkCancel, MessageText, TitleText);
+				const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(
+					EAppMsgType::OkCancel, MessageText, TitleText);
 
 				if (ButtonClicked == EAppReturnType::Ok)
 				{
@@ -301,7 +322,10 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 	{
 		if (MaxNumberOfLODs > 0)
 		{
-			TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(Main_Asset_To_Edit->ReferenceMeshNative, FName(FString::Format(TEXT("{0}_Reference"), {*WantedMeshName})), true);
+			TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(Main_Asset_To_Edit->ReferenceMeshNative,
+			                                                          FName(FString::Format(
+				                                                          TEXT("{0}_Reference"), {*WantedMeshName})),
+			                                                          true);
 			uint8 NumIterations = MaxNumberOfLODs / GET5_NUMBER + GET1_NUMBER;
 			for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
 			{
@@ -313,20 +337,27 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 				GenerateSkeletalMeshLevelOfDetails(NewMesh, ReductionLOD);
 			}
 
-			FString ReferencePath = FPaths::Combine(DirectorySelected, Main_Asset_To_Edit->ReferenceMeshNative->GetName());
-			ReferencePath = FString::Format(TEXT("{0}_TurboSequence_Reference{1}"), {*ReferencePath, *FPackageName::GetAssetPackageExtension()});
+			FString ReferencePath = FPaths::Combine(DirectorySelected,
+			                                        Main_Asset_To_Edit->ReferenceMeshNative->GetName());
+			ReferencePath = FString::Format(
+				TEXT("{0}_TurboSequence_Reference{1}"), {*ReferencePath, *FPackageName::GetAssetPackageExtension()});
 
 			FTurboSequence_Helper_Lf::SaveNewAsset(NewMesh);
-			
+
 			Main_Asset_To_Edit->MaxLevelOfDetails = MaxNumberOfLODs;
-			Current_SkeletalMesh_Reference = Main_Asset_To_Edit->ReferenceMeshEdited = Cast<USkeletalMesh>(FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, NewMesh, EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
+			Current_SkeletalMesh_Reference = Main_Asset_To_Edit->ReferenceMeshEdited = Cast<USkeletalMesh>(
+				FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, NewMesh,
+				                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
 
 			LevelOfDetails.Empty();
 			TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
 			for (int32 i = GET0_NUMBER; i < MaxNumberOfLODs; ++i)
 			{
 				TArray<int32> StaticMeshIndices;
-				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(NewMesh, i, WantedMeshPath, FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})), StaticMeshIndices))
+				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(
+					NewMesh, i, WantedMeshPath,
+					FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})),
+					StaticMeshIndices))
 				{
 					FMeshItem_Lf Item = FMeshItem_Lf();
 					if (i > GET9_NUMBER)
@@ -343,7 +374,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 
 					FMeshDataOrderView_Lf Order = FMeshDataOrderView_Lf();
 					Order.StaticMeshIndices = StaticMeshIndices;
-					
+
 					MeshDataOrderView.Add(Order);
 				}
 			}
@@ -357,7 +388,8 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 					FNotificationInfo Info(FText::FromString(FString(TEXT("Successfully Converted Meshes"))));
 					Info.ExpireDuration = 8.0f;
 					Info.bUseLargeFont = false;
-					if (TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().AddNotification(Info); Notification.IsValid())
+					if (TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().
+						AddNotification(Info); Notification.IsValid())
 					{
 						Notification->SetCompletionState(SNotificationItem::CS_Success);
 					}
@@ -393,7 +425,10 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 {
 	bool bEditedData = false;
-	if (IsValid(FTurboSequence_Editor_LfModule::GlobalData) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture) && IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame))
+	if (IsValid(FTurboSequence_Editor_LfModule::GlobalData) &&
+		IsValid(FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame) &&
+		IsValid(FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture) && IsValid(
+			FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame))
 	{
 		constexpr uint16 Resolution = GET512_NUMBER;
 
@@ -401,7 +436,8 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 
 		uint64 MaxMeshes = MaxNumMeshes * MaxNumBones * FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer + GET2_NUMBER;
 
-		uint16 NumSlicesTransformTexture = FMath::Min(FMath::CeilToInt(static_cast<float>(MaxMeshes / PowXY)) + GET1_NUMBER, 1023);
+		uint16 NumSlicesTransformTexture = FMath::Min(
+			FMath::CeilToInt(static_cast<float>(MaxMeshes / PowXY)) + GET1_NUMBER, 1023);
 
 		uint8 TextureByteType = GET8_NUMBER;
 		// if (bUseHighPrecisionAnimationMode)
@@ -420,12 +456,24 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 
 		if (!bManuallyAdjustTextureSize)
 		{
-			if ((FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != Resolution || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
-			!= Resolution || NumSlicesTransformTexture != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices /* || FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode*/) || (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeX || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
-			!= FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeY || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->Slices != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetFormat() != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetFormat()))
+			if ((FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != Resolution ||
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
+					!= Resolution || NumSlicesTransformTexture != FTurboSequence_Editor_LfModule::GlobalData->
+					                                              TransformTexture_CurrentFrame->Slices
+					/* || FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode*/)
+				|| (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX !=
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeX ||
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
+					!= FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeY ||
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->Slices !=
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices ||
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetFormat() !=
+					FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetFormat()))
 			{
-				const UPackage* CurrentPackage = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetOutermost();
-				const FString CurrentPackagePath = FPackageName::LongPackageNameToFilename(CurrentPackage->GetName(), FPackageName::GetAssetPackageExtension());
+				const UPackage* CurrentPackage = FTurboSequence_Editor_LfModule::GlobalData->
+				                                 TransformTexture_CurrentFrame->GetOutermost();
+				const FString CurrentPackagePath = FPackageName::LongPackageNameToFilename(
+					CurrentPackage->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*CurrentPackagePath);
 
 				ETextureRenderTargetFormat Format = RTF_RGBA16f;
@@ -434,17 +482,27 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 				// 	Format = RTF_RGBA32f;
 				// }
 
-				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(CurrentPackagePath, FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetName(), Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
+				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame =
+					FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
+						CurrentPackagePath,
+						FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetName(),
+						Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
 
-				const UPackage* PreviousPackage = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetOutermost();
-				const FString PreviousPackagePath = FPackageName::LongPackageNameToFilename(PreviousPackage->GetName(), FPackageName::GetAssetPackageExtension());
+				const UPackage* PreviousPackage = FTurboSequence_Editor_LfModule::GlobalData->
+				                                  TransformTexture_PreviousFrame->GetOutermost();
+				const FString PreviousPackagePath = FPackageName::LongPackageNameToFilename(
+					PreviousPackage->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PreviousPackagePath);
 
-				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(PreviousPackagePath, FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetName(), Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
+				FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame =
+					FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
+						PreviousPackagePath,
+						FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetName(),
+						Resolution, NumSlicesTransformTexture, GetPixelFormatFromRenderTargetFormat(Format));
 
 				bEditedData = true;
 			}
-			
+
 			if (bEditedData)
 			{
 				// if (FTurboSequence_Editor_LfModule::GlobalData->bUseHighPrecisionAnimationMode != bUseHighPrecisionAnimationMode)
@@ -465,20 +523,29 @@ void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Switched to manual texture adjustment mode...."));
 			UE_LOG(LogTurboSequence_Lf, Display, TEXT("--------------------------------------------------"));
 
-			const UPackage* PackageTransformTexture = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetOutermost();
-			const FString PackagePathTransformTexture = FPackageName::LongPackageNameToFilename(PackageTransformTexture->GetName(), FPackageName::GetAssetPackageExtension());
+			const UPackage* PackageTransformTexture = FTurboSequence_Editor_LfModule::GlobalData->
+			                                          TransformTexture_CurrentFrame->GetOutermost();
+			const FString PackagePathTransformTexture = FPackageName::LongPackageNameToFilename(
+				PackageTransformTexture->GetName(), FPackageName::GetAssetPackageExtension());
 
-			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Current Frame Transform Texture is at Path -> %s"), *PackagePathTransformTexture);
+			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Current Frame Transform Texture is at Path -> %s"),
+			       *PackagePathTransformTexture);
 
-			const UPackage* PackageTransformTexturePrevious = FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetOutermost();
-			const FString PackagePathTransformTexturePrevious = FPackageName::LongPackageNameToFilename(PackageTransformTexturePrevious->GetName(), FPackageName::GetAssetPackageExtension());
+			const UPackage* PackageTransformTexturePrevious = FTurboSequence_Editor_LfModule::GlobalData->
+			                                                  TransformTexture_PreviousFrame->GetOutermost();
+			const FString PackagePathTransformTexturePrevious = FPackageName::LongPackageNameToFilename(
+				PackageTransformTexturePrevious->GetName(), FPackageName::GetAssetPackageExtension());
 
-			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Previous Frame Transform Texture is at Path -> %s"), *PackagePathTransformTexturePrevious);
+			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Previous Frame Transform Texture is at Path -> %s"),
+			       *PackagePathTransformTexturePrevious);
 
-			const UPackage* PackageSkinWeightTexture = FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture->GetOutermost();
-			const FString PackagePathSkinWeightTexture = FPackageName::LongPackageNameToFilename(PackageSkinWeightTexture->GetName(), FPackageName::GetAssetPackageExtension());
+			const UPackage* PackageSkinWeightTexture = FTurboSequence_Editor_LfModule::GlobalData->SkinWeightTexture->
+				GetOutermost();
+			const FString PackagePathSkinWeightTexture = FPackageName::LongPackageNameToFilename(
+				PackageSkinWeightTexture->GetName(), FPackageName::GetAssetPackageExtension());
 
-			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Skin Weight Texture is at Path -> %s"), *PackagePathSkinWeightTexture);
+			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Skin Weight Texture is at Path -> %s"),
+			       *PackagePathSkinWeightTexture);
 		}
 	}
 }

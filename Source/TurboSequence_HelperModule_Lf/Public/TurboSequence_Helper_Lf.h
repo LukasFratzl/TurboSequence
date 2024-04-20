@@ -9,8 +9,8 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "RenderTargetPool.h"
-#include "RHIGPUReadback.h"
 #include "RHIDefinitions.h"
+#include "RHIGPUReadback.h"
 #include "TextureRenderTarget2DArrayResource.h"
 #include "Animation/AnimationPoseData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -109,7 +109,6 @@ inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 #define GET100_NEGATIVE_NUMBER ( static_cast<int8>(-100) )
 //         creates -135 AS 2 Byte value
 #define GET135_NEGATIVE_NUMBER ( static_cast<int16>(-135) )
-
 
 
 // -> Licence Start
@@ -258,11 +257,12 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FAnimPose_Lf
 			//GenerateWorldSpaceTransforms();
 
 			const FBlendedCurve& Curve = PoseData.GetCurve();
-			Curve.ForEachElement([&CurveNames = CurveNames, &CurveValues = CurveValues](const UE::Anim::FCurveElement& InElement)
-			{
-				CurveNames.Add(InElement.Name);
-				CurveValues.Add(InElement.Value);
-			});
+			Curve.ForEachElement(
+				[&CurveNames = CurveNames, &CurveValues = CurveValues](const UE::Anim::FCurveElement& InElement)
+				{
+					CurveNames.Add(InElement.Name);
+					CurveValues.Add(InElement.Value);
+				});
 		}
 		else
 		{
@@ -341,12 +341,12 @@ public:
 		return GetTargetPlatformManagerRef().GetRunningTargetPlatform()->PlatformName();
 	}
 
-	inline static constexpr uint8 NumGPUTextureBoneBuffer = GET3_NUMBER;
-	inline static constexpr uint8 NumGPUBoneIKBuffer = GET3_NUMBER;
+	static constexpr uint8 NumGPUTextureBoneBuffer = GET3_NUMBER;
+	static constexpr uint8 NumGPUBoneIKBuffer = GET3_NUMBER;
 	//inline static constexpr uint8 NumInstanceCustomDataPixel = GET2_NUMBER; // Four 16 bit floats per patch
-	inline static constexpr uint8 NumInstanceCustomData = GET16_NUMBER; // Max Niagara
-	inline static constexpr uint8 NumCustomStates = GET1_NUMBER;
-	inline static constexpr uint8 NumSkinWeightPixels = GET7_NUMBER; // 6 For the weights, 1 for custom data
+	static constexpr uint8 NumInstanceCustomData = GET16_NUMBER; // Max Niagara
+	static constexpr uint8 NumCustomStates = GET1_NUMBER;
+	static constexpr uint8 NumSkinWeightPixels = GET7_NUMBER; // 6 For the weights, 1 for custom data
 
 	inline static const FString PluginConfigName = FString("TurboSequence_Lf.ini");
 
@@ -371,13 +371,13 @@ public:
 	inline static const FString ReferenceTurboSequenceTransformTextureCurrentFrame = FString(
 		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_CurrentFrame_Lf.T_TurboSequence_TransformTexture_CurrentFrame_Lf'");
 	inline static const FString ReferenceTurboSequenceTransformTexturePreviousFrame = FString(
-	"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_PreviousFrame_Lf.T_TurboSequence_TransformTexture_PreviousFrame_Lf'");
+		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_PreviousFrame_Lf.T_TurboSequence_TransformTexture_PreviousFrame_Lf'");
 	inline static const FString ReferenceTurboSequenceSkinWeightTexture = FString(
 		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_SkinWeightTexture_Lf.T_TurboSequence_SkinWeightTexture_Lf'");
 	inline static const FString ReferenceTurboSequenceDataTexture = FString(
 		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_DataTexture_Lf.T_TurboSequence_DataTexture_Lf'");
 
-	inline static constexpr uint8 NotVisibleMeshIndex = GET32_NUMBER;
+	static constexpr uint8 NotVisibleMeshIndex = GET32_NUMBER;
 
 	inline static const FName NameMaterialParameterMeshDataTexture = FName("SkinWeight_Texture2DArray");
 	inline static const FName NameMaterialParameterMeshDataTextureSizeX = FName("SkinWeight_TexX");
@@ -417,7 +417,11 @@ public:
 			}
 
 			FBoneContainer RequiredBones;
-			RequiredBones.InitializeTo(RequiredBoneIndexArray, UE::Anim::FCurveFilterSettings(EvaluationOptions.bEvaluateCurves ? UE::Anim::ECurveFilterMode::None : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
+			RequiredBones.InitializeTo(RequiredBoneIndexArray,
+			                           UE::Anim::FCurveFilterSettings(
+				                           EvaluationOptions.bEvaluateCurves
+					                           ? UE::Anim::ECurveFilterMode::None
+					                           : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
 
 			RequiredBones.SetUseRAWData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Raw);
 			RequiredBones.SetUseSourceData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Source);
@@ -497,7 +501,8 @@ public:
 		return Pose.BoneNames.IndexOfByKey(BoneName);
 	}
 
-	static const FTurboSequence_TransposeMatrix_Lf& GetAnimationBonePose(const FAnimPose_Lf& Pose, const FName& BoneName)
+	static const FTurboSequence_TransposeMatrix_Lf& GetAnimationBonePose(
+		const FAnimPose_Lf& Pose, const FName& BoneName)
 	{
 		if (const int32 BoneIndex = Pose.BoneNames.IndexOfByKey(BoneName); BoneIndex != INDEX_NONE)
 		{
@@ -548,7 +553,11 @@ public:
 		}
 
 		FBoneContainer RequiredBones;
-		RequiredBones.InitializeTo(RequiredBoneIndexArray, UE::Anim::FCurveFilterSettings(EvaluationOptions.bEvaluateCurves ? UE::Anim::ECurveFilterMode::None : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
+		RequiredBones.InitializeTo(RequiredBoneIndexArray,
+		                           UE::Anim::FCurveFilterSettings(
+			                           EvaluationOptions.bEvaluateCurves
+				                           ? UE::Anim::ECurveFilterMode::None
+				                           : UE::Anim::ECurveFilterMode::DisallowAll), *AssetToUse);
 
 		RequiredBones.SetUseRAWData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Raw);
 		RequiredBones.SetUseSourceData(EvaluationOptions.EvaluationType == EAnimDataEvalType_Lf::Source);
@@ -717,7 +726,8 @@ public:
 
 	static FORCEINLINE_DEBUGGABLE void GetCameraFrustumPlanes_ObjectSpace(FPlane (&Out_ObjectSpace_Planes)[GET6_NUMBER],
 	                                                                      float Fov, const FVector2f ViewportSize,
-	                                                                      const TOptional<EAspectRatioAxisConstraint> InAspectRatioAxisConstraint,
+	                                                                      const TOptional<EAspectRatioAxisConstraint>
+	                                                                      InAspectRatioAxisConstraint,
 	                                                                      float NearClippingPlane,
 	                                                                      float FarClippingPlane,
 	                                                                      bool bOrthographicModeEnabled,
@@ -735,15 +745,16 @@ public:
 		float HozLength;
 		float VertLength;
 		float AspectRatio;
-		if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+		if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (
+			InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
 		{
 			//if the viewport is wider than it is tall
-			AspectRatio = ViewportSize.X / (float)ViewportSize.Y;
+			AspectRatio = ViewportSize.X / static_cast<float>(ViewportSize.Y);
 		}
 		else
 		{
 			//if the viewport is taller than it is wide
-			AspectRatio = ViewportSize.Y / (float)ViewportSize.X;
+			AspectRatio = ViewportSize.Y / static_cast<float>(ViewportSize.X);
 		}
 
 		if (bOrthographicModeEnabled)
@@ -753,7 +764,8 @@ public:
 		}
 		else
 		{
-			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (
+				InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
 			{
 				// Calculate lengths based on the chosen FOV
 				HozLength = NearClippingPlane * FMath::Tan(HozHalfAngleInRadians);
@@ -775,7 +787,8 @@ public:
 
 		if (!bOrthographicModeEnabled)
 		{
-			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+			if (((ViewportSize.X > ViewportSize.Y) && (InAspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (
+				InAspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
 			{
 				// Calculate lengths based on the chosen FOV
 				HozLength = FarClippingPlane * FMath::Tan(HozHalfAngleInRadians);
@@ -1000,7 +1013,7 @@ public:
 	static FORCEINLINE_DEBUGGABLE FIntVector2 DecodeUInt16ToUInt8Vector2(uint16 Number)
 	{
 		FIntVector2 Vector;
-		
+
 		Vector.Y = (Number >> GET8_NUMBER) & 0xFF;
 		Vector.X = Number & 0xFF;
 
@@ -1195,22 +1208,22 @@ public:
 	 * @return returns the final pass parameter to use it for your shader allocation as unordered access view
 	 */
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTexture_Half4_Out(FRDGBuilder& GraphBuilder,
-	                                                                             FRDGTextureRef& OutputTextureRef,
-	                                                                             int32 SizeX, int32 SizeY,
-	                                                                             const TCHAR* TextureName, const FStaticShaderPlatform& ShaderPlatform)
+		FRDGTextureRef& OutputTextureRef,
+		int32 SizeX, int32 SizeY,
+		const TCHAR* TextureName, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		return CreateWriteTexture_Custom_Out(GraphBuilder, OutputTextureRef, SizeX, SizeY, TextureName, PF_FloatRGBA,
 		                                     ShaderPlatform);
 	}
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureUAVRef CreateWriteTexture_Custom_Out(FRDGBuilder& GraphBuilder,
-	                                                                              FRDGTextureRef& OutputTextureRef,
-	                                                                              int32 SizeX, int32 SizeY,
-	                                                                              const TCHAR* TextureName,
-	                                                                              const EPixelFormat& Format, const FStaticShaderPlatform& ShaderPlatform)
+		FRDGTextureRef& OutputTextureRef,
+		int32 SizeX, int32 SizeY,
+		const TCHAR* TextureName,
+		const EPixelFormat& Format, const FStaticShaderPlatform& ShaderPlatform)
 	{
 		ETextureCreateFlags TexCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable | TexCreate_UAV;
-		
+
 
 		// Create the texture description
 		// here we straight define PF_FloatRGBA to have a float4 value in the shader
@@ -1412,12 +1425,14 @@ public:
 	{
 		TRefCountPtr<IPooledRenderTarget> PooledRenderTarget;
 		FRDGTextureRef OutputTextureRef;
-		return CreateReadRenderTargetArrayTexture_Custom_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef,Texture,TextureName, EPixelFormat::PF_FloatRGBA);
+		return CreateReadRenderTargetArrayTexture_Custom_Out(GraphBuilder, PooledRenderTarget, OutputTextureRef,
+		                                                     Texture, TextureName, PF_FloatRGBA);
 	}
 
 	static FORCEINLINE_DEBUGGABLE FRDGTextureSRVRef CreateReadRenderTargetArrayTexture_Custom_Out(
 		FRDGBuilder& GraphBuilder, TRefCountPtr<IPooledRenderTarget>& PooledRenderTarget,
-		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName, const EPixelFormat& Format)
+		FRDGTextureRef& OutputTextureRef, UTextureRenderTarget2DArray& Texture, const TCHAR* TextureName,
+		const EPixelFormat& Format)
 	{
 		// Get the render target resource
 		const FRenderTarget* RenderTargetResource = Texture.GetRenderTargetResource();
@@ -1765,7 +1780,8 @@ public:
 		Map.KeySort([](const Key& A, const Key& B) { return A < B; });
 	}
 
-	static FORCEINLINE_DEBUGGABLE void SaveNewAsset(const TObjectPtr<UObject> Asset, const FString& UniqueIdentifier = FString(""))
+	static FORCEINLINE_DEBUGGABLE void SaveNewAsset(const TObjectPtr<UObject> Asset,
+	                                                const FString& UniqueIdentifier = FString(""))
 	{
 		UPackage* Package = Asset->GetOutermost();
 		if (!Package->MarkPackageDirty())

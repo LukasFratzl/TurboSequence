@@ -106,19 +106,22 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 		GlobalLibrary_RenderThread.AnimationLibraryParams.bIsAdditiveWrite = true;
 		GlobalLibrary_RenderThread.AnimationLibraryParams.bUse32BitTexture = false;
 
-		FSettingsCompute_Shader_Execute_Lf::Dispatch(GlobalLibrary_RenderThread.AnimationLibraryParams, GlobalData->AnimationLibraryTexture);
-			
+		FSettingsCompute_Shader_Execute_Lf::Dispatch(GlobalLibrary_RenderThread.AnimationLibraryParams,
+		                                             GlobalData->AnimationLibraryTexture);
+
 		FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread = GlobalLibrary_RenderThread;
 		ENQUEUE_RENDER_COMMAND(TurboSequence_ClearAnimLibraryInput_Lf)(
-		[&Library_RenderThread](FRHICommandListImmediate& RHICmdList)
-		{
-			Library_RenderThread.AnimationLibraryParams.SettingsInput.Reset();
-			Library_RenderThread.AnimationLibraryParams.AdditiveWriteBaseIndex = Library_RenderThread.AnimationLibraryMaxNum;
-		});
-		
+			[&Library_RenderThread](FRHICommandListImmediate& RHICmdList)
+			{
+				Library_RenderThread.AnimationLibraryParams.SettingsInput.Reset();
+				Library_RenderThread.AnimationLibraryParams.AdditiveWriteBaseIndex = Library_RenderThread.
+					AnimationLibraryMaxNum;
+			});
+
 		GlobalLibrary_RenderThread.BoneTransformParams.AnimationLibraryTexture = GlobalData->AnimationLibraryTexture;
-		GlobalLibrary_RenderThread.BoneTransformParams.AnimationOutputTexturePrevious = GlobalData->TransformTexture_PreviousFrame;
-		
+		GlobalLibrary_RenderThread.BoneTransformParams.AnimationOutputTexturePrevious = GlobalData->
+			TransformTexture_PreviousFrame;
+
 		FMeshUnit_Compute_Shader_Execute_Lf::Dispatch(
 			[&](FRHICommandListImmediate& RHICmdList)
 			{
@@ -139,7 +142,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				}
 			});
 	}
-	
+
 	GlobalLibrary.NumGroupsUpdatedThisFrame = GET0_NUMBER;
 
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Num())
@@ -197,7 +200,8 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInsta
 	return Data;
 }
 
-bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurboSequence_MinimalMeshData_Lf& MeshData, UWorld* InWorld)
+bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurboSequence_MinimalMeshData_Lf& MeshData,
+                                                                     UWorld* InWorld)
 {
 	bool bSuccess = false;
 
@@ -253,16 +257,17 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			if (!IsValid(FromAsset->GlobalData))
 			{
 				UE_LOG(LogTurboSequence_Lf, Warning,
-					   TEXT("Can't create Mesh Instance, there is no global data available...."));
+				       TEXT("Can't create Mesh Instance, there is no global data available...."));
 				UE_LOG(LogTurboSequence_Lf, Error,
-					   TEXT(
-						   "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
-					   ));
+				       TEXT(
+					       "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
+				       ));
 				return GET0_NUMBER;
 			}
 		}
 
-		if (!IsValid(FromAsset->GlobalData->TransformTexture_CurrentFrame) || !IsValid(FromAsset->GlobalData->TransformTexture_PreviousFrame))
+		if (!IsValid(FromAsset->GlobalData->TransformTexture_CurrentFrame) || !IsValid(
+			FromAsset->GlobalData->TransformTexture_PreviousFrame))
 		{
 			UE_LOG(LogTurboSequence_Lf, Warning,
 			       TEXT(
@@ -382,7 +387,8 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			for (FCameraView_Lf& View : GlobalLibrary.CameraViews)
 			{
 				FTurboSequence_Helper_Lf::GetCameraFrustumPlanes_ObjectSpace(
-					View.Planes_Internal, View.Fov, View.ViewportSize, View.AspectRatioAxisConstraint, View.NearClipPlane, View.FarClipPlane,
+					View.Planes_Internal, View.Fov, View.ViewportSize, View.AspectRatioAxisConstraint,
+					View.NearClipPlane, View.FarClipPlane,
 					!View.bIsPerspective, View.OrthoWidth);
 
 				View.InterpolatedCameraTransform_Internal = View.CameraTransform;
@@ -553,7 +559,8 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int64 MeshI
  * @param InWorld The world, we need it for the cameras and culling
  * @param UpdateContext The Update Context for useful stuff like the Group Index
  */
-void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* InWorld, FTurboSequence_UpdateContext_Lf UpdateContext)
+void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* InWorld,
+                                                       FTurboSequence_UpdateContext_Lf UpdateContext)
 {
 	SCOPE_CYCLE_COUNTER(STAT_Solve_TurboSequenceMeshes_Lf);
 	{
@@ -640,19 +647,13 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 				FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(
 					Runtime, Reference, GlobalLibrary.CameraViews, ThreadContext, bIsVisiblePrevious, GlobalLibrary);
+				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
 
 				FTurboSequence_Utility_Lf::UpdateDistanceUpdating(Runtime, DeltaTime);
 
-				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
-				if (LodElement.bIsRenderStateValid)
-				{
-					FTurboSequence_Utility_Lf::SetCustomDataForInstance(
-						Reference, GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()], LodElement.SkinWeightOffset,
-						Runtime, GlobalLibrary);
-				}
-
 				bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
-					(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
+				(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
+					HybridModeMeshDrawRangeUEInstance);
 
 				if (!LodElement.bIsFrustumCullingEnabled && bIsInTSMeshDrawRange)
 				{
@@ -669,7 +670,16 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						Reference, Runtime, LodElement, false);
 				}
 
-				if (Runtime.bIsVisible || Runtime.bForceVisibilityUpdatingThisFrame)
+				// Need to be at last because bIsVisible is updating later
+				if (LodElement.bIsRenderStateValid)
+				{
+					FTurboSequence_Utility_Lf::SetCustomDataForInstance(
+						Reference, GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()], LodElement.SkinWeightOffset,
+						Runtime, GlobalLibrary);
+				}
+
+				if (FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference) || Runtime.
+					bForceVisibilityUpdatingThisFrame)
 				{
 					FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
 
@@ -716,7 +726,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 		}, EParallelForFlags::BackgroundPriority);
 
 
-		FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(ThreadContext->CriticalSection, GlobalLibrary, Library_RenderThread);
+		FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(ThreadContext->CriticalSection, GlobalLibrary,
+		                                                     Library_RenderThread);
 
 		for (TTuple<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf>& ReferenceData : GlobalLibrary.
 		     PerReferenceData)
@@ -745,7 +756,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						{
 							Runtime.bSpawnedHybridActor = false;
 
-							Runtime.FootprintAsset->OnHybridModeUEInstanceDestroy_GameThread_Override(MeshData, InWorld);
+							Runtime.FootprintAsset->
+							        OnHybridModeUEInstanceDestroy_GameThread_Override(MeshData, InWorld);
 
 							GlobalLibrary.HybridMeshes.Remove(MeshData);
 						}
@@ -775,7 +787,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 			GlobalLibrary_RenderThread.BoneTransformParams.NumDebugData = GET10_NUMBER;
 
-			GlobalLibrary_RenderThread.BoneTransformParams.bUse32BitTransformTexture = Instance->GlobalData->bUseHighPrecisionAnimationMode;
+			GlobalLibrary_RenderThread.BoneTransformParams.bUse32BitTransformTexture = Instance->GlobalData->
+				bUseHighPrecisionAnimationMode;
 
 			const uint32 AnimationMaxNum = GlobalLibrary.AnimationLibraryMaxNum;
 
@@ -796,7 +809,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 			FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(
 				GlobalLibrary, Library_RenderThread, ThreadContext->CriticalSection);
 		}
-		
+
 		FTurboSequence_Utility_Lf::UpdateCameras_2(LastFrameCameraTransforms, GlobalLibrary.CameraViews);
 
 		GlobalLibrary.bMaxNumCPUBonesChanged = false;
@@ -871,7 +884,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 				CriticalSection.Lock();
 				GlobalLibrary_RenderThread.NumAnimationsCurrentFrame += Runtime.AnimationMetaData_RenderThread.Num();
 
-				
+
 				CriticalSection.Unlock();
 
 
@@ -936,7 +949,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	MeshParams.PerMeshCustomDataCollectionIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
 	MeshParams.AnimationStartIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
 	MeshParams.AnimationEndIndex_RenderThread.SetNumUninitialized(NumMeshes_RenderThread);
-	
+
 	MeshParams.AnimationFramePose0_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
 	MeshParams.AnimationWeights_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
 	MeshParams.AnimationLayerIndex_RenderThread.SetNumUninitialized(NumAnimations_RenderThread);
@@ -1019,7 +1032,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 							AnimIdx];
 
 						int32 BufferIndex = CurrentAnimationIndex;
-						
+
 						MeshParams.AnimationFramePose0_RenderThread[BufferIndex] = Animation.GPUAnimationIndex_0;
 						MeshParams.AnimationWeights_RenderThread[BufferIndex] = Animation.FinalAnimationWeight;
 						MeshParams.AnimationLayerIndex_RenderThread[BufferIndex] = Animation.LayerMaskIndex;
@@ -1070,7 +1083,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 								MeshParams.BoneSpaceAnimationIKData_RenderThread[CurrentIKDataIndex] = BoneIdx.Value;
 
 								const FMatrix& BoneMatrix = Runtime.IKData[BoneIdx.Key].IKWriteTransform.
-								                                                        ToMatrixWithScale();
+									ToMatrixWithScale();
 
 								for (int32 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 								{
@@ -1140,7 +1153,8 @@ void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const 
 			Group.RawIDs.Add(MeshID);
 			if (!Group.MeshIDToMinimal.Contains(GlobalLibrary.MeshIDToMinimalData[MeshID]))
 			{
-				Group.MeshIDToMinimal.Add(GlobalLibrary.MeshIDToMinimalData[MeshID], FIntVector2(GET1_NUMBER, Group.MeshIDToMinimal.Num()));
+				Group.MeshIDToMinimal.Add(GlobalLibrary.MeshIDToMinimalData[MeshID],
+				                          FIntVector2(GET1_NUMBER, Group.MeshIDToMinimal.Num()));
 				Group.RawMinimalData.Add(GlobalLibrary.MeshIDToMinimalData[MeshID]);
 			}
 			else
@@ -1213,7 +1227,8 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(c
 					Group.MeshIDToMinimal[GlobalLibrary.MeshIDToMinimalData[MeshID]].X--;
 					if (Group.MeshIDToMinimal[GlobalLibrary.MeshIDToMinimalData[MeshID]].X <= GET0_NUMBER)
 					{
-						const int32 MinimalIndexToRemove = Group.MeshIDToMinimal[GlobalLibrary.MeshIDToMinimalData[MeshID]].Y;
+						const int32 MinimalIndexToRemove = Group.MeshIDToMinimal[GlobalLibrary.MeshIDToMinimalData[
+							MeshID]].Y;
 
 						Group.MeshIDToMinimal.Remove(GlobalLibrary.MeshIDToMinimalData[MeshID]);
 						Group.RawMinimalData.RemoveAt(MinimalIndexToRemove);
@@ -1233,7 +1248,8 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(c
 }
 
 void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(const int32 GroupIndex,
-                                                                         const FTurboSequence_MinimalMeshData_Lf& MeshData)
+                                                                         const FTurboSequence_MinimalMeshData_Lf&
+                                                                         MeshData)
 {
 	RemoveInstanceFromUpdateGroup_RawID_Concurrent(GroupIndex, MeshData.RootMotionMeshID);
 	for (int64 MeshID : MeshData.CustomizableMeshIDs)

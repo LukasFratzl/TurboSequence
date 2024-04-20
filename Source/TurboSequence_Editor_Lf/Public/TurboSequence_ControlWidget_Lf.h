@@ -123,11 +123,14 @@ public:
 
 	TMap<EShow_ControlPanel_Objects_Lf, TObjectPtr<UObject>> EditorObjects;
 
-	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object, const EShow_ControlPanel_Objects_Lf& Category, bool SuppressInfo = false)
+	FORCEINLINE_DEBUGGABLE void AddObject(const TObjectPtr<UObject> Object,
+	                                      const EShow_ControlPanel_Objects_Lf& Category, bool SuppressInfo = false)
 	{
 		if (!Object && !SuppressInfo)
 		{
-			UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Missing Object in the Editor Control Panel UI, this should not happen ...., Category -> %s"), *UEnum::GetValueAsString(Category));
+			UE_LOG(LogTurboSequence_Lf, Warning,
+			       TEXT("Missing Object in the Editor Control Panel UI, this should not happen ...., Category -> %s"),
+			       *UEnum::GetValueAsString(Category));
 		}
 		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Object, Category);
 	}
@@ -159,7 +162,10 @@ public:
 
 	static FORCEINLINE_DEBUGGABLE void PrintMainAssetMissingWarning(const FName& ItemName, const FName& ItemType)
 	{
-		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Trying to set %s without having the Main Asset Assigned ( This one in the Reference Section ), the progress won't save, please assign the Main Asset and set the %s again..."), *ItemName.ToString(), *ItemType.ToString());
+		UE_LOG(LogTurboSequence_Lf, Warning,
+		       TEXT(
+			       "Trying to set %s without having the Main Asset Assigned ( This one in the Reference Section ), the progress won't save, please assign the Main Asset and set the %s again..."
+		       ), *ItemName.ToString(), *ItemType.ToString());
 	}
 
 	static FORCEINLINE_DEBUGGABLE void SaveAssetByTimer(float TimeInSeconds)
@@ -168,7 +174,6 @@ public:
 		SaveTimerMainAsset = TimeInSeconds;
 	}
 
-public:
 	TMap<EShow_ControlPanel_Section_Lf, TObjectPtr<UScrollBox>> Sections;
 	TMap<EShow_ControlPanel_Buttons_Lf, TArray<TObjectPtr<UButton>>> Buttons;
 	TMap<EShow_ControlPanel_Properties_Lf, TArray<TObjectPtr<UPropertyViewBase>>> Properties;
@@ -176,10 +181,14 @@ public:
 	EShow_ControlPanel_Section_Lf CurrentSectionWhichIsShowing = EShow_ControlPanel_Section_Lf::Reference;
 
 	UFUNCTION(BlueprintCallable)
-	void CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox, UScrollBox* GenerateScrollBox, UScrollBox* TweaksScrollBox);
+	void CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox, UScrollBox* GenerateScrollBox,
+	                   UScrollBox* TweaksScrollBox);
 
 	UFUNCTION(BlueprintCallable)
-	void CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton, UButton* GenerateButton, UButton* TweaksButton, UButton* DocsButton, UButton* DiscordButton, TArray<UButton*> PreviousSectionButtons, TArray<UButton*> NextSectionButtons, UButton* CreateLodButton, UButton* CreateGlobalTextureButton);
+	void CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton, UButton* GenerateButton,
+	                  UButton* TweaksButton, UButton* DocsButton, UButton* DiscordButton,
+	                  TArray<UButton*> PreviousSectionButtons, TArray<UButton*> NextSectionButtons,
+	                  UButton* CreateLodButton, UButton* CreateGlobalTextureButton);
 
 	UFUNCTION(BlueprintCallable)
 	void CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh,
@@ -204,7 +213,8 @@ public:
 	void OnGenerateButtonPressed();
 
 
-	FORCEINLINE_DEBUGGABLE void AddSection(const TObjectPtr<UScrollBox> Section, const EShow_ControlPanel_Section_Lf& Category)
+	FORCEINLINE_DEBUGGABLE void AddSection(const TObjectPtr<UScrollBox> Section,
+	                                       const EShow_ControlPanel_Section_Lf& Category)
 	{
 		if (Section && !Sections.Contains(Category))
 		{
@@ -212,7 +222,8 @@ public:
 		}
 	}
 
-	FORCEINLINE_DEBUGGABLE void AddButton(const TObjectPtr<UButton> Button, const EShow_ControlPanel_Buttons_Lf& Category)
+	FORCEINLINE_DEBUGGABLE void AddButton(const TObjectPtr<UButton> Button,
+	                                      const EShow_ControlPanel_Buttons_Lf& Category)
 	{
 		if (Button)
 		{
@@ -231,7 +242,8 @@ public:
 		}
 	}
 
-	FORCEINLINE_DEBUGGABLE void AddPropertyToArray(const TObjectPtr<UPropertyViewBase> Property, const EShow_ControlPanel_Properties_Lf& Category)
+	FORCEINLINE_DEBUGGABLE void AddPropertyToArray(const TObjectPtr<UPropertyViewBase> Property,
+	                                               const EShow_ControlPanel_Properties_Lf& Category)
 	{
 		if (Property)
 		{
@@ -275,7 +287,8 @@ public:
 		}
 	}
 
-	static FORCEINLINE_DEBUGGABLE EShow_ControlPanel_Buttons_Lf GetCommonButtonEnum(const EShow_ControlPanel_Section_Lf& RequestEnum)
+	static FORCEINLINE_DEBUGGABLE EShow_ControlPanel_Buttons_Lf GetCommonButtonEnum(
+		const EShow_ControlPanel_Section_Lf& RequestEnum)
 	{
 		switch (RequestEnum)
 		{
@@ -303,10 +316,14 @@ public:
 												TWEAKING BEHAVIOUR
 	==============================================================================================================	*/
 
-	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Instances ( Including Customization Parts )", ClampMin = "100", ClampMax = "200000"), Category="Texture Tweaking")
+	UPROPERTY(EditAnywhere, Config,
+		meta = (DisplayName = "Max Amount of Instances ( Including Customization Parts )", ClampMin = "100", ClampMax =
+			"200000"), Category="Texture Tweaking")
 	uint32 MaxNumMeshes = 20000;
 
-	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Max Amount of Bones In all Skeletons", ClampMin = "5", ClampMax = "200"), Category="Texture Tweaking")
+	UPROPERTY(EditAnywhere, Config,
+		meta = (DisplayName = "Max Amount of Bones In all Skeletons", ClampMin = "5", ClampMax = "200"),
+		Category="Texture Tweaking")
 	uint32 MaxNumBones = 75;
 
 	//UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Use high precision 32 bit Textures for Animations"), Category="Texture Tweaking")
@@ -328,7 +345,8 @@ public:
 	===========================================================================================================	*/
 
 	// TODO: move in helpers
-	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> DuplicateSkeletalMesh(const TObjectPtr<USkeletalMesh> FromMesh, const FName& AssetName, bool bRemoveLODs)
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> DuplicateSkeletalMesh(
+		const TObjectPtr<USkeletalMesh> FromMesh, const FName& AssetName, bool bRemoveLODs)
 	{
 		const TObjectPtr<USkeletalMesh> DuplicatedMesh = DuplicateObject(FromMesh, FromMesh->GetOuter(), AssetName);
 
@@ -341,45 +359,52 @@ public:
 	}
 
 	// TODO: move in helpers
-	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> GenerateSkeletalMeshLevelOfDetails(const TObjectPtr<USkeletalMesh> FromMesh, int32 NewLODCount)
+	static FORCEINLINE_DEBUGGABLE TObjectPtr<USkeletalMesh> GenerateSkeletalMeshLevelOfDetails(
+		const TObjectPtr<USkeletalMesh> FromMesh, int32 NewLODCount)
 	{
-		UE_LOG(LogTurboSequence_Lf, Display, TEXT("Reducing Mesh for Platform -> %s"), *GetTargetPlatformManagerRef().GetRunningTargetPlatform()->DisplayName().ToString());
+		UE_LOG(LogTurboSequence_Lf, Display, TEXT("Reducing Mesh for Platform -> %s"),
+		       *GetTargetPlatformManagerRef().GetRunningTargetPlatform()->DisplayName().ToString());
 
-		FLODUtilities::RegenerateLOD(FromMesh, GetTargetPlatformManagerRef().GetRunningTargetPlatform(), NewLODCount, true, false);
+		FLODUtilities::RegenerateLOD(FromMesh, GetTargetPlatformManagerRef().GetRunningTargetPlatform(), NewLODCount,
+		                             true, false);
 
 		return FromMesh;
 	}
 
 
 	// TODO: move in helpers
-	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh, int32 LodIndex, const FString& InPath, const FString& InAssetName, TArray<int32>& OutMeshIndicesOrder)
+	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh,
+	                                                                  int32 LodIndex, const FString& InPath,
+	                                                                  const FString& InAssetName,
+	                                                                  TArray<int32>& OutMeshIndicesOrder)
 	{
-		
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
 			if (!IsValid(SkeletalMesh))
 			{
-				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s"), *PackageName);
+				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s"),
+				       *PackageName);
 				return nullptr;
 			}
-			
+
 			// Then find/create it.
 			UPackage* Package = CreatePackage(*PackageName);
 			check(Package);
 
 			// Create StaticMesh object
-			TObjectPtr<UStaticMesh> StaticMesh = NewObject<UStaticMesh>(Package, *InAssetName, RF_Public | RF_Standalone);
+			TObjectPtr<UStaticMesh> StaticMesh = NewObject<UStaticMesh>(
+				Package, *InAssetName, RF_Public | RF_Standalone);
 			StaticMesh->InitResources();
 
 			StaticMesh->SetLightingGuid();
-			
+
 			uint32 MaxNumTextureCoordinate = GET0_NUMBER;
 			const FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetResourceForRendering();
 
 
 			const FSkeletalMeshLODModel& LodModel = SkeletalMesh->GetImportedModel()->LODModels[LodIndex];
 			uint32 SkinnedMeshVertices = LodModel.NumVertices;
-		
+
 			FMeshDescription MeshDescription;
 			LodModel.GetMeshDescription(SkeletalMesh, LodIndex, MeshDescription);
 
@@ -391,7 +416,7 @@ public:
 			FSkeletalMeshAttributes MeshAttributes(MeshDescription);
 
 			TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = MeshAttributes.GetVertexInstanceUVs();
-			
+
 			VertexInstanceUVs.InsertChannel(MaxNumTextCoord);
 
 			int32 NumIndices = LodModel.IndexBuffer.Num();
@@ -408,7 +433,7 @@ public:
 
 				VertexInstanceUVs.Set(Idx, MaxNumTextCoord, FVector2f(BitValues.X, BitValues.Y));
 			}
-			
+
 
 			FRawMesh RawMesh;
 			FStaticMeshOperations::ConvertToRawMesh(MeshDescription, RawMesh, TMap<FName, int32>());
@@ -458,26 +483,32 @@ public:
 				SectionIndex++;
 			}
 			StaticMesh->GetOriginalSectionInfoMap().CopyFrom(StaticMesh->GetSectionInfoMap());
-			
+
 			StaticMesh->Build(false);
 			if (!StaticMesh->GetRenderData())
 			{
-				UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Seems like a caching error while generating %s, please delete this asset manually and try again"), *PackageName);
+				UE_LOG(LogTurboSequence_Lf, Warning,
+				       TEXT(
+					       "Seems like a caching error while generating %s, please delete this asset manually and try again"
+				       ), *PackageName);
 				return nullptr;
 			}
 			StaticMesh->PostEditChange();
-			
-			 FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
-			 const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
-			 float WantedZ = MinMax.Z;
-			 Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
-			
-			 StaticMesh->GetRenderData()->Bounds = Bounds;
-			 StaticMesh->SetExtendedBounds(Bounds);
+
+			FBoxSphereBounds Bounds = StaticMesh->GetRenderData()->Bounds;
+			const FVector MinMax = Bounds.BoxExtent * GET2_NUMBER;
+			float WantedZ = MinMax.Z;
+			Bounds = FBoxSphereBounds(Bounds.Origin, FVector::OneVector * WantedZ, WantedZ);
+
+			StaticMesh->GetRenderData()->Bounds = Bounds;
+			StaticMesh->SetExtendedBounds(Bounds);
 
 			if (SkinnedMeshVertices != StaticMesh->GetNumVertices(GET0_NUMBER))
 			{
-				UE_LOG(LogTurboSequence_Lf, Error, TEXT("It seems the created mesh has different amounts of vertices, it's not possible to skin weight the mesh without the same amount of vertices, the mesh would deform at runtime not great, -> Source Vertices %d, Converted Vertices -> %d"), SkinnedMeshVertices, StaticMesh->GetNumVertices(GET0_NUMBER));
+				UE_LOG(LogTurboSequence_Lf, Error,
+				       TEXT(
+					       "It seems the created mesh has different amounts of vertices, it's not possible to skin weight the mesh without the same amount of vertices, the mesh would deform at runtime not great, -> Source Vertices %d, Converted Vertices -> %d"
+				       ), SkinnedMeshVertices, StaticMesh->GetNumVertices(GET0_NUMBER));
 				return nullptr;
 			}
 

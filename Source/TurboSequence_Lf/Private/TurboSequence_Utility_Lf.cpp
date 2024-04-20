@@ -62,7 +62,7 @@ void FTurboSequence_Utility_Lf::CreateTurboSequenceReference(FSkinnedMeshGlobalL
 
 	FSkinnedMeshReference_Lf Reference = FSkinnedMeshReference_Lf(FromAsset);
 	FSkinnedMeshReference_RenderThread_Lf Reference_RenderThread = FSkinnedMeshReference_RenderThread_Lf();
-	
+
 
 	CreateLevelOfDetails(Reference, Reference_RenderThread, CriticalSection, FromAsset);
 
@@ -130,7 +130,8 @@ void FTurboSequence_Utility_Lf::CreateGPUBones(FSkinnedMeshReferenceLodElement_L
 				{
 					if (int32 BoneIndex =
 							GetBoneMapIndex_CPU(Section.BoneMap, SkinWeightBuffer->GetBoneIndex(VertIdx, InfluenceIdx));
-						SkinWeightBuffer->GetBoneWeight(VertIdx, InfluenceIdx) && BoneIndex > INDEX_NONE && !LodElement.CPUBoneToGPUBoneIndicesMap.Contains(BoneIndex))
+						SkinWeightBuffer->GetBoneWeight(VertIdx, InfluenceIdx) && BoneIndex > INDEX_NONE && !LodElement.
+						CPUBoneToGPUBoneIndicesMap.Contains(BoneIndex))
 					{
 						CriticalSection.Lock();
 						LodElement.CPUBoneToGPUBoneIndicesMap.Add(BoneIndex, GET0_NUMBER);
@@ -204,7 +205,6 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 				Library_RenderThread.BoneTransformParams.ReferenceNumCPUBones.SetNum(NumReferences);
 				for (int32 i = GET0_NUMBER; i < NumReferences; ++i)
 				{
-
 					FSkinnedMeshReference_RenderThread_Lf& Reference = Library_RenderThread.PerReferenceData[
 						Library_RenderThread.PerReferenceDataKeys[i]];
 
@@ -275,7 +275,6 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 					}
 					CachedIndices[BaseIndex + i] = Data;
 				}
-				
 			}, EParallelForFlags::BackgroundPriority);
 
 
@@ -398,7 +397,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 
 		CreateGPUBones(LodElement, CriticalSection, FromAsset, true);
 
-		const FSkeletalMeshLODRenderData& RenderData = FromAsset->ReferenceMeshEdited->GetResourceForRendering()->LODRenderData[LodElement.MeshIndex];
+		const FSkeletalMeshLODRenderData& RenderData = FromAsset->ReferenceMeshEdited->GetResourceForRendering()->
+		                                                          LODRenderData[LodElement.MeshIndex];
 		const FSkinWeightVertexBuffer* SkinWeightBuffer = RenderData.GetSkinWeightVertexBuffer();
 
 
@@ -436,8 +436,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 					int32 RawBoneIndex = SkinWeightBuffer->GetBoneIndex(RealVertexIndex, ChunkIndex + WeightIdx);
 
 					int32 IndexedBoneIndex = GetBoneMapIndex_GPU(LodElement.CPUBoneToGPUBoneIndicesMap,
-					                                                    Section.BoneMap, RawBoneIndex, Weight);
-					
+					                                             Section.BoneMap, RawBoneIndex, Weight);
+
 
 					Indices[WeightIdx] = IndexedBoneIndex;
 
@@ -448,8 +448,13 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 				}
 
 
-				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER] = Indices;
-				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER + GET1_NUMBER] = Weights;
+				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset +
+						RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx *
+						GET2_NUMBER] =
+					Indices;
+				FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset +
+					RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + InfluenceChunkIdx * GET2_NUMBER +
+					GET1_NUMBER] = Weights;
 			}
 
 			FVector4f PerVertexCustomData_0;
@@ -458,13 +463,16 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			PerVertexCustomData_0.Z = GET0_NUMBER;
 			PerVertexCustomData_0.W = GET0_NUMBER;
 
-			FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset + RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels + FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
+			FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput[LodElement.SkinWeightOffset +
+				RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels +
+				FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
 		}
 	}, EParallelForFlags::BackgroundPriority);
 
 	const int32 Slice = FMath::Min(
 		FMath::CeilToInt(
-			static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Num()) / static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023);
+			static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Num()) /
+			static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023);
 
 	FromAsset->GlobalData->SkinWeightTexture->Init(GET128_NUMBER, GET128_NUMBER, Slice, PF_FloatRGBA);
 	FromAsset->GlobalData->SkinWeightTexture->UpdateResourceImmediate(true);
@@ -481,7 +489,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			return;
 		}
 
-		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
+		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->
+			SkinWeightTexture->HasPendingRenderResourceInitialization())
 		{
 			bool bValidPixels = true;
 			if (bValidPixels)
@@ -490,7 +499,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 					[FromAsset](FRHICommandListImmediate& RHICmdList)
 					{
 						FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
-							RHICmdList, FromAsset->GlobalData->CachedMeshDataCreationSettingsParams, FromAsset->GlobalData->SkinWeightTexture);
+							RHICmdList, FromAsset->GlobalData->CachedMeshDataCreationSettingsParams,
+							FromAsset->GlobalData->SkinWeightTexture);
 					});
 
 				ENQUEUE_RENDER_COMMAND(TurboSequence_FillRenderThreadSkinWeightData_Iteration2_Lf)(
@@ -504,7 +514,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 								FromAsset->MeshDataCustomData--;
 								if (FromAsset->MeshDataCustomData < GET0_NUMBER)
 								{
-									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams = FSettingsComputeShader_Params_Lf();
+									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams =
+										FSettingsComputeShader_Params_Lf();
 									PostCall(false);
 									return;
 								}
@@ -512,7 +523,8 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 								if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !
 									FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
 								{
-									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams = FSettingsComputeShader_Params_Lf();
+									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams =
+										FSettingsComputeShader_Params_Lf();
 									PostCall(true);
 								}
 								else
@@ -544,7 +556,6 @@ void FTurboSequence_Utility_Lf::RemoveAnimationFromLibraryChunked(FSkinnedMeshGl
                                                                   Library_RenderThread,
                                                                   FCriticalSection& CriticalSection)
 {
-	
 }
 
 
@@ -573,7 +584,8 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 	{
 		if (!LibraryAnimData.KeyframesFilled.Num())
 		{
-			LibraryAnimData.MaxFrames = Animation.Animation->GetPlayLength() / Runtime.DataAsset->TimeBetweenAnimationLibraryFrames - GET1_NUMBER;
+			LibraryAnimData.MaxFrames = Animation.Animation->GetPlayLength() / Runtime.DataAsset->
+				TimeBetweenAnimationLibraryFrames - GET1_NUMBER;
 
 
 			LibraryAnimData.KeyframesFilled.Init(INDEX_NONE, LibraryAnimData.MaxFrames);
@@ -678,7 +690,8 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 		for (uint16 b = GET0_NUMBER; b < LibraryAnimData.NumBones; ++b)
 		{
 			const FTurboSequence_TransposeMatrix_Lf& BoneSpaceTransform = GetBoneTransformFromLocalPoses(
-				b, LibraryAnimData, ReferenceSkeleton, AnimationSkeleton, LibraryAnimData.AnimPoses[Pose0].Pose, Animation.Animation);
+				b, LibraryAnimData, ReferenceSkeleton, AnimationSkeleton, LibraryAnimData.AnimPoses[Pose0].Pose,
+				Animation.Animation);
 
 			// NOTE: Keep in mind this matrix is not in correct order after uploading it
 			//		 for performance reason we using matrix calculations which match the oder
@@ -774,7 +787,8 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 	FSkinnedMeshReference_Lf& PostReference = Library.PerReferenceData[TargetMesh];
 
 	RemoveRenderInstance(PreReference, Runtime, CriticalSection);
-	if (const FRenderData_Lf& PreRenderData = PreReference.RenderData[Runtime.MaterialsHash]; !PreRenderData.InstanceMap.Num())
+	if (const FRenderData_Lf& PreRenderData = PreReference.RenderData[Runtime.MaterialsHash]; !PreRenderData.InstanceMap
+		.Num())
 	{
 		CleanNiagaraRenderer(NiagaraComponents, PreReference, Runtime);
 	}

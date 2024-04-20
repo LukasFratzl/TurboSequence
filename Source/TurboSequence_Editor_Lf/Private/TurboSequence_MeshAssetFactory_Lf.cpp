@@ -15,7 +15,8 @@ UTurboSequence_MeshAssetFactory_Lf::UTurboSequence_MeshAssetFactory_Lf()
 	FString DefaultRenderingNiagaraSystem;
 
 	FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultRenderingNiagaraSystem,
-	                                                 TEXT("/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
+	                                                 TEXT(
+		                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
 	                                                 TEXT("Default_Rendering_NiagaraSystem"));
 
 	if (DefaultRenderingNiagaraSystem.IsEmpty())
@@ -32,19 +33,27 @@ UTurboSequence_MeshAssetFactory_Lf::UTurboSequence_MeshAssetFactory_Lf()
 	}
 	else
 	{
-		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can not find Niagara System, it should at .../Plugins/TurboSequence_Lf/Resources/FXS_TurboSequence_Mesh_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths"))
+		UE_LOG(LogTurboSequence_Lf, Warning,
+		       TEXT(
+			       "Can not find Niagara System, it should at .../Plugins/TurboSequence_Lf/Resources/FXS_TurboSequence_Mesh_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths"
+		       ))
 	}
 }
 
-UObject* UTurboSequence_MeshAssetFactory_Lf::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
+UObject* UTurboSequence_MeshAssetFactory_Lf::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name,
+                                                              EObjectFlags Flags, UObject* Context,
+                                                              FFeedbackContext* Warn)
 {
-	const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = NewObject<UTurboSequence_MeshAsset_Lf>(InParent, Class, Name, Flags, Context);
-	
+	const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = NewObject<UTurboSequence_MeshAsset_Lf>(
+		InParent, Class, Name, Flags, Context);
+
 	Asset->bNeedGeneratedNextEngineStart = false;
 
-	const FAssetRegistryModule& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	const FAssetRegistryModule& AssetRegistry = FModuleManager::LoadModuleChecked<
+		FAssetRegistryModule>("AssetRegistry");
 	TArray<FAssetData> GlobalAssetData;
-	AssetRegistry.Get().GetAssetsByClass(FTopLevelAssetPath(UTurboSequence_GlobalData_Lf::StaticClass()->GetPathName()), GlobalAssetData);
+	AssetRegistry.Get().GetAssetsByClass(FTopLevelAssetPath(UTurboSequence_GlobalData_Lf::StaticClass()->GetPathName()),
+	                                     GlobalAssetData);
 	if (GlobalAssetData.Num())
 	{
 		FTurboSequence_Helper_Lf::SortAssetsByPathName(GlobalAssetData);
@@ -52,7 +61,10 @@ UObject* UTurboSequence_MeshAssetFactory_Lf::FactoryCreateNew(UClass* Class, UOb
 	}
 	else
 	{
-		UE_LOG(LogTurboSequence_Lf, Error, TEXT("Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"));
+		UE_LOG(LogTurboSequence_Lf, Error,
+		       TEXT(
+			       "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
+		       ));
 	}
 
 
@@ -62,7 +74,10 @@ UObject* UTurboSequence_MeshAssetFactory_Lf::FactoryCreateNew(UClass* Class, UOb
 	}
 	else
 	{
-		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can not find Niagara System, it should at .../Plugins/TurboSequence_Lf/Resources/FXS_TurboSequence_Mesh_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths"))
+		UE_LOG(LogTurboSequence_Lf, Warning,
+		       TEXT(
+			       "Can not find Niagara System, it should at .../Plugins/TurboSequence_Lf/Resources/FXS_TurboSequence_Mesh_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths"
+		       ))
 	}
 
 	return Asset; //NewObject<UTurboSequence_MeshAsset_Lf>(InParent, Class, Name, Flags, Context);

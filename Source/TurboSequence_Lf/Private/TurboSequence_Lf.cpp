@@ -22,7 +22,6 @@ void FTurboSequence_LfModule::ShutdownModule()
 
 void FTurboSequence_LfModule::OnFilesLoaded()
 {
-
 	IAssetRegistry& IAssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	IAssetRegistry.OnFilesLoaded().RemoveAll(this);
 }

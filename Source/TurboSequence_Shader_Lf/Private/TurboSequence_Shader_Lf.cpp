@@ -8,7 +8,8 @@
 
 void FTurboSequence_Shader_LfModule::StartupModule()
 {
-	const FString ShaderDirectory = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("TurboSequence_Lf"))->GetBaseDir(), TEXT("Shaders"));
+	const FString ShaderDirectory = FPaths::Combine(
+		IPluginManager::Get().FindPlugin(TEXT("TurboSequence_Lf"))->GetBaseDir(), TEXT("Shaders"));
 	AddShaderSourceDirectoryMapping("/TurboSequence_Shaders", ShaderDirectory);
 }
 

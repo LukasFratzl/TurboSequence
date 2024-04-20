@@ -493,10 +493,13 @@ float3x4 BendBoneFromAnimations_Full(in uint BoneIndexCPU, in int AnimStartIndex
 
 		uint LibraryIndexCurrent = AnimationOffset0 + BoneIndexCPU * 3;
 
-		float4 C0 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent, AnimTextureSizeX, AnimTextureSizeY)];
-		float4 C1 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent + 1, AnimTextureSizeX, AnimTextureSizeY)];
-		float4 C2 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(LibraryIndexCurrent + 2, AnimTextureSizeX, AnimTextureSizeY)];
-		
+		float4 C0 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(
+			LibraryIndexCurrent, AnimTextureSizeX, AnimTextureSizeY)];
+		float4 C1 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(
+			LibraryIndexCurrent + 1, AnimTextureSizeX, AnimTextureSizeY)];
+		float4 C2 = R_AnimationLibrary_InputTexture[GetDimensionsFromIndex3D(
+			LibraryIndexCurrent + 2, AnimTextureSizeX, AnimTextureSizeY)];
+
 		float3x4 RuntimeBoneMatrixCurrent = float3x4(C0, C1, C2);
 
 		FMatrix_Lf Atom = GetIdentity_Matrix();
@@ -548,31 +551,30 @@ void Main(
 	uint GroupIndex : SV_GroupIndex
 )
 {
-
 	RW_BoneTransform_OutputTexture[uint3(0, 0, 0)] = float4(0,
-															0,
-															NumCustomStates,
-															NumPixelBuffer);
+	                                                        0,
+	                                                        NumCustomStates,
+	                                                        NumPixelBuffer);
 	RW_BoneTransform_OutputTexture[uint3(1, 0, 0)] = float4(0,
-															0,
-															OutputTextureSizeX,
-															OutputTextureSizeY);
+	                                                        0,
+	                                                        OutputTextureSizeX,
+	                                                        OutputTextureSizeY);
 
 	RW_BoneTransformPrevious_OutputTexture[uint3(0, 0, 0)] = float4(0,
-														0,
-														NumCustomStates,
-														NumPixelBuffer);
+	                                                                0,
+	                                                                NumCustomStates,
+	                                                                NumPixelBuffer);
 	RW_BoneTransformPrevious_OutputTexture[uint3(1, 0, 0)] = float4(0,
-															0,
-															OutputTextureSizeX,
-															OutputTextureSizeY);
-	
+	                                                                0,
+	                                                                OutputTextureSizeX,
+	                                                                OutputTextureSizeY);
+
 	uint ThreadIndex = GroupIndex * NumMeshesPerThread;
 	if (ThreadIndex >= NumMeshesPerFrame)
 	{
 		return;
 	}
-	
+
 	for (uint MeshIndex = 0; MeshIndex < NumMeshesPerThread; ++MeshIndex)
 	{
 		uint LocalMeshIndex = ThreadIndex + MeshIndex;
@@ -693,11 +695,17 @@ void Main(
 			uint GPUBoneIndexBase = CurrentTextureIndex + (uint)ReferenceIndices.y * NumPixelBuffer;
 
 			RW_BoneTransformPrevious_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase, OutputTextureSizeX,
-			OutputTextureSizeY)] = R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase, OutputTextureSizeX, OutputTextureSizeY)];
+			                                                                OutputTextureSizeY)] =
+				R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase, OutputTextureSizeX,
+				                                                       OutputTextureSizeY)];
 			RW_BoneTransformPrevious_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 1, OutputTextureSizeX,
-			OutputTextureSizeY)] = R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 1, OutputTextureSizeX, OutputTextureSizeY)];
+			                                                                OutputTextureSizeY)] =
+				R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 1, OutputTextureSizeX,
+				                                                       OutputTextureSizeY)];
 			RW_BoneTransformPrevious_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 2, OutputTextureSizeX,
-			OutputTextureSizeY)] = R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 2, OutputTextureSizeX, OutputTextureSizeY)];
+			                                                                OutputTextureSizeY)] =
+				R_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase + 2, OutputTextureSizeX,
+				                                                       OutputTextureSizeY)];
 
 			RW_BoneTransform_OutputTexture[GetDimensionsFromIndex3D(GPUBoneIndexBase, OutputTextureSizeX,
 			                                                        OutputTextureSizeY)] = BoneMatrix[0];

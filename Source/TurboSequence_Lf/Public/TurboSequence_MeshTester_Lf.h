@@ -38,7 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Mesh Tester")
 	FTurboSequence_UpdateContext_Lf MeshUpdateContext = FTurboSequence_UpdateContext_Lf();
-	
+
 	void TestMesh(float DeltaTime);
 	FTurboSequence_MeshSpawnData_Lf LastSpawnData;
 

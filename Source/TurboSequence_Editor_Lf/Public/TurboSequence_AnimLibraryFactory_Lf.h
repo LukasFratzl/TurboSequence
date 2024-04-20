@@ -18,6 +18,7 @@ class TURBOSEQUENCE_EDITOR_LF_API UTurboSequence_AnimLibraryFactory_Lf : public 
 
 public:
 	UTurboSequence_AnimLibraryFactory_Lf();
-	virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
+	virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags,
+	                                  UObject* Context, FFeedbackContext* Warn) override;
 	virtual FString GetDefaultNewAssetName() const override;
 };

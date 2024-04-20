@@ -9,36 +9,45 @@ UTurboSequence_FootprintAsset_Lf::UTurboSequence_FootprintAsset_Lf()
 {
 }
 
-void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
+void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(
+	int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
 {
 	if (MeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 	{
 		const FSkinnedMeshRuntime_Lf& Runtime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 
 		bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
-			(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
+		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
+			HybridModeMeshDrawRangeUEInstance);
 
 		bool bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
-			(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
+		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
+			HybridModeAnimationDrawRangeUEInstance);
 
 
-		if (!DefaultAnimationTransitions.Contains(MeshID) || (DefaultAnimationTransitions.Contains(MeshID) && DefaultAnimationTransitions[MeshID] <= 0.005f))
+		if (!DefaultAnimationTransitions.Contains(MeshID) || (DefaultAnimationTransitions.Contains(MeshID) &&
+			DefaultAnimationTransitions[MeshID] <= 0.005f))
 		{
 			if (bIsInTSAnimationRange && bIsInTSMeshDrawRange)
 			{
 				// We Remove Hybrid Data
 				if (ATurboSequence_Manager_Lf::GlobalLibrary.MeshIDToMinimalData.Contains(Runtime.GetMeshID()))
 				{
-					const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.MeshIDToMinimalData[Runtime.GetMeshID()];
-					const FSkinnedMeshRuntime_Lf& RootMeshRuntime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshData.RootMotionMeshID];
-					FSkinnedMeshReference_Lf& RootMeshReference = ATurboSequence_Manager_Lf::GlobalLibrary.PerReferenceData[RootMeshRuntime.DataAsset];
+					const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.
+						MeshIDToMinimalData[Runtime.GetMeshID()];
+					const FSkinnedMeshRuntime_Lf& RootMeshRuntime = ATurboSequence_Manager_Lf::GlobalLibrary.
+						RuntimeSkinnedMeshes[MeshData.RootMotionMeshID];
+					FSkinnedMeshReference_Lf& RootMeshReference = ATurboSequence_Manager_Lf::GlobalLibrary.
+						PerReferenceData[RootMeshRuntime.DataAsset];
 
 					if (RootMeshRuntime.bSpawnedHybridActor)
 					{
-						FSkinnedMeshReference_Lf& Reference = ATurboSequence_Manager_Lf::GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-						const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+						FSkinnedMeshReference_Lf& Reference = ATurboSequence_Manager_Lf::GlobalLibrary.PerReferenceData[
+							Runtime.DataAsset];
+						const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.
+							LodIndex];
 						FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(Reference, Runtime, LodElement,
-						                                                              LodElement.bIsRenderStateValid);
+							LodElement.bIsRenderStateValid);
 
 						ThreadContext->LockThread();
 						RootMeshReference.HybridMeshManagementData.FindOrAdd(RootMeshRuntime.GetMeshID(), false);
@@ -53,9 +62,12 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 				// We Add Hybrid Data
 				if (ATurboSequence_Manager_Lf::GlobalLibrary.MeshIDToMinimalData.Contains(Runtime.GetMeshID()))
 				{
-					const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.MeshIDToMinimalData[Runtime.GetMeshID()];
-					const FSkinnedMeshRuntime_Lf& RootMeshRuntime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshData.RootMotionMeshID];
-					FSkinnedMeshReference_Lf& RootMeshReference = ATurboSequence_Manager_Lf::GlobalLibrary.PerReferenceData[RootMeshRuntime.DataAsset];
+					const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.
+						MeshIDToMinimalData[Runtime.GetMeshID()];
+					const FSkinnedMeshRuntime_Lf& RootMeshRuntime = ATurboSequence_Manager_Lf::GlobalLibrary.
+						RuntimeSkinnedMeshes[MeshData.RootMotionMeshID];
+					FSkinnedMeshReference_Lf& RootMeshReference = ATurboSequence_Manager_Lf::GlobalLibrary.
+						PerReferenceData[RootMeshRuntime.DataAsset];
 
 					if (!RootMeshRuntime.bSpawnedHybridActor)
 					{
@@ -125,7 +137,8 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 		{
 			if (bSetTSMeshToUEMeshTransform)
 			{
-				const TObjectPtr<USkinnedMeshComponent> SkinnedMeshComponent = Runtime.HybridMeshInstance->FindComponentByClass<USkinnedMeshComponent>();
+				const TObjectPtr<USkinnedMeshComponent> SkinnedMeshComponent = Runtime.HybridMeshInstance->
+					FindComponentByClass<USkinnedMeshComponent>();
 
 				FTransform SpawnTransform;
 				if (IsValid(SkinnedMeshComponent))
@@ -169,7 +182,9 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 			for (UActorComponent* SkinnedMeshComponent : SkinnedMeshComponents)
 			{
 				if (const TObjectPtr<USkinnedMeshComponent> Component = Cast<
-					USkinnedMeshComponent>(SkinnedMeshComponent); Component->GetSkinnedAsset() == Runtime.DataAsset->ReferenceMeshNative)
+						USkinnedMeshComponent>(SkinnedMeshComponent); Component->GetSkinnedAsset() == Runtime.DataAsset
+					->
+					ReferenceMeshNative)
 				{
 					RootComponent = Component;
 					break;
@@ -178,9 +193,11 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 
 
 			bool bIsInUEMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
-				(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
+			(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->
+				HybridModeMeshDrawRangeUEInstance);
 
-			bool bIsInUEAnimationRange = !IsValid(Runtime.FootprintAsset) || (IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
+			bool bIsInUEAnimationRange = !IsValid(Runtime.FootprintAsset) || (IsValid(Runtime.FootprintAsset) && Runtime
+				.ClosestCameraDistance < Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
 
 			FTransform SpawnTransform;
 			if (IsValid(RootComponent))
@@ -201,11 +218,15 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 					DefaultAnimationTransitions[MeshData.RootMotionMeshID], GET0_NUMBER, MaxTransitionTime);
 			}
 
-			const FTransform& CurrentTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(MeshData);
+			const FTransform& CurrentTransform =
+				ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(MeshData);
 
-			SpawnTransform.SetScale3D(FMath::Lerp(CurrentTransform.GetScale3D(), SpawnTransform.GetScale3D(), UETransitionPercentage_RootBone));
-			SpawnTransform.SetLocation(FMath::Lerp(CurrentTransform.GetLocation(), SpawnTransform.GetLocation(), UETransitionPercentage_RootBone));
-			SpawnTransform.SetRotation(FQuat::Slerp(CurrentTransform.GetRotation(), SpawnTransform.GetRotation(), UETransitionPercentage_RootBone));
+			SpawnTransform.SetScale3D(FMath::Lerp(CurrentTransform.GetScale3D(), SpawnTransform.GetScale3D(),
+			                                      UETransitionPercentage_RootBone));
+			SpawnTransform.SetLocation(FMath::Lerp(CurrentTransform.GetLocation(), SpawnTransform.GetLocation(),
+			                                       UETransitionPercentage_RootBone));
+			SpawnTransform.SetRotation(FQuat::Slerp(CurrentTransform.GetRotation(), SpawnTransform.GetRotation(),
+			                                        UETransitionPercentage_RootBone));
 
 			ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(MeshData, SpawnTransform);
 
@@ -243,8 +264,9 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 							DefaultAnimationTransitions[MeshID], GET0_NUMBER, MaxTransitionTime);
 					}
 
-					if ((bIsInUEAnimationRange || UETransitionPercentage > 0.005f) && IsValid(SkinnedMeshComponent) && IsValid(
-						SkinnedMeshComponent->GetSkinnedAsset()))
+					if ((bIsInUEAnimationRange || UETransitionPercentage > 0.005f) && IsValid(SkinnedMeshComponent) &&
+						IsValid(
+							SkinnedMeshComponent->GetSkinnedAsset()))
 					{
 						const FReferenceSkeleton& ReferenceSkeleton =
 							FTurboSequence_Utility_Lf::GetReferenceSkeleton_Raw(

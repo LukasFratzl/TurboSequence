@@ -2,7 +2,6 @@
 
 struct TurboSequenceVSFunctions_Lf
 {
-
 	int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
 	{
 		//int TexPow = TextureSizeX * TextureSizeY;
@@ -15,7 +14,7 @@ struct TurboSequenceVSFunctions_Lf
 		// #endif
 	}
 
-	
+
 	// Might Change to Non Bit Shifting Version if compiler <= ES3.2
 	int EncodeUInt16ToUInt32_Int(in uint XValue, in uint YValue)
 	{
@@ -40,7 +39,11 @@ struct TurboSequenceVSFunctions_Lf
 	}
 
 
-	void VertexSkin(inout float3 FinalCurrentBlendPosition, inout float3 FinalPreviousBlendPosition, in Texture2DArray<float4> TransformTexture_Current, in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture, in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1, in int2 MaterialSettings0, in float3 VertexPosition)
+	void VertexSkin(inout float3 FinalCurrentBlendPosition, inout float3 FinalPreviousBlendPosition,
+	                in Texture2DArray<float4> TransformTexture_Current,
+	                in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture,
+	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
+	                in int2 MaterialSettings0, in float3 VertexPosition)
 	{
 		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
 		int TransformTexPow = Settings1.z * Settings1.w;
@@ -50,8 +53,10 @@ struct TurboSequenceVSFunctions_Lf
 		for (min16int i = 0; i < 3; ++i)
 		{
 			int VertexOffsetIndex = VertexBaseIndex + i * 2;
-			min16int4 Indices = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(VertexOffsetIndex, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
-			min16int4 Weights = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(VertexOffsetIndex + 1, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+			min16int4 Indices = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+			min16int4 Weights = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex + 1, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
 
 			for (min16int W = 0; W < 4; ++W)
 			{
@@ -80,8 +85,10 @@ struct TurboSequenceVSFunctions_Lf
 				);
 
 				float Weight = (float)Weights[W] / (float)0xFF;
-				FinalCurrentBlendPosition += (mul(BoneMatrix_Current, float4(VertexPosition, 1.0f)).xyz - VertexPosition) * Weight;
-				FinalPreviousBlendPosition += (mul(BoneMatrix_Previous, float4(VertexPosition, 1.0f)).xyz - VertexPosition) * Weight;
+				FinalCurrentBlendPosition += (mul(BoneMatrix_Current, float4(VertexPosition, 1.0f)).xyz -
+					VertexPosition) * Weight;
+				FinalPreviousBlendPosition += (mul(BoneMatrix_Previous, float4(VertexPosition, 1.0f)).xyz -
+					VertexPosition) * Weight;
 			}
 		}
 	}
@@ -92,19 +99,24 @@ float3 FinalCurrentFrameBlendPosition = float3(0, 0, 0);
 TurboSequenceVSFunctions_Lf f;
 
 int SwTextureOffset = f.EncodeUInt16ToUInt32_Float(CustomData.x, CustomData.y);
-if (SwTextureOffset)
+if
+(SwTextureOffset)
 {
 	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
 
 	float2 UVs = Parameters.TexCoords[NUM_MATERIAL_TEXCOORDS_VERTEX - 1];
-	int VertexBaseIndex = f.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z); // Setting0.z -> Custom States offset
+	int VertexBaseIndex = f.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
+	// Setting0.z -> Custom States offset
 
 	int TTextureOffset = f.EncodeUInt16ToUInt32_Float(CustomData.z, CustomData.w);
 	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];
 	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
 	                              (int)MeshDataTextureDimension.y);
-	
-	f.VertexSkin(FinalCurrentFrameBlendPosition, FinalPreviousBlendPosition, TransformTexture_CurrentFrame, TransformTexture_PreviousFrame, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w, Settings1, MaterialSettings0, VertexPosition);
+
+	f.VertexSkin(FinalCurrentFrameBlendPosition, FinalPreviousBlendPosition, TransformTexture_CurrentFrame,
+	             TransformTexture_PreviousFrame, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w,
+	             Settings1, MaterialSettings0, VertexPosition);
 }
 
-return FinalCurrentFrameBlendPosition;
+return
+FinalCurrentFrameBlendPosition;

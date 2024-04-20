@@ -90,11 +90,11 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 		Bytes += 4;
 
 
-		double BytesDouble = (double)Bytes;
+		double BytesDouble = static_cast<double>(Bytes);
 
 		return BytesDouble / 1000.0 / 1000.0;
 	}
-	
+
 	TArray<int32> BoneSpaceAnimationIKIndex_RenderThread;
 	TArray<int32> PerMeshCustomDataIndex_RenderThread;
 	TArray<int32> ReferenceNumCPUBones;
@@ -108,7 +108,7 @@ struct TURBOSEQUENCE_SHADER_LF_API FMeshUnitComputeShader_Params_Lf
 	TArray<int32> PerMeshCustomDataLod_RenderThread;
 	TArray<int32> PerMeshCustomDataCollectionIndex_RenderThread;
 	TArray<int32> ReferenceNumCPUBones_RenderThread;
-	
+
 	TArray<int32> AnimationStartIndex_RenderThread;
 	TArray<int32> AnimationEndIndex_RenderThread;
 	TArray<int32> AnimationFramePose0_RenderThread;
@@ -163,22 +163,26 @@ public:
 
 	inline static const FString GraphName = TEXT("TurboSequence_MeshUnit_ComputeShaderExecute_{0}");
 	inline static const FString DebugName = TEXT("TurboSequence_MeshUnit_Debug_{0}");
-	inline static const FString BoneTransformsTextureDebugName = TEXT("TurboSequence_Write_Texture_BoneTransform_Library_{0}");
-	inline static const FString AnimationLibraryTextureDebugName = TEXT("TurboSequence_Write_Texture_Animation_Library_{0}");
+	inline static const FString BoneTransformsTextureDebugName = TEXT(
+		"TurboSequence_Write_Texture_BoneTransform_Library_{0}");
+	inline static const FString AnimationLibraryTextureDebugName = TEXT(
+		"TurboSequence_Write_Texture_Animation_Library_{0}");
 	inline static const FString DataTextureDebugName = TEXT("TurboSequence_Write_Texture_CustomData_Library_{0}");
 	inline static const FString AnimationLibraryBufferDebugName = TEXT("TurboSequence_AnimationLibrary_Buffer_{0}");
 	inline static const FString RefPoseDebugName = TEXT("TurboSequence_ReferencePose_Input_{0}");
 	inline static const FString RefPoseCPUIndicesDebugName = TEXT("TurboSequence_ReferencePoseCPUIndices_{0}");
 	inline static const FString RefPoseGPUIndicesDebugName = TEXT("TurboSequence_ReferencePoseGPUIndices_{0}");
-	inline static const FString RefPoseParentIndicesDebugName = TEXT("TurboSequence_ReferencePoseCPU_ParentIndices_{0}");
+	inline static const FString RefPoseParentIndicesDebugName =
+		TEXT("TurboSequence_ReferencePoseCPU_ParentIndices_{0}");
 	inline static const FString CustomDataIndicesDebugName = TEXT("TurboSequence_PerMeshCustomDataIndices_{0}");
 	//inline static const FString CustomDataDebugName = TEXT("TurboSequence_PerMeshCustomData_{0}");
 	inline static const FString CustomDataLodDebugName = TEXT("TurboSequence_PerMeshCustomDataLod_{0}");
 	inline static const FString SkinWeightOffsetLodDebugName = TEXT("TurboSequence_SkinWeightOffsetLod_{0}");
-	
+
 	inline static const FString AnimationWeightsDebugName = TEXT("TurboSequence_AnimationWeights_{0}");
 	inline static const FString PerBoneAnimationWeightsDebugName = TEXT("TurboSequence_PerBoneAnimationWeights_{0}");
-	inline static const FString PerBoneAnimationWeightIndicesDebugName = TEXT("TurboSequence_PerBoneAnimationWeightIndices_{0}");
+	inline static const FString PerBoneAnimationWeightIndicesDebugName = TEXT(
+		"TurboSequence_PerBoneAnimationWeightIndices_{0}");
 	inline static const FString AnimationLocationWeightsDebugName = TEXT("TurboSequence_AnimationWeights_{0}");
 	inline static const FString AnimationRotationWeightsDebugName = TEXT("TurboSequence_AnimationWeights_{0}");
 	inline static const FString AnimationScaleWeightsDebugName = TEXT("TurboSequence_AnimationWeights_{0}");
@@ -194,12 +198,16 @@ public:
 	inline static const FString AnimationLayersDebugName = TEXT("TurboSequence_AnimationLayers_{0}");
 	inline static const FString AnimationFrameMaxFramesDebugName = TEXT("TurboSequence_AnimationNextFrames_{0}");
 	inline static const FString AnimationOffsetDebugName = TEXT("TurboSequence_AnimationOffset_{0}");
-	inline static const FString BoneTransformsTextureCopyDebugName = TEXT("TurboSequence_Write_Texture_BoneTransform_Library_Copy_{0}");
-	inline static const FString CustomDataTextureCopyDebugName = TEXT("TurboSequence_Write_Texture_CustomLibrary_Library_Copy_{0}");
+	inline static const FString BoneTransformsTextureCopyDebugName = TEXT(
+		"TurboSequence_Write_Texture_BoneTransform_Library_Copy_{0}");
+	inline static const FString CustomDataTextureCopyDebugName = TEXT(
+		"TurboSequence_Write_Texture_CustomLibrary_Library_Copy_{0}");
 	inline static const FString BoneSpaceAnimationIKInputDebugName = TEXT("TurboSequence_IK_Bones_Input_{0}");
 	inline static const FString BoneSpaceAnimationIKDataInputDebugName = TEXT("TurboSequence_IK_Data_Bones_Input_{0}");
-	inline static const FString BoneSpaceAnimationIKDataStartIndexInputDebugName = TEXT("TurboSequence_IK_Data_Bones_Input_StartIndex_{0}");
-	inline static const FString BoneSpaceAnimationIKDataEndIndexInputDebugName = TEXT("TurboSequence_IK_Data_Bones_Input_EndIndex_{0}");
+	inline static const FString BoneSpaceAnimationIKDataStartIndexInputDebugName = TEXT(
+		"TurboSequence_IK_Data_Bones_Input_StartIndex_{0}");
+	inline static const FString BoneSpaceAnimationIKDataEndIndexInputDebugName = TEXT(
+		"TurboSequence_IK_Data_Bones_Input_EndIndex_{0}");
 
 	DECLARE_GLOBAL_SHADER(FTurboSequence_BoneTransform_CS_Lf);
 	SHADER_USE_PARAMETER_STRUCT(FTurboSequence_BoneTransform_CS_Lf, FGlobalShader);
@@ -210,7 +218,7 @@ public:
 
 		SHADER_PARAMETER(int, NumCPUBones)
 		SHADER_PARAMETER(int, NumMeshesPerFrame)
-	
+
 		SHADER_PARAMETER(int, AnimTextureSizeX)
 		SHADER_PARAMETER(int, AnimTextureSizeY)
 
@@ -240,11 +248,11 @@ public:
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16int>, AnimationWeight_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, AnimationFramePose0_StructuredBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerIndex_StructuredBuffer)
-	
+
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<min16uint>, AnimationLayerLibrary_StructuredBuffer)
 
 		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_AnimationLibrary_InputTexture)
-	
+
 		SHADER_PARAMETER_RDG_TEXTURE_SRV(Texture2DArray<float4>, R_BoneTransform_OutputTexture)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransform_OutputTexture)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_BoneTransformPrevious_OutputTexture)
@@ -262,7 +270,8 @@ public:
 		return true;
 	}
 
-	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters,
+	                                         FShaderCompilerEnvironment& OutEnvironment)
 	{
 		FGlobalShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
 
@@ -294,7 +303,7 @@ public:
 		SHADER_PARAMETER(uint32, BaseIndex)
 
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FVector4f>, BoneWeights_StructuredBuffer)
-	
+
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<FVector4f>, RW_Settings_OutputTexture)
 	END_SHADER_PARAMETER_STRUCT()
 
@@ -306,7 +315,8 @@ public:
 		return true;
 	}
 
-	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters,
+	                                         FShaderCompilerEnvironment& OutEnvironment)
 	{
 		FGlobalShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
 
@@ -322,7 +332,6 @@ public:
 class TURBOSEQUENCE_SHADER_LF_API FTurboSequence_ClearRenderTarget_CS_Lf
 {
 public:
-
 	BEGIN_SHADER_PARAMETER_STRUCT(FParameters,)
 		SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2DArray<float4>, RW_OutputTexture)
 	END_SHADER_PARAMETER_STRUCT()
@@ -332,7 +341,8 @@ public:
 	inline static const FString TexName = TEXT("TurboSequence_ClearRenderTarget_Texture");
 	inline static const FString RenderTexName = TEXT("TurboSequence_ClearRenderTarget_RenderTexture");
 
-	static void ClearRenderTarget_GameThread(const TObjectPtr<UTextureRenderTarget2DArray> Texture, const EPixelFormat& TextureFormat)
+	static void ClearRenderTarget_GameThread(const TObjectPtr<UTextureRenderTarget2DArray> Texture,
+	                                         const EPixelFormat& TextureFormat)
 	{
 		ENQUEUE_RENDER_COMMAND(TurboSequence_ClearRenderTarget_Lf)(
 			[Texture, TextureFormat](FRHICommandListImmediate& RHICmdList)
@@ -341,14 +351,18 @@ public:
 			});
 	}
 
-	static void ClearRenderTarget_RenderThread(FRHICommandListImmediate& RHICmdList, const TObjectPtr<UTextureRenderTarget2DArray> Texture, const EPixelFormat& TextureFormat)
+	static void ClearRenderTarget_RenderThread(FRHICommandListImmediate& RHICmdList,
+	                                           const TObjectPtr<UTextureRenderTarget2DArray> Texture,
+	                                           const EPixelFormat& TextureFormat)
 	{
 		FRDGBuilder GraphBuilder(RHICmdList, FRDGEventName(*GraphName), ERDGBuilderFlags::AllowParallelExecute);
 
 		FParameters* Parameters = GraphBuilder.AllocParameters<FParameters>();
 
 		FRDGTextureRef DataOutputTextureRef;
-		Parameters->RW_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(GraphBuilder, DataOutputTextureRef, Texture->SizeX, Texture->SizeY, Texture->Slices, *TexName, TextureFormat);
+		Parameters->RW_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
+			GraphBuilder, DataOutputTextureRef, Texture->SizeX, Texture->SizeY, Texture->Slices, *TexName,
+			TextureFormat);
 
 		GraphBuilder.AddPass(
 			RDG_EVENT_NAME("TurboSequence_Execute_Clearing_RenderTarget"),
@@ -359,7 +373,8 @@ public:
 				RHICommandList.ClearUAVFloat(Parameters->RW_OutputTexture->GetRHI(), FLinearColor::Transparent);
 			});
 
-		const FRDGTextureRef OutputTexture = GraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetRenderTargetResource()->GetTexture2DArrayRHI(), *RenderTexName));
+		const FRDGTextureRef OutputTexture = GraphBuilder.RegisterExternalTexture(
+			CreateRenderTarget(Texture->GetRenderTargetResource()->GetTexture2DArrayRHI(), *RenderTexName));
 
 		FRHICopyTextureInfo CopyInfo = FRHICopyTextureInfo();
 		CopyInfo.NumSlices = Texture->Slices;
@@ -381,10 +396,11 @@ public:
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FRHICommandListImmediate& RHICmdList,
 		FMeshUnitComputeShader_Params_Lf& Params,
-		UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*UTextureRenderTarget2DArray* DataOutputTexture,*/ TFunction<void(TArray<float>& DebugValues)> AsyncCallback
+		UTextureRenderTarget2DArray* AnimationOutputTextureCurrent, /*UTextureRenderTarget2DArray* DataOutputTexture,*/
+		TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 	);
 
-	
+
 	static void DispatchGameThread(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
@@ -394,12 +410,14 @@ public:
 	)
 	{
 		ENQUEUE_RENDER_COMMAND(TurboSequence_MeshUnit_ComputeShader_Lf)(
-			[PreCall, &Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback](FRHICommandListImmediate& RHICmdList)
+			[PreCall, &Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback](
+			FRHICommandListImmediate& RHICmdList)
 			{
-				DispatchRenderThread(PreCall, RHICmdList, Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
+				DispatchRenderThread(PreCall, RHICmdList, Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/
+				                     AsyncCallback);
 			});
 	}
-	
+
 	static void Dispatch(
 		const TFunction<void(FRHICommandListImmediate& RHICmdList)>& PreCall,
 		FMeshUnitComputeShader_Params_Lf& Params,
@@ -410,7 +428,8 @@ public:
 	{
 		if (IsInRenderingThread())
 		{
-			DispatchRenderThread(PreCall, GetImmediateCommandList_ForRenderCommand(), Params, AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
+			DispatchRenderThread(PreCall, GetImmediateCommandList_ForRenderCommand(), Params,
+			                     AnimationOutputTextureCurrent, /*DataOutputTexture,*/ AsyncCallback);
 		}
 		else
 		{
@@ -428,7 +447,7 @@ public:
 		UTextureRenderTarget2DArray* OutputTexture
 	);
 
-	
+
 	static void DispatchGameThread(
 		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture
@@ -441,7 +460,7 @@ public:
 			});
 	}
 
-	
+
 	static void Dispatch(
 		FSettingsComputeShader_Params_Lf& Params,
 		UTextureRenderTarget2DArray* OutputTexture

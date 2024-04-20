@@ -37,7 +37,6 @@ public:
 	                             const TArray<TObjectPtr<UMaterialInterface>>& Materials,
 	                             uint32 MaterialsHash)
 	{
-
 		if (RenderComponents.Contains(FromAsset) && RenderComponents[FromAsset].NiagaraRenderer.Contains(MaterialsHash))
 		{
 			return MaterialsHash;
@@ -72,7 +71,7 @@ public:
 		);
 
 		Component->SetVisibleInRayTracing(true);
-		
+
 		TArray<FRenderingMaterialKeyValue_Lf> ConvertedMaterial;
 		for (const TObjectPtr<UMaterialInterface>& Material : Materials)
 		{
@@ -145,7 +144,8 @@ public:
 				WantedMaterialName, MaterialInstance);
 
 			// For Debugging nice...
-			RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].Materials[MaterialIdx].MaterialValue = MaterialInstance;
+			RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].Materials[MaterialIdx].MaterialValue =
+				MaterialInstance;
 		}
 
 		// Set Bounds
@@ -187,7 +187,7 @@ public:
 			                                          LocalPlayer->Size.Y * ViewportSize.Y);
 
 			FVector2f ViewportDimensions = FVector2f(ViewportSize.X, ViewportSize.Y);
-			
+
 			float Fov = PlayerController->PlayerCameraManager->GetFOVAngle();
 			if (!bIsSinglePlayer)
 			{
@@ -195,19 +195,20 @@ public:
 
 
 				float AspectRatio;
-				if (((ViewportSize.X > ViewportSize.Y) && (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MajorAxisFOV)) || (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+				if (((ViewportSize.X > ViewportSize.Y) && (LocalPlayer->AspectRatioAxisConstraint ==
+					AspectRatio_MajorAxisFOV)) || (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
 				{
 					//if the viewport is wider than it is tall
-					AspectRatio = ViewportDimensions.X / (float)ViewportDimensions.Y;
+					AspectRatio = ViewportDimensions.X / ViewportDimensions.Y;
 				}
 				else
 				{
 					//if the viewport is taller than it is wide
-					AspectRatio = ViewportDimensions.Y / (float)ViewportDimensions.X;
+					AspectRatio = ViewportDimensions.Y / ViewportDimensions.X;
 				}
-				
+
 				Fov = FMath::RadiansToDegrees(GET2_NUMBER * FMath::Atan(
-									  FMath::Tan(FMath::DegreesToRadians(Fov) * 0.5f) * AspectRatio));
+					FMath::Tan(FMath::DegreesToRadians(Fov) * 0.5f) * AspectRatio));
 			}
 
 			FCameraView_Lf View;
@@ -240,7 +241,8 @@ public:
 
 			float InterpolatedFov = View.Fov; // + GET5_NUMBER * DeltaTime;
 			FTurboSequence_Helper_Lf::GetCameraFrustumPlanes_ObjectSpace(
-				View.Planes_Internal, InterpolatedFov, View.ViewportSize, View.AspectRatioAxisConstraint, View.NearClipPlane, View.FarClipPlane,
+				View.Planes_Internal, InterpolatedFov, View.ViewportSize, View.AspectRatioAxisConstraint,
+				View.NearClipPlane, View.FarClipPlane,
 				!View.bIsPerspective, View.OrthoWidth);
 
 			if (LastFrameCameraTransforms.Contains(i))
@@ -617,7 +619,8 @@ public:
 	static bool IsValidBufferIndex(const FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library,
 	                               int32 Index)
 	{
-		if (!(Library.BoneTransformParams.PerMeshCustomDataIndex_RenderThread.IsValidIndex(Index) && Library.BoneTransformParams.BoneSpaceAnimationIKIndex_RenderThread.IsValidIndex(Index)))
+		if (!(Library.BoneTransformParams.PerMeshCustomDataIndex_RenderThread.IsValidIndex(Index) && Library.
+			BoneTransformParams.BoneSpaceAnimationIKIndex_RenderThread.IsValidIndex(Index)))
 		{
 			return false;
 		}
@@ -633,7 +636,7 @@ public:
 	                                          FCriticalSection& CriticalSection, int32& CPUIndices,
 	                                          const FSkinnedMeshRuntime_Lf& Runtime,
 	                                          const FAnimationMetaData_Lf& Animation);
-	
+
 	static void CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime, const TObjectPtr<UTurboSequence_MeshAsset_Lf> TargetMesh,
 	                          const TArray<TObjectPtr<UMaterialInterface>>& TargetMaterials,
 	                          TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>&
@@ -711,7 +714,9 @@ public:
 		//SetCustomDataForInstance(Reference, LodElement, Runtime);
 	}
 
-	static void CleanNiagaraRenderer(TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>& NiagaraComponents, FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime)
+	static void CleanNiagaraRenderer(
+		TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>& NiagaraComponents,
+		FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime)
 	{
 		NiagaraComponents[Runtime.DataAsset].NiagaraRenderer[Runtime.MaterialsHash].NiagaraRenderer->DestroyComponent();
 		NiagaraComponents[Runtime.DataAsset].NiagaraRenderer.Remove(Runtime.MaterialsHash);
@@ -792,8 +797,15 @@ public:
 
 		const uint32 CustomDataBaseIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData;
 
+		bool bIsAnimated = GetIsMeshVisible(Runtime, Reference);
+		if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
+		{
+			const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+			bIsAnimated = LodElement.bIsAnimated && bIsAnimated;
+		}
+
 		const FIntVector2& BitValueSkinWeightOffset = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(
-			(SkinWeightOffset + FTurboSequence_Helper_Lf::NumCustomStates) * Runtime.bIsVisible);
+			(SkinWeightOffset + FTurboSequence_Helper_Lf::NumCustomStates) * bIsAnimated);
 		RenderData.ParticleCustomData[CustomDataBaseIndex + GET0_NUMBER] = BitValueSkinWeightOffset.X;
 		RenderData.ParticleCustomData[CustomDataBaseIndex + GET1_NUMBER] = BitValueSkinWeightOffset.Y;
 
@@ -804,13 +816,16 @@ public:
 		RenderData.ParticleCustomData[CustomDataBaseIndex + GET3_NUMBER] = BitValuesTransformIndex.Y;
 	}
 
-	static bool SetCustomDataForInstance_User(FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime, int16 CustomDataFractionIndex, float CustomDataValue)
+	static bool SetCustomDataForInstance_User(FSkinnedMeshReference_Lf& Reference,
+	                                          const FSkinnedMeshRuntime_Lf& Runtime, int16 CustomDataFractionIndex,
+	                                          float CustomDataValue)
 	{
-		if (CustomDataFractionIndex < GET4_NUMBER || CustomDataFractionIndex > FTurboSequence_Helper_Lf::NumInstanceCustomData)
+		if (CustomDataFractionIndex < GET4_NUMBER || CustomDataFractionIndex >
+			FTurboSequence_Helper_Lf::NumInstanceCustomData)
 		{
 			return false;
 		}
-		
+
 		FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
 		if (!RenderData.InstanceMap.Contains(Runtime.GetMeshID()))
@@ -820,17 +835,30 @@ public:
 
 		const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 
-		const uint32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + CustomDataFractionIndex;
+		const uint32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData +
+			CustomDataFractionIndex;
 
 		if (!RenderData.ParticleCustomData.IsValidIndex(CustomDataIndex))
 		{
 			return false;
 		}
-		
+
 		RenderData.ParticleCustomData[CustomDataIndex] = CustomDataValue;
 		RenderData.bCollectionDirty = true;
-		
+
 		return true;
+	}
+
+
+	static bool GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& Runtime, const FSkinnedMeshReference_Lf& Reference)
+	{
+		if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
+		{
+			const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+
+			return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
+		}
+		return Runtime.bIsVisible;
 	}
 
 
@@ -854,10 +882,12 @@ public:
 		Runtime.ClosestCameraDistance = ClosestCameraDistance;
 
 		bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
-		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeMeshDrawRangeUEInstance);
+		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
+			HybridModeMeshDrawRangeUEInstance);
 
 		bool bIsInTSAnimationRange = !IsValid(Runtime.FootprintAsset) ||
-		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->HybridModeAnimationDrawRangeUEInstance);
+		(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
+			HybridModeAnimationDrawRangeUEInstance);
 
 		if (bIsInTSMeshDrawRange)
 		{
@@ -865,12 +895,14 @@ public:
 			{
 				const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
 				UpdateRenderInstanceLod_Concurrent(Reference, Runtime, LodElement,
-				                                   Runtime.bIsVisible && LodElement.bIsRenderStateValid);
+				                                   GetIsMeshVisible(Runtime, Reference) && LodElement.
+				                                   bIsRenderStateValid);
 			}
 		}
 		if (IsValid(Runtime.FootprintAsset))
 		{
-			Runtime.FootprintAsset->OnHybridModeUEInstanceAddRemove_Concurrent_Override(Runtime.GetMeshID(), ThreadContext);
+			Runtime.FootprintAsset->OnHybridModeUEInstanceAddRemove_Concurrent_Override(
+				Runtime.GetMeshID(), ThreadContext);
 		}
 
 
@@ -890,7 +922,8 @@ public:
 			const FSkinnedMeshReferenceLodElement_Lf& NextLodElement = Reference.LevelOfDetails[
 				ClosestLevelOfDetailIndex];
 			UpdateRenderInstanceLod_Concurrent(Reference, Runtime, NextLodElement,
-			                                   Runtime.bIsVisible && NextLodElement.bIsRenderStateValid);
+			                                   GetIsMeshVisible(Runtime, Reference) && NextLodElement.
+			                                   bIsRenderStateValid);
 		}
 		Runtime.LodIndex = ClosestLevelOfDetailIndex;
 	}
@@ -899,7 +932,8 @@ public:
 	{
 		if (Runtime.DataAsset->bUseDistanceUpdating)
 		{
-			float DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->DistanceUpdatingRatio;
+			float DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->
+				DistanceUpdatingRatio;
 			Runtime.DeltaTimeAccumulator -= DeltaTime;
 			if (Runtime.DeltaTimeAccumulator < DistanceRatioSeconds)
 			{
@@ -1161,7 +1195,7 @@ public:
 	                                    bool bIsAdd)
 	{
 		FScopeLock Lock(&CriticalSection);
-		
+
 		bool bEditedLayer = false;
 		if (bIsAdd)
 		{
@@ -1236,7 +1270,6 @@ public:
 	                                           const FSkinnedMeshGlobalLibrary_RenderThread_Lf&
 	                                           Library_RenderThread)
 	{
-
 		int16 NumOperations = Library.AnimationBlendLayerMasks.Num();
 
 		int16 MatchingPatternIndex = INDEX_NONE;
@@ -1269,7 +1302,6 @@ public:
 		bool bEditedLayers = false;
 		if (Library.AnimationBlendLayerMasksRuntimeDirty.Num())
 		{
-
 			int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
 
 			// TODO: Multi-Thread that, it's having somewhere a logic error when using parallelism here ... 
@@ -1446,7 +1478,7 @@ public:
 				});
 		}
 	}
-	
+
 	static void AddAnimation(FSkinnedMeshRuntime_Lf& Runtime,
 	                         const FSkinnedMeshReference_Lf& Reference,
 	                         FAnimationMetaData_Lf& Animation,
@@ -1474,8 +1506,9 @@ public:
 			Runtime.AnimationMetaData.Add(Animation);
 			Runtime.AnimationMetaData_RenderThread.Add(Animation_RenderThread);
 			Runtime.AnimationIDs.Add(Animation.AnimationID, GET0_NUMBER);
-			
-			Library.AnimationBlendLayerMasksRuntimeDirty.FindOrAdd(FUintVector2(Runtime.GetMeshID(), Animation.AnimationID), true);
+
+			Library.AnimationBlendLayerMasksRuntimeDirty.FindOrAdd(
+				FUintVector2(Runtime.GetMeshID(), Animation.AnimationID), true);
 
 			int16 NumAnimations = Runtime.AnimationMetaData.Num();
 			for (int16 AnimIdx = GET0_NUMBER; AnimIdx < NumAnimations; ++AnimIdx)
@@ -1502,7 +1535,7 @@ public:
 		}
 	}
 
-	
+
 	static void RemoveAnimation(FSkinnedMeshRuntime_Lf& Runtime,
 	                            FCriticalSection& CriticalSection,
 	                            FSkinnedMeshGlobalLibrary_Lf& Library,
@@ -1523,7 +1556,8 @@ public:
 				}
 			}
 
-			Library.AnimationBlendLayerMasksRuntimeDirty.FindOrAdd(FUintVector2(Runtime.GetMeshID(), AnimationID), false);
+			Library.AnimationBlendLayerMasksRuntimeDirty.FindOrAdd(FUintVector2(Runtime.GetMeshID(), AnimationID),
+			                                                       false);
 
 			if (Runtime.AnimationIDs.Contains(AnimationID))
 			{
@@ -1580,8 +1614,6 @@ public:
 	static bool RefreshBlendSpaceState(const TObjectPtr<UBlendSpace> BlendSpace, FAnimationBlendSpaceData_Lf& Data,
 	                                   float DeltaTime, FCriticalSection& CriticalSection)
 	{
-
-
 		Data.Tick = FAnimTickRecord(BlendSpace, FVector(Data.CurrentPosition), Data.CachedBlendSampleData,
 		                            Data.BlendFilter, true, 1.0f, true, true, 1.0f, Data.CurrentTime, Data.Record);
 		const TArray<FName> MarkerNames;
@@ -1630,14 +1662,13 @@ public:
 
 		for (int32 i = GET0_NUMBER; i < NumSamples; ++i)
 		{
-
 			float PlayLength = BlendSpace->GetBlendSample(i).Animation->GetPlayLength();
 
 			Data.LongestPlayLength = FMath::Max(Data.LongestPlayLength, PlayLength);
 
 			uint32 AnimID = PlayAnimation(Reference, Library, Library_RenderThread, Runtime, CriticalSection,
-			                                     BlendSpace->GetBlendSample(i).Animation, Settings, BlendSpace->bLoop,
-			                                     OverrideWeight, OverrideStartTime, OverrideEndTime);
+			                              BlendSpace->GetBlendSample(i).Animation, Settings, BlendSpace->bLoop,
+			                              OverrideWeight, OverrideStartTime, OverrideEndTime);
 
 			if (const FBlendSampleData* Sample = Data.CachedBlendSampleData.FindByPredicate(
 				[&i](const FBlendSampleData& Other) { return Other.SampleDataIndex == i; }))
@@ -1711,7 +1742,7 @@ public:
 		return BlendSpaceData;
 	}
 
-	
+
 	static uint32 PlayAnimation(const FSkinnedMeshReference_Lf& Reference,
 	                            FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
@@ -1803,7 +1834,7 @@ public:
 
 		Frame.SetAnimationID(Runtime.AnimationIDs, Runtime.GetMeshID());
 		Frame.Settings = AnimSettings;
-		
+
 		uint16 NumAnimationsPreAdd = Runtime.AnimationMetaData.Num();
 		for (int32 AnimIdx = NumAnimationsPreAdd - GET1_NUMBER; AnimIdx >= GET1_NUMBER; --AnimIdx)
 		{
@@ -2030,7 +2061,7 @@ public:
 
 			int32 CPUPoses;
 			int32 GPUPoses = AddAnimationToLibraryChunked(Library, CriticalSection, CPUPoses,
-			                                                     Runtime, Animation);
+			                                              Runtime, Animation);
 
 			FAnimationMetaData_RenderThread_Lf& RenderData = Runtime.AnimationMetaData_RenderThread[AnimIdx];
 
@@ -2262,7 +2293,8 @@ public:
 			{
 			case ERootMotionRootLock::RefPose:
 				{
-					const FMatrix RefPoseMatrix = GetSkeletonRefPose(ReferenceSkeleton)[GET0_NUMBER].ToMatrixWithScale();
+					const FMatrix RefPoseMatrix = GetSkeletonRefPose(ReferenceSkeleton)[GET0_NUMBER].
+						ToMatrixWithScale();
 
 					for (uint8 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 					{
@@ -2336,11 +2368,12 @@ public:
 
 			if (LibraryData.AnimPoses.Contains(Animation.CPUAnimationIndex_0))
 			{
-				const FTurboSequence_TransposeMatrix_Lf& Matrix = GetBoneTransformFromLocalPoses(SkeletonBoneIndex, LibraryData, ReferenceSkeleton,
-				                                                                                 AnimationSkeleton,
-				                                                                                 LibraryData.AnimPoses[Animation.CPUAnimationIndex_0].Pose,
-				                                                                                 Animation.Animation);
-				
+				const FTurboSequence_TransposeMatrix_Lf& Matrix = GetBoneTransformFromLocalPoses(
+					SkeletonBoneIndex, LibraryData, ReferenceSkeleton,
+					AnimationSkeleton,
+					LibraryData.AnimPoses[Animation.CPUAnimationIndex_0].Pose,
+					Animation.Animation);
+
 				for (uint8 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 				{
 					OutAtom.M[GET0_NUMBER][M] = Matrix.Colum[M].X;

@@ -393,7 +393,9 @@ public:
 
 	FString ToString() const
 	{
-		FString String = FString::Printf(TEXT("bIsValid -> %s | Root Mesh ID -> %lld"), IsMeshDataValid() ? TEXT("True") : TEXT("False"), RootMotionMeshID);
+		FString String = FString::Printf(
+			TEXT("bIsValid -> %s | Root Mesh ID -> %lld"), IsMeshDataValid() ? TEXT("True") : TEXT("False"),
+			RootMotionMeshID);
 		for (int64 MeshID : CustomizableMeshIDs)
 		{
 			String += FString::Printf(TEXT(" | Customizable ID -> %lld"), MeshID);
@@ -420,7 +422,8 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_PoseCurveData_Lf
 	{
 	}
 
-	FTurboSequence_PoseCurveData_Lf(const TObjectPtr<UAnimSequence>& CurveAnimation, const FName& CurveID, float CurveFrame0)
+	FTurboSequence_PoseCurveData_Lf(const TObjectPtr<UAnimSequence>& CurveAnimation, const FName& CurveID,
+	                                float CurveFrame0)
 		: CurveAnimation(CurveAnimation),
 		  CurveName(CurveID),
 		  CurveFrame_0(CurveFrame0)

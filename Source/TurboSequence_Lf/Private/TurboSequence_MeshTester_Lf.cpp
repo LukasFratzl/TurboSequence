@@ -35,23 +35,26 @@ void ATurboSequence_MeshTester_Lf::TestMesh(float DeltaTime)
 
 		if (CurrentMeshID.IsMeshDataValid())
 		{
-			ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(MeshUpdateContext.GroupIndex, CurrentMeshID);
+			ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(
+				MeshUpdateContext.GroupIndex, CurrentMeshID);
 
 			ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(CurrentMeshID, GetWorld());
-			
 		}
 
 		if (SpawnData.IsSpawnDataValid())
 		{
-			CurrentMeshID = ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(SpawnData, GetActorTransform(), GetWorld());
+			CurrentMeshID = ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+				SpawnData, GetActorTransform(), GetWorld());
 			if (CurrentMeshID.IsMeshDataValid())
 			{
-				ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(MeshUpdateContext.GroupIndex, CurrentMeshID);
+				ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(
+					MeshUpdateContext.GroupIndex, CurrentMeshID);
 
-				CurrentAnimationID = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(CurrentMeshID, MeshAnimation, MeshAnimationSettings);
+				CurrentAnimationID = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
+					CurrentMeshID, MeshAnimation, MeshAnimationSettings);
 			}
 		}
 	}
-	
+
 	ATurboSequence_Manager_Lf::SolveMeshes_GameThread(DeltaTime, GetWorld(), MeshUpdateContext);
 }

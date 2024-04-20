@@ -42,7 +42,8 @@ FText UTurboSequence_RefSettings_Lf::GetSectionText() const
 
 FText UTurboSequence_RefSettings_Lf::GetSectionDescription() const
 {
-	return LOCTEXT("UTurboSequence_RefSettings_Lf::GetSectionDescription", "The engine load on startup assets for TurboSequence, here it can get defined the paths");
+	return LOCTEXT("UTurboSequence_RefSettings_Lf::GetSectionDescription",
+	               "The engine load on startup assets for TurboSequence, here it can get defined the paths");
 }
 #endif
 

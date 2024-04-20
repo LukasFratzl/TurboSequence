@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/Optional.h"
 #include "NiagaraComponent.h"
 #include "TurboSequence_ComputeShaders_Lf.h"
 #include "TurboSequence_Helper_Lf.h"
 #include "TurboSequence_MeshAsset_Lf.h"
 #include "TurboSequence_MinimalData_Lf.h"
 #include "Animation/BlendSpace.h"
+#include "Misc/Optional.h"
 
 #include "TurboSequence_Data_Lf.generated.h"
 
@@ -25,7 +25,7 @@ struct TURBOSEQUENCE_LF_API FCameraView_Lf
 
 	UPROPERTY(EditAnywhere, Category="Aspect")
 	FVector2f ViewportSize = FVector2f::ZeroVector;
-	
+
 	TOptional<EAspectRatioAxisConstraint> AspectRatioAxisConstraint;
 
 	UPROPERTY(EditAnywhere, Category="Aspect")
@@ -192,7 +192,7 @@ USTRUCT()
 struct TURBOSEQUENCE_LF_API FAnimationLibraryData_Lf
 {
 	GENERATED_BODY()
-	
+
 	int32 MaxFrames = GET0_NUMBER;
 
 	uint16 NumBones = GET0_NUMBER;
@@ -225,7 +225,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_RenderThread_Lf
 	~FAnimationMetaData_RenderThread_Lf()
 	{
 	}
-	
+
 	int32 GPUAnimationIndex_0 = GET0_NUMBER;
 
 	uint16 FinalAnimationWeight = GET0_NUMBER;
@@ -279,7 +279,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 
 	UPROPERTY(EditAnywhere, Category="Animation")
 	uint16 LayerMaskIndex = GET0_NUMBER;
-	
+
 	bool bNeedRebuildAnimationLayers = false;
 	// < Hash >
 	uint32 AnimationLayerHash = GET0_NUMBER;
@@ -287,7 +287,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 	uint32 AnimationGroupLayerHash = GET0_NUMBER;
 
 	FUintVector AnimationLibraryHash = FUintVector::ZeroValue;
-	
+
 	float AnimationNormalizedTime = GET0_NUMBER;
 	float AnimationMaxPlayLength = GET1_NUMBER;
 	int32 CurrentFrame = GET0_NUMBER;
@@ -315,7 +315,8 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 		// We don't want a 0 Hash because it's the Instance Return type when the function cancel unexpected
 		// Here we check if the hash is unique, if not we run the loop again,
 		// usually on the 1st try it already pass the check fine
-		while (InputCollection.Contains(AnimationID) || (!InputCollection.Contains(AnimationID) && AnimationID == GET0_NUMBER))
+		while (InputCollection.Contains(AnimationID) || (!InputCollection.Contains(AnimationID) && AnimationID ==
+			GET0_NUMBER))
 		{
 			SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
 			SecurityNumber++;
@@ -356,7 +357,6 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialKeyValue_Lf
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UMaterialInterface> MaterialValue;
-	
 };
 
 USTRUCT()
@@ -637,7 +637,7 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<AActor> HybridMeshInstance;
-	
+
 	bool bSpawnedHybridActor = false;
 };
 
@@ -670,9 +670,9 @@ struct TURBOSEQUENCE_LF_API FAsyncTextureGenerationChunk_Lf
 	TArray<FUintVector3> LodDimensions;
 
 	int32 NumPixelsPerIteration = GET0_NUMBER;
-	
+
 	int32 NumPixelsComputed = GET0_NUMBER;
-	
+
 	TMap<int32, bool> TestValue;
 
 	UPROPERTY()
@@ -720,7 +720,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 
 	TMap<uint32, FSkinnedMeshRuntime_RenderThread_Lf> RuntimeSkinnedMeshes;
 	TArray<uint32> RuntimeSkinnedMeshesHashMap;
-	
+
 	uint32 AnimationLibraryMaxNum = GET0_NUMBER;
 
 	TMap<uint32, int32> MeshIDToGlobalIndex;

@@ -6,58 +6,60 @@ public class TurboSequence_Lf : ModuleRules
 {
 	public TurboSequence_Lf(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
 		PublicIncludePaths.AddRange(
-			new string[] {
-				// ... add public include paths required here ...
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				// ... add other private include paths required here ...
-			}
-			);
-			
-		
-		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", 
+				// ... add public include paths required here ...
+			}
+		);
+
+
+		PrivateIncludePaths.AddRange(
+			new string[]
+			{
+				// ... add other private include paths required here ...
+			}
+		);
+
+
+		PublicDependencyModuleNames.AddRange(
+			new[]
+			{
+				"Core",
 				"Engine",
 				"TurboSequence_Shader_Lf",
 				"RenderCore",
 				"TurboSequence_HelperModule_Lf",
-				"Niagara",
+				"Niagara"
 				//"AnimationBlueprintLibrary"
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
-			
-		
+		);
+
+
 		PrivateDependencyModuleNames.AddRange(
-			new string[]
+			new[]
 			{
 				"CoreUObject",
 				"Engine",
 				"Projects",
 				"UMG",
-				"RenderCore", 
+				"RenderCore",
 				"Renderer",
 				"RHI",
 				"MeshDescription"
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		
-		
+		);
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
 			}
-			);
+		);
 	}
 }

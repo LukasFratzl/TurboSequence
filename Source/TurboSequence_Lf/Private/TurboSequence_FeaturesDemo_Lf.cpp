@@ -65,7 +65,7 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 	}
 
 	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::RootMotion) && RootMotionDemo.bEnable && RootMotionDemo.Spawns
-	                                                                                                             .Num())
+		.Num())
 	{
 		RootMotionDemo.MeshData.Add(
 			ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
@@ -154,7 +154,7 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 					else
 					{
 						CustomizationDemo.CategorizeCustomizableData[CustomizableAsset.CategoryName].CategorizedData.
-						                                                                             Add(CustomizableAsset);
+							Add(CustomizableAsset);
 					}
 				}
 			}
@@ -181,7 +181,7 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 	}
 
 	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::BlendSpaces) && BlendSpaceDemo.bEnable && BlendSpaceDemo.
-	                                                                                                Spawns.Num())
+		Spawns.Num())
 	{
 		BlendSpaceDemo.MeshData.Add(
 			ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
@@ -240,14 +240,16 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 		}
 	}
 
-	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::UpdateGroups) && UpdateGroupsDemo.bEnable && UpdateGroupsDemo.Spawns.Num() >= 1)
+	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::UpdateGroups) && UpdateGroupsDemo.bEnable && UpdateGroupsDemo.
+		Spawns.Num() >= 1)
 	{
 		int32 GrouIndex = 1;
 		//int8 Index = 0;
 		for (const FTransform& SpawnTransform : UpdateGroupsDemo.ActionTransforms)
 		{
 			const FTurboSequence_MinimalMeshData_Lf& MeshData =
-				ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(UpdateGroupsDemo.Spawns[0], SpawnTransform, GetWorld());
+				ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+					UpdateGroupsDemo.Spawns[0], SpawnTransform, GetWorld());
 			ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(GrouIndex, MeshData);
 
 			FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
@@ -261,7 +263,7 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 	}
 
 	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::HybridMode) && HybridMode.bEnable && HybridMode.Spawns
-	                                                                                                     .Num())
+		.Num())
 	{
 		HybridMode.MeshData.Add(
 			ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
@@ -282,7 +284,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 
 	FCriticalSection CriticalSection;
 
-	if (SimpleBlendingDemo.bEnable && SimpleBlendingDemo.MeshData.Num() && SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations.Num() > 1)
+	if (SimpleBlendingDemo.bEnable && SimpleBlendingDemo.MeshData.Num() && SimpleBlendingDemo.Spawns[0].RootMotionMesh.
+		Mesh->AnimationLibrary->Animations.Num() > 1)
 	{
 		SimpleBlendingDemo.RandomTimer -= DeltaTime;
 		if (SimpleBlendingDemo.RandomTimer < 0)
@@ -290,7 +293,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			SimpleBlendingDemo.RandomTimer = FMath::RandRange(3.0f, 4.0f);
 
 			int32 RandomAnimation = 0;
-			while (SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].Animation ==
+			while (SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].
+				Animation ==
 				ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
 					SimpleBlendingDemo.MeshData[0]))
 			{
@@ -301,11 +305,14 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
 			//AnimationPlaySettings.Animation = SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation];
 			ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(SimpleBlendingDemo.MeshData[0],
-			                                                    SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].Animation,AnimationPlaySettings);
+			                                                    SimpleBlendingDemo.Spawns[0].RootMotionMesh.Mesh->
+			                                                    AnimationLibrary->Animations[RandomAnimation].Animation,
+			                                                    AnimationPlaySettings);
 		}
 	}
 
-	if (LayerBlendingDemo.bEnable && LayerBlendingDemo.MeshData.Num() && LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations.Num() > 1)
+	if (LayerBlendingDemo.bEnable && LayerBlendingDemo.MeshData.Num() && LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh
+		->AnimationLibrary->Animations.Num() > 1)
 	{
 		LayerBlendingDemo.RandomTimer -= DeltaTime;
 		if (LayerBlendingDemo.RandomTimer < 0)
@@ -313,7 +320,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			LayerBlendingDemo.RandomTimer = FMath::RandRange(3.0f, 4.0f);
 
 			int32 RandomAnimation = 0;
-			while (LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].Animation ==
+			while (LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].
+				Animation ==
 				ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(LayerBlendingDemo.MeshData[0]))
 			{
 				RandomAnimation = FMath::RandRange(
@@ -323,7 +331,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
 			//AnimationPlaySettings.Animation = LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation];
 			ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(LayerBlendingDemo.MeshData[0],
-			                                                    LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].Animation,
+			                                                    LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->
+			                                                    AnimationLibrary->Animations[RandomAnimation].Animation,
 			                                                    AnimationPlaySettings);
 
 
@@ -333,7 +342,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 
 			//AnimationPlaySettings.Animation = LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation];
 			ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(LayerBlendingDemo.MeshData[0],
-			                                                    LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->AnimationLibrary->Animations[RandomAnimation].Animation,
+			                                                    LayerBlendingDemo.Spawns[0].RootMotionMesh.Mesh->
+			                                                    AnimationLibrary->Animations[RandomAnimation].Animation,
 			                                                    AnimationPlaySettings);
 		}
 	}
@@ -440,7 +450,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 	}
 
 	if (BlendSpaceDemo.bEnable && BlendSpaceDemo.MeshData.Num() && BlendSpaceDemo.TweakingBlendSpace.
-	                                                                              IsAnimCollectionValid())
+		IsAnimCollectionValid())
 	{
 		BlendSpaceDemo.RandomTimer -= DeltaTime;
 		if (BlendSpaceDemo.RandomTimer < 0)
@@ -453,7 +463,6 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			LastDemoBlendSpacePosition = Position;
 
 			ATurboSequence_Manager_Lf::TweakBlendSpace_Concurrent(BlendSpaceDemo.TweakingBlendSpace, Position);
-			
 		}
 	}
 
@@ -491,7 +500,8 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 		UpdateContext.GroupIndex = CurrentUpdateGroupIndex;
 		//UpdateContext.bCollectGarbageThisFrame = bCollectGarbageThisFrame;
 
-		ATurboSequence_Manager_Lf::SolveMeshes_GameThread(UpdateGroupsDemo.DeltaTime[DeltaTimeIndex], GetWorld(), UpdateContext);
+		ATurboSequence_Manager_Lf::SolveMeshes_GameThread(UpdateGroupsDemo.DeltaTime[DeltaTimeIndex], GetWorld(),
+		                                                  UpdateContext);
 		UpdateGroupsDemo.DeltaTime[DeltaTimeIndex] = 0;
 
 		CurrentUpdateGroupIndex++;

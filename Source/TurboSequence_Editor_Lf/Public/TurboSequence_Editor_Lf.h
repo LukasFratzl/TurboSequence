@@ -27,7 +27,8 @@ public:
 	inline static TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData;
 	inline static TArray<FAssetData> TurboSequence_MeshAssetData_AsyncComputeSwapBack;
 	static void RepairMeshAssetAsync();
-	static void RepairMeshAssetAsync2(const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset, const TObjectPtr<UWorld> World, const bool bIsCollection);
+	static void RepairMeshAssetAsync2(const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
+	                                  const TObjectPtr<UWorld> World, const bool bIsCollection);
 	inline static int16 RepairMaxIterationCounter = GET0_NUMBER;
 
 	void PluginButtonClicked() const;

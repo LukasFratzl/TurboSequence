@@ -41,7 +41,8 @@ FText UTurboSequence_NiagaraSettings_Lf::GetSectionText() const
 
 FText UTurboSequence_NiagaraSettings_Lf::GetSectionDescription() const
 {
-	return LOCTEXT("UTurboSequence_RefSettings_Lf::GetSectionDescription", "Turbo Sequence is using Niagara to render the Instances, here can change settings for the niagara system");
+	return LOCTEXT("UTurboSequence_RefSettings_Lf::GetSectionDescription",
+	               "Turbo Sequence is using Niagara to render the Instances, here can change settings for the niagara system");
 }
 #endif
 
@@ -74,31 +75,39 @@ void UTurboSequence_NiagaraSettings_Lf::PostEditChangeProperty(FPropertyChangedE
 			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraMaterialObject = NameNiagaraMaterialObject;
 		}
 
-		if (NameNiagaraParticleLocations != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleLocations.ToString())
+		if (NameNiagaraParticleLocations != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleLocations.
+			ToString())
 		{
 			bEditedData = true;
-			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleLocations = FName(NameNiagaraParticleLocations);
+			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleLocations = FName(
+				NameNiagaraParticleLocations);
 		}
 
-		if (NameNiagaraParticleRotations != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRotations.ToString())
+		if (NameNiagaraParticleRotations != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRotations.
+			ToString())
 		{
 			bEditedData = true;
-			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRotations = FName(NameNiagaraParticleRotations);
+			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRotations = FName(
+				NameNiagaraParticleRotations);
 		}
 
-		if (NameNiagaraParticleScales != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleScales.ToString())
+		if (NameNiagaraParticleScales != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleScales.
+			ToString())
 		{
 			bEditedData = true;
 			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleScales = FName(NameNiagaraParticleScales);
 		}
 
-		if (NameNiagaraLevelOfDetailIndex != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraLevelOfDetailIndex.ToString())
+		if (NameNiagaraLevelOfDetailIndex != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraLevelOfDetailIndex.
+			ToString())
 		{
 			bEditedData = true;
-			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraLevelOfDetailIndex = FName(NameNiagaraLevelOfDetailIndex);
+			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraLevelOfDetailIndex = FName(
+				NameNiagaraLevelOfDetailIndex);
 		}
 
-		if (NameNiagaraParticleRemove != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRemove.ToString())
+		if (NameNiagaraParticleRemove != FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRemove.
+			ToString())
 		{
 			bEditedData = true;
 			FTurboSequence_Editor_LfModule::GlobalData->NameNiagaraParticleRemove = FName(NameNiagaraParticleRemove);

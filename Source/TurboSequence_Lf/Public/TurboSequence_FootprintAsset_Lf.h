@@ -32,14 +32,16 @@ public:
 	float HybridModeAnimationDrawRangeUEInstance = 5000;
 
 	TMap<uint32, float> DefaultAnimationTransitions;
-	
-	void TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext);
 
-	virtual void OnHybridModeUEInstanceAddRemove_Concurrent_Override(int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
+	void TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(
+		int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext);
+
+	virtual void OnHybridModeUEInstanceAddRemove_Concurrent_Override(int64 MeshID,
+	                                                                 UTurboSequence_ThreadContext_Lf* ThreadContext)
 	{
 		TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(MeshID, ThreadContext);
 	}
-	
+
 	AActor* TurboSequence_Default_HybridModeUEInstanceSpawn_GameThread_Lf(
 		const FTurboSequence_MinimalMeshData_Lf& MeshData, UWorld* InWorld);
 
@@ -48,7 +50,7 @@ public:
 	{
 		TurboSequence_Default_HybridModeUEInstanceSpawn_GameThread_Lf(MeshData, InWorld);
 	}
-	
+
 	void TurboSequence_Default_HybridModeUEInstanceDestroy_GameThread_Lf(
 		const FTurboSequence_MinimalMeshData_Lf& MeshData,
 		bool bSetTSMeshToUEMeshTransform = true);
@@ -58,7 +60,7 @@ public:
 	{
 		TurboSequence_Default_HybridModeUEInstanceDestroy_GameThread_Lf(MeshData, true);
 	}
-	
+
 	void TurboSequence_Default_HybridModeUEInstanceTick_GameThread_Lf(const FTurboSequence_MinimalMeshData_Lf& MeshData,
 	                                                                  float DeltaTime);
 

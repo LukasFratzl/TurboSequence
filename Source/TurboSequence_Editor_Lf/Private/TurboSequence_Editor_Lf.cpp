@@ -38,7 +38,7 @@ void FTurboSequence_Editor_LfModule::StartupModule()
 		FMenuBarExtensionDelegate::CreateRaw(this, &FTurboSequence_Editor_LfModule::AddMenu)
 	);
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
-	
+
 	IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	AssetRegistry.OnFilesLoaded().AddRaw(this, &FTurboSequence_Editor_LfModule::OnFilesLoaded);
 }
@@ -53,7 +53,7 @@ void FTurboSequence_Editor_LfModule::ShutdownModule()
 	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(TurboSequence_MeshAssetTypeActions.ToSharedRef());
 
 	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(TurboSequence_AnimLibraryTypeActions.ToSharedRef());
-	
+
 	IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	AssetRegistry.OnFilesLoaded().RemoveAll(this);
 }
@@ -144,18 +144,19 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 					if (IsValid(TurboSequence_Asset->InstancedMeshes[MeshIdx].StaticMesh))
 					{
 						const UPackage* Package = TurboSequence_Asset->InstancedMeshes[MeshIdx].StaticMesh->
-						                                                                        GetOutermost();
+							GetOutermost();
 						const FString PackagePath = FPackageName::LongPackageNameToFilename(
 							Package->GetName(), FPackageName::GetAssetPackageExtension());
 						UPackageTools::LoadPackage(*PackagePath);
 
 						TArray<int32> StaticMeshOrderIndices;
-						
+
 						if (TObjectPtr<UStaticMesh> StaticMesh =
 							UTurboSequence_ControlWidget_Lf::GenerateStaticMeshFromSkeletalMesh(
 								TurboSequence_Asset->ReferenceMeshEdited, MeshIdx, PackagePath,
 								FString(FString::Format(
-									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)})), StaticMeshOrderIndices))
+									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)})),
+								StaticMeshOrderIndices))
 						{
 							//FMeshItem_Lf Item = FMeshItem_Lf();
 							if (MeshIdx > GET9_NUMBER)
@@ -172,7 +173,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 
 							TurboSequence_Asset->MeshDataOrderView.Add(Order);
 
-							
+
 							bSkinWeightEdited = true;
 						}
 					}
@@ -340,7 +341,7 @@ void FTurboSequence_Editor_LfModule::PluginButtonClicked() const
 		for (const FAssetData& Asset : AssetData)
 		{
 			if (UEditorUtilityWidgetBlueprint* Widget = Cast<UEditorUtilityWidgetBlueprint>(Asset.GetAsset()); Widget->
-			                                                                                                   ParentClass->IsChildOf(UTurboSequence_ControlWidget_Lf::StaticClass()))
+				ParentClass->IsChildOf(UTurboSequence_ControlWidget_Lf::StaticClass()))
 			{
 				WidgetBP = Widget;
 				break;
@@ -555,7 +556,8 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		                                                 TEXT("Default_Rendering_TransformTexture_CurrentFrame"));
 		if (DefaultTransformTextureReferencePathCurrentFrame.IsEmpty())
 		{
-			DefaultTransformTextureReferencePathCurrentFrame = FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTextureCurrentFrame;
+			DefaultTransformTextureReferencePathCurrentFrame =
+				FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTextureCurrentFrame;
 		}
 		if (!IsValid(GlobalData->TransformTexture_CurrentFrame))
 		{
@@ -588,18 +590,20 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 					Package->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PackagePath);
 				GlobalData->TransformTexture_CurrentFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
-					PackagePath, GlobalData->TransformTexture_CurrentFrame->GetName(), GET2048_NUMBER, GET12_NUMBER, GetPixelFormatFromRenderTargetFormat(Format));
+					PackagePath, GlobalData->TransformTexture_CurrentFrame->GetName(), GET2048_NUMBER, GET12_NUMBER,
+					GetPixelFormatFromRenderTargetFormat(Format));
 			}
 		}
 
 		FString DefaultTransformTextureReferencePathPreviousFrame;
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePathPreviousFrame,
-														 TEXT(
-															 "/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
-														 TEXT("Default_Rendering_TransformTexture_PreviousFrame"));
+		                                                 TEXT(
+			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_RefSettings_Lf"),
+		                                                 TEXT("Default_Rendering_TransformTexture_PreviousFrame"));
 		if (DefaultTransformTextureReferencePathPreviousFrame.IsEmpty())
 		{
-			DefaultTransformTextureReferencePathPreviousFrame = FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTexturePreviousFrame;
+			DefaultTransformTextureReferencePathPreviousFrame =
+				FTurboSequence_Helper_Lf::ReferenceTurboSequenceTransformTexturePreviousFrame;
 		}
 		if (!IsValid(GlobalData->TransformTexture_PreviousFrame))
 		{
@@ -611,15 +615,19 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		if (!IsValid(GlobalData->TransformTexture_PreviousFrame))
 		{
 			UE_LOG(LogTurboSequence_Lf, Error,
-				   TEXT(
-					   "Can not find Transform Texture, it should at .../Plugins/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths, if it's not there please create a default Render Target 2D Array Texture and assign the reference in the TurboSequence Lf -> Reference Paths Project settings and open ../Plugins/TurboSequence_Lf/Resources/MF_TurboSequence_PositionOffset_Lf and assign it into the Texture Object with the Transform Texture Comment"
-				   ));
+			       TEXT(
+				       "Can not find Transform Texture, it should at .../Plugins/TurboSequence_Lf/Resources/T_TurboSequence_TransformTexture_Lf, please assign it manually in the Project settings under TurboSequence Lf -> Reference Paths, if it's not there please create a default Render Target 2D Array Texture and assign the reference in the TurboSequence Lf -> Reference Paths Project settings and open ../Plugins/TurboSequence_Lf/Resources/MF_TurboSequence_PositionOffset_Lf and assign it into the Texture Object with the Transform Texture Comment"
+			       ));
 		}
 		else
 		{
-
-			if (FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeX != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeX || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->SizeY
-			!= FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->SizeY || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->Slices != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->Slices || FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_PreviousFrame->GetFormat() != FTurboSequence_Editor_LfModule::GlobalData->TransformTexture_CurrentFrame->GetFormat())
+			if (GlobalData->TransformTexture_CurrentFrame->SizeX != GlobalData->TransformTexture_PreviousFrame->SizeX ||
+				GlobalData->TransformTexture_CurrentFrame->SizeY
+				!= GlobalData->TransformTexture_PreviousFrame->SizeY || GlobalData->TransformTexture_PreviousFrame->
+				Slices != GlobalData->TransformTexture_CurrentFrame->Slices || GlobalData->
+				                                                               TransformTexture_PreviousFrame->
+				                                                               GetFormat() != GlobalData->
+				TransformTexture_CurrentFrame->GetFormat())
 			{
 				bAssetEdited = true;
 				const UPackage* Package = GlobalData->TransformTexture_PreviousFrame->GetOutermost();
@@ -627,11 +635,12 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 					Package->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PackagePath);
 				GlobalData->TransformTexture_PreviousFrame = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
-					PackagePath, GlobalData->TransformTexture_PreviousFrame->GetName(), GlobalData->TransformTexture_CurrentFrame->SizeX, GlobalData->TransformTexture_CurrentFrame->Slices, GlobalData->TransformTexture_CurrentFrame->GetFormat());
+					PackagePath, GlobalData->TransformTexture_PreviousFrame->GetName(),
+					GlobalData->TransformTexture_CurrentFrame->SizeX, GlobalData->TransformTexture_CurrentFrame->Slices,
+					GlobalData->TransformTexture_CurrentFrame->GetFormat());
 			}
 		}
 
-		
 
 		FString DefaultSkinWeightTextureReferencePath;
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultSkinWeightTextureReferencePath,
@@ -665,7 +674,8 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 					Package->GetName(), FPackageName::GetAssetPackageExtension());
 				UPackageTools::LoadPackage(*PackagePath);
 				GlobalData->SkinWeightTexture = FTurboSequence_Helper_Lf::GenerateBlankRenderTargetArray(
-					PackagePath, GlobalData->SkinWeightTexture->GetName(), GET128_NUMBER, GET24_NUMBER, GetPixelFormatFromRenderTargetFormat(RTF_RGBA16f));
+					PackagePath, GlobalData->SkinWeightTexture->GetName(), GET128_NUMBER, GET24_NUMBER,
+					GetPixelFormatFromRenderTargetFormat(RTF_RGBA16f));
 			}
 		}
 
@@ -696,7 +706,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 
 	AssetRegistry.Get().GetAssetsByClass(FTopLevelAssetPath(UTurboSequence_MeshAsset_Lf::StaticClass()->GetPathName()),
 	                                     TurboSequence_MeshAssetData_AsyncComputeSwapBack);
-	
+
 
 	if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.Num())
 	{

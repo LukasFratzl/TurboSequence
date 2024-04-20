@@ -25,7 +25,6 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 
 	if (AssetData.Num())
 	{
-
 		UpdateGroupIndex = QualityGroupIndex + 1;
 
 		AssetDataRuntime.Empty();
@@ -154,14 +153,16 @@ void ATurboSequence_Demo_Lf::Tick(float DeltaTime)
 					ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(
 						Mesh.CurrentUpdateGroupIndex, Mesh.MeshData);
 					Mesh.CurrentUpdateGroupIndex = QualityGroupIndex;
-					ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(Mesh.CurrentUpdateGroupIndex, Mesh.MeshData);
+					ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(
+						Mesh.CurrentUpdateGroupIndex, Mesh.MeshData);
 				}
 				else
 				{
 					ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(
 						QualityGroupIndex, Mesh.MeshData);
 					Mesh.CurrentUpdateGroupIndex = Mesh.DefaultUpdateGroupIndex;
-					ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(Mesh.CurrentUpdateGroupIndex, Mesh.MeshData);
+					ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(
+						Mesh.CurrentUpdateGroupIndex, Mesh.MeshData);
 				}
 			}
 
@@ -325,7 +326,8 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 				break;
 			}
 
-			const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.UpdateGroups[GroupIndex].RawMinimalData[Index];
+			const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GlobalLibrary.UpdateGroups[
+				GroupIndex].RawMinimalData[Index];
 
 			if (Meshes.Contains(MeshData.RootMotionMeshID))
 			{
@@ -351,8 +353,8 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 	float CameraDistance = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_Concurrent(
 		Mesh.MeshData);
 	float DistanceRatioSeconds = MeshAsset->bUseDistanceUpdating
-		                                    ? CameraDistance / 250000 * MeshAsset->DistanceUpdatingRatio
-		                                    : 0;
+		                             ? CameraDistance / 250000 * MeshAsset->DistanceUpdatingRatio
+		                             : 0;
 
 	Mesh.DeltaTimeAccumulator += DeltaTime;
 	if (Mesh.DeltaTimeAccumulator > DistanceRatioSeconds)
@@ -382,7 +384,8 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 				FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
 					Mesh.MeshData);
 
-				MeshTransform.SetLocation(MeshTransform.GetLocation() + MeshTransform.GetRotation().RotateVector(Speed * DeltaTime));
+				MeshTransform.SetLocation(
+					MeshTransform.GetLocation() + MeshTransform.GetRotation().RotateVector(Speed * DeltaTime));
 
 				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
 			}
@@ -432,8 +435,8 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 						}
 						FTurboSequence_AnimPlaySettings_Lf PlaySettings = FTurboSequence_AnimPlaySettings_Lf();
 						Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-								Mesh.MeshData, MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
-								PlaySettings);
+							Mesh.MeshData, MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
+							PlaySettings);
 
 						if (AssetCustomData->bUseLayer)
 						{
@@ -499,7 +502,7 @@ void ATurboSequence_Demo_Lf::SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSecti
 				OffsetTransform.Inverse();
 
 			float Dot = FVector::DotProduct(CameraRotation.Vector(),
-			                                       MeshTransform.GetRotation().Vector());
+			                                MeshTransform.GetRotation().Vector());
 			bool bIsInView = Dot < 0;
 
 			Mesh.IKWeight = FTurboSequence_Helper_Lf::Clamp01(FMath::Lerp(
