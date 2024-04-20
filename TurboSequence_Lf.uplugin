@@ -1,45 +1,45 @@
 {
-  "FileVersion": 3,
-  "Version": 1,
-  "VersionName": "1.0",
-  "FriendlyName": "Turbo Sequence Lf",
-  "Description": "GPU Instanced Skeletal Meshes and Animation Framework",
-  "Category": "Animation",
-  "CreatedBy": "Lukas Fratzl",
-  "CreatedByURL": "https://lukas-fratzl.com/",
-  "DocsURL": "",
-  "MarketplaceURL": "",
-  "SupportURL": "https://lukas-fratzl.com/",
-  "CanContainContent": true,
-  "IsBetaVersion": true,
-  "IsExperimentalVersion": false,
-  "Installed": false,
-  "Modules": [
-    {
-      "Name": "TurboSequence_Lf",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "TurboSequence_Editor_Lf",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "TurboSequence_Shader_Lf",
-      "Type": "Runtime",
-      "LoadingPhase": "PostConfigInit"
-    },
-    {
-      "Name": "TurboSequence_HelperModule_Lf",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "Niagara",
-      "Enabled": true
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Turbo Sequence Lf",
+	"Description": "GPU Instanced Skeletal Meshes and Animation Framework",
+	"Category": "Animation",
+	"CreatedBy": "Lukas Fratzl",
+	"CreatedByURL": "https://lukas-fratzl.com/",
+	"DocsURL": "https://github.com/LukasFratzl/TurboSequence/wiki",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "TurboSequence_Lf",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "TurboSequence_Editor_Lf",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "TurboSequence_Shader_Lf",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		},
+		{
+			"Name": "TurboSequence_HelperModule_Lf",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "Niagara",
+			"Enabled": true
+		}
+	]
 }
