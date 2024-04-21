@@ -85,7 +85,7 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 	TArray<TObjectPtr<UMaterialInterface>> Materials;
 
 	// ID
-	TMap<uint32, int32> InstanceMap; // < MeshID | Renderer Instance Index >
+	TMap<int32, int32> InstanceMap; // < MeshID | Renderer Instance Index >
 
 	// Transform
 	TArray<FVector> ParticlePositions;
@@ -307,7 +307,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 		return Hash;
 	}
 
-	void SetAnimationID(const TMap<uint32, int32>& InputCollection, uint32 BelongsToMeshID)
+	void SetAnimationID(const TMap<uint32, int32>& InputCollection, int32 BelongsToMeshID)
 	{
 		uint32 SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
 		// Set the hash
@@ -509,7 +509,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 	TMap<uint32, FRenderData_Lf> RenderData;
 
 	// < Mesh ID
-	TMap<uint32, bool> HybridMeshManagementData;
+	TMap<int32, bool> HybridMeshManagementData;
 };
 
 /*	==============================================================================================================
@@ -529,7 +529,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 	{
 	}
 
-	explicit FSkinnedMeshRuntime_RenderThread_Lf(uint32 WantedMeshID,
+	explicit FSkinnedMeshRuntime_RenderThread_Lf(int32 WantedMeshID,
 	                                             const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset)
 	{
 		MeshID = WantedMeshID;
@@ -548,10 +548,10 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 	TMap<uint16, FIKBoneData_Lf> IKData;
 
 protected:
-	uint32 MeshID = GET0_NUMBER;
+	int32 MeshID = GET0_NUMBER;
 
 public:
-	FORCEINLINE_DEBUGGABLE uint32 GetMeshID() const
+	FORCEINLINE_DEBUGGABLE int32 GetMeshID() const
 	{
 		return MeshID;
 	}
@@ -570,33 +570,28 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	{
 	}
 
-	explicit FSkinnedMeshRuntime_Lf(const TMap<uint32, FSkinnedMeshRuntime_Lf>& InputCollection,
+	explicit FSkinnedMeshRuntime_Lf(const TMap<int32, FSkinnedMeshRuntime_Lf>& InputCollection,
 	                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset)
 	{
-		uint32 SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
-		// Set the hash
-		MeshID = SetHash(SecurityNumber);
-		// We don't want a 0 Hash because it's the Instance Return type when the function cancel unexpected
-		// Here we check if the hash is unique, if not we run the loop again,
-		// usually on the 1st try it already pass the check fine
-		while (InputCollection.Contains(MeshID) || (!InputCollection.Contains(MeshID) && MeshID == GET0_NUMBER))
+		MeshID = FMath::RandRange(0, INT32_MAX - 1);
+		MeshID++;
+		while (InputCollection.Contains(MeshID) || (!InputCollection.Contains(MeshID) && MeshID < GET0_NUMBER))
 		{
-			SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
-			SecurityNumber++;
-			MeshID = SetHash(SecurityNumber);
+			MeshID = FMath::RandRange(0, INT32_MAX - 1);
+			MeshID++;
 		}
 
 		DataAsset = Asset;
 	}
 
 private:
-	uint32 SetHash(uint32 SecurityIndex) const
-	{
-		uint32 Hash = GET0_NUMBER;
-		Hash = HashCombine(Hash, GetTypeHash(FGuid::NewGuid()));
-		Hash = HashCombine(Hash, GetTypeHash(SecurityIndex));
-		return Hash;
-	}
+	// uint32 SetHash(uint32 SecurityIndex) const
+	// {
+	// 	uint32 Hash = GET0_NUMBER;
+	// 	Hash = HashCombine(Hash, GetTypeHash(FGuid::NewGuid()));
+	// 	Hash = HashCombine(Hash, GetTypeHash(SecurityIndex));
+	// 	return Hash;
+	// }
 
 public:
 	FORCEINLINE_DEBUGGABLE bool operator==(const FSkinnedMeshRuntime_Lf& Rhs) const
@@ -702,6 +697,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	{
 		SkinWeightParams = FSettingsComputeShader_Params_Lf();
 		BoneTransformParams = FMeshUnitComputeShader_Params_Lf();
+		AnimationLibraryParams = FSettingsComputeShader_Params_Lf();
 	}
 
 	~FSkinnedMeshGlobalLibrary_RenderThread_Lf()
@@ -718,12 +714,13 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	uint32 NumIKPixelCurrentFrame = GET0_NUMBER;
 	uint32 NumAnimationsCurrentFrame = GET0_NUMBER;
 
-	TMap<uint32, FSkinnedMeshRuntime_RenderThread_Lf> RuntimeSkinnedMeshes;
-	TArray<uint32> RuntimeSkinnedMeshesHashMap;
+	TMap<int32, FSkinnedMeshRuntime_RenderThread_Lf> RuntimeSkinnedMeshes;
+	TArray<int32> RuntimeSkinnedMeshesHashMap;
 
 	uint32 AnimationLibraryMaxNum = GET0_NUMBER;
 
-	TMap<uint32, int32> MeshIDToGlobalIndex;
+	// < MeshID | Index >
+	TMap<int32, int32> MeshIDToGlobalIndex;
 
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_RenderThread_Lf> PerReferenceData;
 	UPROPERTY()
@@ -744,9 +741,10 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 	{
 	}
 
-	TMap<uint32, FSkinnedMeshRuntime_Lf> RuntimeSkinnedMeshes;
-	TArray<uint32> RuntimeSkinnedMeshesHashMap;
-	TMap<uint32, FTurboSequence_MinimalMeshData_Lf> MeshIDToMinimalData;
+	TMap<int32, FSkinnedMeshRuntime_Lf> RuntimeSkinnedMeshes;
+	TArray<int32> RuntimeSkinnedMeshesHashMap;
+	// < MeshID | Data >
+	TMap<int32, FTurboSequence_MinimalMeshData_Lf> MeshIDToMinimalData;
 
 	TMap<FTurboSequence_MinimalMeshData_Lf, bool> HybridMeshes;
 
@@ -777,7 +775,8 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 
 	TArray<FTurboSequence_UpdateGroup_Lf> UpdateGroups;
 
-	TMap<uint32, int32> MeshIDToGlobalIndex;
+	// < MeshID | Index >
+	TMap<int32, int32> MeshIDToGlobalIndex;
 
 	int16 NumGroupsUpdatedThisFrame = GET0_NUMBER;
 };

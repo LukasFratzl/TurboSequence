@@ -140,7 +140,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalData_Lf
 	}
 
 	uint32 AnimationID = GET0_NUMBER;
-	uint32 BelongsToMeshID = GET0_NUMBER;
+	int32 BelongsToMeshID = GET0_NUMBER;
 
 protected:
 	bool bIsValid = false;
@@ -214,7 +214,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalBlendSpace_Lf
 	TObjectPtr<UBlendSpace> BlendSpace;
 
 	UPROPERTY(EditAnywhere)
-	uint32 BelongsToMeshID = GET0_NUMBER;
+	int32 BelongsToMeshID = GET0_NUMBER;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -361,10 +361,10 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MinimalMeshData_Lf
 	}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int64 RootMotionMeshID = GET0_NUMBER;
+	int32 RootMotionMeshID = GET0_NUMBER;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<int64> CustomizableMeshIDs;
+	TArray<int32> CustomizableMeshIDs;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -373,7 +373,7 @@ protected:
 public:
 	bool IsMeshDataValid() const
 	{
-		return bIsValid;
+		return bIsValid && RootMotionMeshID > INDEX_NONE;
 	}
 
 	bool operator==(const FTurboSequence_MinimalMeshData_Lf& Other) const
@@ -394,11 +394,11 @@ public:
 	FString ToString() const
 	{
 		FString String = FString::Printf(
-			TEXT("bIsValid -> %s | Root Mesh ID -> %lld"), IsMeshDataValid() ? TEXT("True") : TEXT("False"),
+			TEXT("bIsValid -> %s | Root Mesh ID -> %d"), IsMeshDataValid() ? TEXT("True") : TEXT("False"),
 			RootMotionMeshID);
-		for (int64 MeshID : CustomizableMeshIDs)
+		for (int32 MeshID : CustomizableMeshIDs)
 		{
-			String += FString::Printf(TEXT(" | Customizable ID -> %lld"), MeshID);
+			String += FString::Printf(TEXT(" | Customizable ID -> %d"), MeshID);
 		}
 		return String;
 	}
@@ -464,10 +464,10 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateGroup_Lf
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<uint32> RawIDs;
+	TArray<int32> RawIDs;
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<uint32, int32> RawIDData;
+	TMap<int32, int32> RawIDData;
 
 	UPROPERTY(VisibleAnywhere)
 	TMap<FTurboSequence_MinimalMeshData_Lf, FIntVector2> MeshIDToMinimal;

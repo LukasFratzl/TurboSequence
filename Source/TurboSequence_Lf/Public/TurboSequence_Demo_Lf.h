@@ -230,7 +230,7 @@ public:
 	FTransform TestRotationTransform = FTransform::Identity;
 
 
-	TMap<uint32, FDemoMeshWrapper_Lf> Meshes;
+	TMap<int32, FDemoMeshWrapper_Lf> Meshes;
 
 	static void GetRandomMeshSpawnData(FTurboSequence_MeshSpawnData_Lf& Data,
 	                                   const FDemoCustomizationContainer_Lf& CategorizedRootData,

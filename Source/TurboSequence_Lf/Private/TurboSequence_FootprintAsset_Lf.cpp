@@ -10,9 +10,9 @@ UTurboSequence_FootprintAsset_Lf::UTurboSequence_FootprintAsset_Lf()
 }
 
 void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(
-	int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
+	int32 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext)
 {
-	if (MeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
+	if (ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 	{
 		const FSkinnedMeshRuntime_Lf& Runtime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 
@@ -85,11 +85,10 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 AActor* UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceSpawn_GameThread_Lf(
 	const FTurboSequence_MinimalMeshData_Lf& MeshData, UWorld* InWorld)
 {
-	if (MeshData.RootMotionMeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(
-		MeshData.RootMotionMeshID))
+	if (ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshData.RootMotionMeshID))
 	{
 		DefaultAnimationTransitions.FindOrAdd(MeshData.RootMotionMeshID, GET0_NUMBER);
-		for (int64 MeshID : MeshData.CustomizableMeshIDs)
+		for (int32 MeshID : MeshData.CustomizableMeshIDs)
 		{
 			DefaultAnimationTransitions.FindOrAdd(MeshID, GET0_NUMBER);
 		}
@@ -117,14 +116,13 @@ AActor* UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInst
 void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceDestroy_GameThread_Lf(
 	const FTurboSequence_MinimalMeshData_Lf& MeshData, const bool bSetTSMeshToUEMeshTransform)
 {
-	if (MeshData.RootMotionMeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(
-		MeshData.RootMotionMeshID))
+	if (ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshData.RootMotionMeshID))
 	{
 		if (DefaultAnimationTransitions.Contains(MeshData.RootMotionMeshID))
 		{
 			DefaultAnimationTransitions.Remove(MeshData.RootMotionMeshID);
 		}
-		for (int64 MeshID : MeshData.CustomizableMeshIDs)
+		for (int32 MeshID : MeshData.CustomizableMeshIDs)
 		{
 			if (DefaultAnimationTransitions.Contains(MeshID))
 			{
@@ -162,8 +160,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanceTick_GameThread_Lf(
 	const FTurboSequence_MinimalMeshData_Lf& MeshData, float DeltaTime)
 {
-	if (MeshData.RootMotionMeshID && ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(
-		MeshData.RootMotionMeshID))
+	if (ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshData.RootMotionMeshID))
 	{
 		if (const FSkinnedMeshRuntime_Lf& Runtime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[
 			MeshData.
@@ -303,7 +300,7 @@ void UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInstanc
 
 			RunnerFunction(RootComponent, MeshData.RootMotionMeshID);
 
-			for (int64 MeshID : MeshData.CustomizableMeshIDs)
+			for (int32 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				const FSkinnedMeshRuntime_Lf& RuntimeOther = ATurboSequence_Manager_Lf::GlobalLibrary.
 					RuntimeSkinnedMeshes[

@@ -240,7 +240,6 @@ void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
 
 				const int32 GroupIndex = ATurboSequence_Manager_Lf::GetNumOfAllMeshes_Concurrent() /
 					NumInstancesPerUpdateGroup + QualityGroupIndex + 1;
-				// 10 -> Reserved for quality update | All below reserved for other groups might coming
 
 				Mesh.DefaultUpdateGroupIndex = GroupIndex;
 				Mesh.CurrentUpdateGroupIndex = GroupIndex;

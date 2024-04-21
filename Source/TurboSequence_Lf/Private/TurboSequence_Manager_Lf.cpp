@@ -169,11 +169,11 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInsta
 		return FTurboSequence_MinimalMeshData_Lf(false);
 	}
 
-	const uint32 RootMotionMeshID = AddSkinnedMeshInstance_GameThread(
+	const int32 RootMotionMeshID = AddSkinnedMeshInstance_GameThread(
 		FromSpawnData.RootMotionMesh.Mesh, SpawnTransform, InWorld, FromSpawnData.RootMotionMesh.OverrideMaterials,
 		FromSpawnData.RootMotionMesh.FootprintAsset);
 
-	if (!RootMotionMeshID)
+	if (RootMotionMeshID < GET0_NUMBER)
 	{
 		return FTurboSequence_MinimalMeshData_Lf(false);
 	}
@@ -184,15 +184,15 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::AddSkinnedMeshInsta
 
 	for (const FTurboSequence_MeshMetaData_Lf& MeshData : FromSpawnData.CustomizableMeshes)
 	{
-		if (const uint32 MeshID = AddSkinnedMeshInstance_GameThread(MeshData.Mesh, SpawnTransform, InWorld,
+		if (const int32 MeshID = AddSkinnedMeshInstance_GameThread(MeshData.Mesh, SpawnTransform, InWorld,
 		                                                            MeshData.OverrideMaterials,
-		                                                            MeshData.FootprintAsset))
+		                                                            MeshData.FootprintAsset); MeshID > INDEX_NONE)
 		{
 			Data.CustomizableMeshIDs.Add(MeshID);
 		}
 	}
 	GlobalLibrary.MeshIDToMinimalData.Add(RootMotionMeshID, Data);
-	for (int64 MeshID : Data.CustomizableMeshIDs)
+	for (int32 MeshID : Data.CustomizableMeshIDs)
 	{
 		GlobalLibrary.MeshIDToMinimalData.Add(MeshID, Data);
 	}
@@ -215,7 +215,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurb
 		}
 	}
 
-	for (int64 MeshID : MeshData.CustomizableMeshIDs)
+	for (int32 MeshID : MeshData.CustomizableMeshIDs)
 	{
 		if (RemoveSkinnedMeshInstance_GameThread(MeshID, InWorld))
 		{
@@ -231,7 +231,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurb
 	return bSuccess;
 }
 
-uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 	const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset, const FTransform& SpawnTransform,
 	const TObjectPtr<UWorld> InWorld,
 	const TArray<TObjectPtr<UMaterialInterface>>& OverrideMaterials,
@@ -262,7 +262,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 				       TEXT(
 					       "Can not find the Global Data asset -> This is really bad, without it Turbo Sequence does not work, you can recover it by creating an UTurboSequence_GlobalData_Lf Data Asset, Right click in the content browser anywhere in the Project, select Data Asset and choose UTurboSequence_GlobalData_Lf, save it and restart the editor"
 				       ));
-				return GET0_NUMBER;
+				return INDEX_NONE;
 			}
 		}
 
@@ -277,13 +277,13 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			       TEXT(
 				       "Can not find Transform Texture ... "
 			       ));
-			return GET0_NUMBER;
+			return INDEX_NONE;
 		}
 
 		if (!IsValid(InWorld))
 		{
 			UE_LOG(LogTurboSequence_Lf, Warning, TEXT("Can't create Mesh Instance, the World is not valid..."));
-			return GET0_NUMBER;
+			return INDEX_NONE;
 		}
 
 		if (!IsValid(Instance))
@@ -302,7 +302,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 					       TEXT(
 						       "Can't create Mesh Instance because Instance is not valid, make sure to have a ATurboSequence_Manager_Lf in the map"
 					       ));
-					return GET0_NUMBER;
+					return INDEX_NONE;
 				}
 			}
 		}
@@ -313,14 +313,14 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			       TEXT(
 				       "Can't create Mesh Instance, make sure to have ATurboSequence_Manager_Lf as a blueprint in the map"
 			       ));
-			return GET0_NUMBER;
+			return INDEX_NONE;
 		}
 
 		Instance->GlobalData = FromAsset->GlobalData;
 
 		if (!FromAsset->IsMeshAssetValid())
 		{
-			return GET0_NUMBER;
+			return INDEX_NONE;
 		}
 
 		FCriticalSection CriticalSection;
@@ -439,7 +439,7 @@ uint32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 	}
 }
 
-bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int64 MeshID,
+bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshID,
                                                                      const TObjectPtr<UWorld> InWorld)
 {
 	if (!IsValid(InWorld))
@@ -486,7 +486,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int64 MeshI
 
 	const int32 GlobalIndex = GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()];
 	GlobalLibrary.MeshIDToGlobalIndex.Remove(Runtime.GetMeshID());
-	for (TTuple<uint32, int32>& Index : GlobalLibrary.MeshIDToGlobalIndex)
+	for (TTuple<int32, int32>& Index : GlobalLibrary.MeshIDToGlobalIndex)
 	{
 		if (Index.Value > GlobalIndex)
 		{
@@ -494,13 +494,13 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int64 MeshI
 		}
 	}
 
-	const uint32 MeshID_RenderThread = Runtime.GetMeshID();
+	const int32 MeshID_RenderThread = Runtime.GetMeshID();
 	ENQUEUE_RENDER_COMMAND(TurboSequence_RemoveRenderInstance_Lf)(
 		[&Library_RenderThread, MeshID_RenderThread](FRHICommandListImmediate& RHICmdList)
 		{
 			const int32 GlobalIndex = Library_RenderThread.MeshIDToGlobalIndex[MeshID_RenderThread];
 			Library_RenderThread.MeshIDToGlobalIndex.Remove(MeshID_RenderThread);
-			for (TTuple<uint32, int32>& Index : Library_RenderThread.MeshIDToGlobalIndex)
+			for (TTuple<int32, int32>& Index : Library_RenderThread.MeshIDToGlobalIndex)
 			{
 				if (Index.Value > GlobalIndex)
 				{
@@ -694,7 +694,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						ThreadContext->CriticalSection.Unlock();
 
 						const uint8 MeshIdx = LodElement.GPUMeshIndex;
-						const uint32 MeshID = Runtime.GetMeshID();
+						const int32 MeshID = Runtime.GetMeshID();
 						const TArray<FAnimationMetaData_RenderThread_Lf> Animations_RenderThread = Runtime.
 							AnimationMetaData_RenderThread;
 						TMap<uint16, FIKBoneData_Lf> IK_RenderThread;
@@ -734,7 +734,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 		{
 			FSkinnedMeshReference_Lf& Reference = ReferenceData.Value;
 
-			for (const TTuple<uint32, bool>& ManagementData : Reference.HybridMeshManagementData)
+			for (const TTuple<int32, bool>& ManagementData : Reference.HybridMeshManagementData)
 			{
 				if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(ManagementData.Key))
 				{
@@ -1102,7 +1102,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 								NumIKBones++;
 
 								// Runtime.IKData.Empty(); Replaced now without disposing the memory
-								// Cause we will write the new data anyway every IK frame
+								// Because we will write the new data anyway every IK frame
 								Runtime.IKData[BoneIdx.Key].bIsInUsingWriteDataThisFrame = false;
 							}
 						}
@@ -1135,7 +1135,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	}, EParallelForFlags::BackgroundPriority);
 }
 
-void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID)
+void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int32 MeshID)
 {
 	{
 		FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
@@ -1184,7 +1184,7 @@ void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(const int32 
 			Group.RawIDs.Add(MeshData.RootMotionMeshID);
 			Group.MeshIDToMinimal.Add(MeshData, FIntVector2(GET1_NUMBER, Group.MeshIDToMinimal.Num()));
 			Group.RawMinimalData.Add(MeshData);
-			for (int64 MeshID : MeshData.CustomizableMeshIDs)
+			for (int32 MeshID : MeshData.CustomizableMeshIDs)
 			{
 				if (!Group.RawIDData.Contains(MeshID))
 				{
@@ -1197,7 +1197,7 @@ void ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(const int32 
 	}
 }
 
-void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int64 MeshID)
+void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(const int32 GroupIndex, int32 MeshID)
 {
 	//int32 RawIndexToRemove = INDEX_NONE;
 	{
@@ -1214,7 +1214,7 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_RawID_Concurrent(c
 				Group.RawIDData.Remove(MeshID);
 				Group.RawIDs.RemoveAt(RawIndexToRemove);
 
-				for (TTuple<uint32, int32>& Data : Group.RawIDData)
+				for (TTuple<int32, int32>& Data : Group.RawIDData)
 				{
 					if (Data.Value > RawIndexToRemove)
 					{
@@ -1252,7 +1252,7 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(const i
                                                                          MeshData)
 {
 	RemoveInstanceFromUpdateGroup_RawID_Concurrent(GroupIndex, MeshData.RootMotionMeshID);
-	for (int64 MeshID : MeshData.CustomizableMeshIDs)
+	for (int32 MeshID : MeshData.CustomizableMeshIDs)
 	{
 		RemoveInstanceFromUpdateGroup_RawID_Concurrent(GroupIndex, MeshID);
 	}

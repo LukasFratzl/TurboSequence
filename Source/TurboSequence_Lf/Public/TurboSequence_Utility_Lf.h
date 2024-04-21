@@ -154,7 +154,7 @@ public:
 		{
 			if (LevelOfDetails[i].bIsRenderStateValid)
 			{
-				// Basically 5 000 Meter Radius
+				// Basically 5000-Meter Radius
 				constexpr float BoundsExtend = GET1000_NUMBER * GET1000_NUMBER / GET2_NUMBER;
 				const FBox& Bounds = FBox(FVector::OneVector * -BoundsExtend, FVector::OneVector * BoundsExtend);
 				RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetEmitterFixedBounds(
@@ -746,7 +746,7 @@ public:
 		const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 		//CriticalSection.Lock();
 		RenderData.InstanceMap.Remove(Runtime.GetMeshID());
-		for (TTuple<uint32, int32>& Instance : RenderData.InstanceMap)
+		for (TTuple<int32, int32>& Instance : RenderData.InstanceMap)
 		{
 			if (Instance.Value > InstanceIndex)
 			{
@@ -1970,7 +1970,7 @@ public:
 	static void SolveAnimations(FSkinnedMeshRuntime_Lf& Runtime, FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                            const FSkinnedMeshReference_Lf& Reference, float DeltaTime,
-	                            int64 CurrentFrameCount, FCriticalSection& CriticalSection)
+	                            int32 CurrentFrameCount, FCriticalSection& CriticalSection)
 	{
 		if (CurrentFrameCount == Runtime.LastFrameAnimationSolved)
 		{
@@ -2460,7 +2460,7 @@ public:
 			FMatrix BoneSpaceAtom = FMatrix::Identity;
 
 			// Since we get the data directly from the GPU Collection Data we can likely ignore the root state,
-			// the correct root bone data already baked into the collection ..
+			// the correct root bone data already baked into the collection .
 			GetBoneTransformFromAnimationSafe(BoneSpaceAtom, Animation, BoneIndex, Runtime.DataAsset, Library,
 			                                  ReferenceSkeleton);
 
@@ -2530,7 +2530,7 @@ public:
 	                           FSkinnedMeshGlobalLibrary_Lf& Library,
 	                           FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                           const EBoneSpaces::Type& Space, float AnimationDeltaTime,
-	                           int64 CurrentFrameCount, FCriticalSection& CriticalSection)
+	                           int32 CurrentFrameCount, FCriticalSection& CriticalSection)
 	{
 		SolveAnimations(Runtime, Library, Library_RenderThread, Reference, AnimationDeltaTime, CurrentFrameCount,
 		                CriticalSection);
@@ -2669,7 +2669,7 @@ public:
 	                               FSkinnedMeshGlobalLibrary_RenderThread_Lf&
 	                               Library_RenderThread, const EBoneSpaces::Type& Space,
 	                               float AnimationDeltaTime,
-	                               int64 CurrentFrameCount,
+	                               int32 CurrentFrameCount,
 	                               FCriticalSection& CriticalSection)
 	{
 		const USkeletalMeshSocket* Socket = Runtime.DataAsset->ReferenceMeshNative->FindSocket(SocketName);

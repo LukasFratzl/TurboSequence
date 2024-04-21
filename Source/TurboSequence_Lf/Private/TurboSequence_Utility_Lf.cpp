@@ -694,7 +694,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 				Animation.Animation);
 
 			// NOTE: Keep in mind this matrix is not in correct order after uploading it
-			//		 for performance reason we using matrix calculations which match the oder
+			//		 for performance reason we are using matrix calculations which match the order
 			//		 in the Vertex Shader
 			for (uint8 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 			{
@@ -747,7 +747,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
 		{
 			const FMatrix& BoneMatrix = GetSkeletonRefPose(ReferenceSkeleton)[b].ToMatrixWithScale();
 			// NOTE: Keep in mind this matrix is not in correct order after uploading it
-			//		 for performance reason we using matrix calculations which match the oder
+			//		 for performance reason we are using matrix calculations which match the order
 			//		 in the Vertex Shader
 			for (uint8 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 			{
@@ -858,7 +858,7 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 	                {
 		                return true;
 	                });
-	// Clear Animations Keeps the Base Layer so we remove it as well, to add it later back in
+	// Clear Animations Keeps the Base Layer, so we remove it as well, to add it later back in
 	RemoveAnimation(Runtime, CriticalSection, Library, Library_RenderThread, GET0_NUMBER);
 	PlayAnimation(PostReference, Library, Library_RenderThread, Runtime, CriticalSection,
 	              TargetMesh->OverrideDefaultAnimation, PlaySettings, bLoop, BaseLayerWeight, BaseLayerStartTime);
@@ -876,7 +876,7 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 	}
 	Runtime.bForceVisibilityUpdatingThisFrame = true;
 
-	const uint32 MeshID = Runtime.GetMeshID();
+	const int32 MeshID = Runtime.GetMeshID();
 	ENQUEUE_RENDER_COMMAND(TurboSequence_CustomizeRenderInstance_Lf)(
 		[&Library_RenderThread, MeshID, TargetMesh](FRHICommandListImmediate& RHICmdList)
 		{

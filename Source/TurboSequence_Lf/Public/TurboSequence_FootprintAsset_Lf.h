@@ -31,12 +31,12 @@ public:
 	UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="25000"), Category="Hybrid Mode")
 	float HybridModeAnimationDrawRangeUEInstance = 5000;
 
-	TMap<uint32, float> DefaultAnimationTransitions;
+	TMap<int32, float> DefaultAnimationTransitions;
 
 	void TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(
-		int64 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext);
+		int32 MeshID, UTurboSequence_ThreadContext_Lf* ThreadContext);
 
-	virtual void OnHybridModeUEInstanceAddRemove_Concurrent_Override(int64 MeshID,
+	virtual void OnHybridModeUEInstanceAddRemove_Concurrent_Override(int32 MeshID,
 	                                                                 UTurboSequence_ThreadContext_Lf* ThreadContext)
 	{
 		TurboSequence_Default_HybridModeUEInstanceAddRemove_Concurrent_Lf(MeshID, ThreadContext);
