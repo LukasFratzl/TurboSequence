@@ -1255,7 +1255,7 @@ void ATurboSequence_Manager_Lf::RemoveInstanceFromUpdateGroup_Concurrent(const i
 	}
 }
 
-int32 ATurboSequence_Manager_Lf::GetNumMeshCollectionsInUpdateGroup_Concurrent(const int32 GroupIndex)
+int32 ATurboSequence_Manager_Lf::GetNumMeshDataInUpdateGroup_Concurrent(const int32 GroupIndex)
 {
 	{
 		FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
@@ -1281,6 +1281,46 @@ int32 ATurboSequence_Manager_Lf::GetNumMeshIDsInUpdateGroup_RawID_Concurrent(con
 
 		return GlobalLibrary.UpdateGroups[GroupIndex].RawIDData.Num();
 	}
+}
+
+FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(
+	const int32 GroupIndex, const int32 IndexInGroup)
+{
+	//FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+
+	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
+	{
+		return FTurboSequence_MinimalMeshData_Lf(false);
+	}
+
+	FTurboSequence_UpdateGroup_Lf& Group = GlobalLibrary.UpdateGroups[GroupIndex];
+
+	if (!Group.RawMinimalData.IsValidIndex(IndexInGroup))
+	{
+		return FTurboSequence_MinimalMeshData_Lf(false);
+	}
+
+	return Group.RawMinimalData[IndexInGroup];
+}
+
+int32 ATurboSequence_Manager_Lf::GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex,
+	const int32 IndexInGroup)
+{
+	//FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+
+	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
+	{
+		return INDEX_NONE;
+	}
+
+	FTurboSequence_UpdateGroup_Lf& Group = GlobalLibrary.UpdateGroups[GroupIndex];
+
+	if (!Group.RawIDs.IsValidIndex(IndexInGroup))
+	{
+		return INDEX_NONE;
+	}
+
+	return Group.RawIDs[IndexInGroup];
 }
 
 void ATurboSequence_Manager_Lf::CleanManager_GameThread(bool bIsEndPlay)

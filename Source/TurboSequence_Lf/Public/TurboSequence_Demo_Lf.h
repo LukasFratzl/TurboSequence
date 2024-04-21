@@ -179,10 +179,7 @@ public:
 	void LeftMouseButtonPressed();
 
 	void SolveGroup(int32 GroupIndex, float DeltaTime, const FRotator& CameraRotation, const FVector& CameraLocation,
-	                TMap<uint32, bool>& SwitchingGroups);
-
-	void SolveMesh(FDemoMeshWrapper_Lf& Mesh, FCriticalSection& CriticalSection, const FRotator& CameraRotation,
-	               const FVector& CameraLocation, TMap<uint32, bool>& SwitchingGroups, float DeltaTime);
+	                TMap<FTurboSequence_MinimalMeshData_Lf, bool>& SwitchingGroups);
 
 	const uint8 QualityGroupIndex = 10;
 
@@ -230,7 +227,7 @@ public:
 	FTransform TestRotationTransform = FTransform::Identity;
 
 
-	TMap<int32, FDemoMeshWrapper_Lf> Meshes;
+	TMap<FTurboSequence_MinimalMeshData_Lf, FDemoMeshWrapper_Lf> Meshes;
 
 	static void GetRandomMeshSpawnData(FTurboSequence_MeshSpawnData_Lf& Data,
 	                                   const FDemoCustomizationContainer_Lf& CategorizedRootData,

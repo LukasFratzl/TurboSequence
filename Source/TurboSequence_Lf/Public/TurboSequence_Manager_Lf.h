@@ -184,13 +184,13 @@ public:
 	                                                     const FTurboSequence_MinimalMeshData_Lf& MeshData);
 
 	/**
-	 * Get the Number of Mesh Collections in a Update Group with the given Index, useful if you need iterate
+	 * Get the Number of Mesh Data in a Update Group with the given Index, useful if you need iterate
 	 * @param GroupIndex The Group Index
 	 * @return The Number of Mesh Collections in the Update Group
 	 */
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Number, Num, Update, Mesh, Group"))
-	static int32 GetNumMeshCollectionsInUpdateGroup_Concurrent(const int32 GroupIndex);
+	static int32 GetNumMeshDataInUpdateGroup_Concurrent(const int32 GroupIndex);
 
 	/**
 	 * Get the Number of Mesh IDs in a Update Group with the given Index, useful if you need iterate
@@ -200,6 +200,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Number, Num, Update, Mesh, Group"))
 	static int32 GetNumMeshIDsInUpdateGroup_RawID_Concurrent(const int32 GroupIndex);
+
+	/**
+	 * Get the Mesh Data in a Update Group with the given Index, useful if you need iterate
+	 * @param GroupIndex The Group Index
+	 * @param IndexInGroup The Index in the Mesh Data Group
+	 * @return The Number of Mesh Collections in the Update Group
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
+	static FTurboSequence_MinimalMeshData_Lf GetMeshDataInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex, const int32 IndexInGroup);
+
+	/**
+	 * Get the Mesh ID in a Update Group with the given Index, useful if you need iterate
+	 * @param GroupIndex The Group Index
+	 * @param IndexInGroup The Index in the Mesh ID Group
+	 * @return The Number of Mesh Collections in the Update Group
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
+	static int32 GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex, const int32 IndexInGroup);
 
 
 	/**
