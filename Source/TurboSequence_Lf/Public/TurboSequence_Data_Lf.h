@@ -118,47 +118,47 @@ private:
 	FName ParticleRemoveName;
 
 public:
-	FName& GetEmitterName()
+	FORCEINLINE FName& GetEmitterName()
 	{
 		return EmitterName;
 	}
 
-	FName& GetPositionName()
+	FORCEINLINE FName& GetPositionName()
 	{
 		return PositionName;
 	}
 
-	FName& GetRotationName()
+	FORCEINLINE FName& GetRotationName()
 	{
 		return RotationName;
 	}
 
-	FName& GetScaleName()
+	FORCEINLINE FName& GetScaleName()
 	{
 		return ScaleName;
 	}
 
-	FString& GetMeshName()
+	FORCEINLINE FString& GetMeshName()
 	{
 		return MeshName;
 	}
 
-	FString& GetMaterialsName()
+	FORCEINLINE FString& GetMaterialsName()
 	{
 		return MaterialsName;
 	}
 
-	FName& GetLodName()
+	FORCEINLINE FName& GetLodName()
 	{
 		return LodName;
 	}
 
-	FName& GetCustomDataName()
+	FORCEINLINE FName& GetCustomDataName()
 	{
 		return CustomDataName;
 	}
 
-	FName& GetParticleRemoveName()
+	FORCEINLINE FName& GetParticleRemoveName()
 	{
 		return ParticleRemoveName;
 	}
@@ -299,7 +299,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 
 	uint32 AnimationID = GET0_NUMBER;
 
-	uint32 SetHash(uint32 SecurityIndex) const
+	FORCEINLINE uint32 SetHash(uint32 SecurityIndex) const
 	{
 		uint32 Hash = GET0_NUMBER;
 		Hash = HashCombine(Hash, GetTypeHash(FGuid::NewGuid()));
@@ -307,7 +307,7 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 		return Hash;
 	}
 
-	void SetAnimationID(const TMap<uint32, int32>& InputCollection, int32 BelongsToMeshID)
+	FORCEINLINE void SetAnimationID(const TMap<uint32, int32>& InputCollection, int32 BelongsToMeshID)
 	{
 		uint32 SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
 		// Set the hash
@@ -476,17 +476,17 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 		DataAsset = Asset;
 	}
 
-	FORCEINLINE_DEBUGGABLE bool operator==(const FSkinnedMeshReference_Lf& Rhs) const
+	FORCEINLINE bool operator==(const FSkinnedMeshReference_Lf& Rhs) const
 	{
 		return this->DataAsset == Rhs.DataAsset;
 	}
 
-	FORCEINLINE_DEBUGGABLE bool operator!=(const FSkinnedMeshReference_Lf& Rhs) const
+	FORCEINLINE bool operator!=(const FSkinnedMeshReference_Lf& Rhs) const
 	{
 		return !(*this == Rhs);
 	}
 
-	FORCEINLINE_DEBUGGABLE uint32 GetClassHash() const
+	FORCEINLINE uint32 GetClassHash() const
 	{
 		return GetTypeHash(DataAsset);
 	}
@@ -551,7 +551,7 @@ protected:
 	int32 MeshID = GET0_NUMBER;
 
 public:
-	FORCEINLINE_DEBUGGABLE int32 GetMeshID() const
+	FORCEINLINE int32 GetMeshID() const
 	{
 		return MeshID;
 	}
@@ -594,12 +594,12 @@ private:
 	// }
 
 public:
-	FORCEINLINE_DEBUGGABLE bool operator==(const FSkinnedMeshRuntime_Lf& Rhs) const
+	FORCEINLINE bool operator==(const FSkinnedMeshRuntime_Lf& Rhs) const
 	{
 		return this->MeshID == Rhs.MeshID;
 	}
 
-	FORCEINLINE_DEBUGGABLE bool operator!=(const FSkinnedMeshRuntime_Lf& Rhs) const
+	FORCEINLINE bool operator!=(const FSkinnedMeshRuntime_Lf& Rhs) const
 	{
 		return !(*this == Rhs);
 	}

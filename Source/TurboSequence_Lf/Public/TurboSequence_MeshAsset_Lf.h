@@ -181,25 +181,17 @@ public:
 	UPROPERTY(SaveGame)
 	TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
 
-
-	// Right now dose nothing
-	void SetReferenceSkeleton(const FReferenceSkeleton& RefSkeleton)
-	{
-		// MeshDataReferenceSkeleton = RefSkeleton;
-		// SaveReferenceSkeleton(MeshDataReferenceSkeleton, MeshDataReferenceSkeletonData);
-	}
-
 	const FReferenceSkeleton& GetReferenceSkeleton() const
 	{
 		return ReferenceMeshNative->GetRefSkeleton();
 	}
 
-	TObjectPtr<USkeleton> GetSkeleton()
+	TObjectPtr<USkeleton> GetSkeleton() const
 	{
 		return ReferenceMeshNative->GetSkeleton();
 	}
 
-	bool IsMeshAssetValid()
+	bool IsMeshAssetValid() const
 	{
 		if (!IsValid(this))
 		{

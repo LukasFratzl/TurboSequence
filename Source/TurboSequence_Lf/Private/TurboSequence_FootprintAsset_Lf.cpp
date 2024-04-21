@@ -96,8 +96,7 @@ AActor* UTurboSequence_FootprintAsset_Lf::TurboSequence_Default_HybridModeUEInst
 		if (FSkinnedMeshRuntime_Lf& Runtime = ATurboSequence_Manager_Lf::GlobalLibrary.RuntimeSkinnedMeshes[MeshData.
 			RootMotionMeshID]; !IsValid(Runtime.HybridMeshInstance) && IsValid(Runtime.FootprintAsset))
 		{
-			const FTransform& SpawnTransform =
-				FTurboSequence_Utility_Lf::GetWorldSpaceTransformIncludingOffsets(Runtime);
+			const FTransform& SpawnTransform = Runtime.WorldSpaceTransform;
 
 			Runtime.HybridMeshInstance = InWorld->SpawnActor<AActor>(Runtime.FootprintAsset->UnrealEngineMeshInstance,
 			                                                         SpawnTransform);

@@ -146,7 +146,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	bool IsAnimationValid() const
+	FORCEINLINE bool IsAnimationValid() const
 	{
 		return bIsValid;
 	}
@@ -182,7 +182,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	bool IsAnimCollectionValid() const
+	FORCEINLINE bool IsAnimCollectionValid() const
 	{
 		return bIsValid;
 	}
@@ -221,7 +221,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	bool IsAnimBlendSpaceValid() const
+	FORCEINLINE bool IsAnimBlendSpaceValid() const
 	{
 		return bIsValid;
 	}
@@ -256,7 +256,7 @@ protected:
 	bool bIsValid = false;
 
 public:
-	bool IsAnimCollectionValid() const
+	FORCEINLINE bool IsAnimCollectionValid() const
 	{
 		return bIsValid;
 	}
@@ -313,22 +313,22 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSpawnData_Lf
 		return Hash;
 	}
 
-	bool operator==(const FTurboSequence_MeshSpawnData_Lf& Other) const
+	FORCEINLINE bool operator==(const FTurboSequence_MeshSpawnData_Lf& Other) const
 	{
 		return Equals(Other);
 	}
 
-	bool operator!=(const FTurboSequence_MeshSpawnData_Lf& Other) const
+	FORCEINLINE bool operator!=(const FTurboSequence_MeshSpawnData_Lf& Other) const
 	{
 		return !Equals(Other);
 	}
 
-	bool Equals(const FTurboSequence_MeshSpawnData_Lf& Other) const
+	FORCEINLINE bool Equals(const FTurboSequence_MeshSpawnData_Lf& Other) const
 	{
 		return GetHash() == Other.GetHash();
 	}
 
-	bool IsSpawnDataValid() const
+	FORCEINLINE bool IsSpawnDataValid() const
 	{
 		return IsValid(RootMotionMesh.Mesh);
 	}
@@ -371,27 +371,27 @@ protected:
 	bool bIsValid = false;
 
 public:
-	bool IsMeshDataValid() const
+	FORCEINLINE bool IsMeshDataValid() const
 	{
 		return bIsValid && RootMotionMeshID > INDEX_NONE;
 	}
 
-	bool operator==(const FTurboSequence_MinimalMeshData_Lf& Other) const
+	FORCEINLINE bool operator==(const FTurboSequence_MinimalMeshData_Lf& Other) const
 	{
 		return Equals(Other);
 	}
 
-	bool operator!=(const FTurboSequence_MinimalMeshData_Lf& Other) const
+	FORCEINLINE bool operator!=(const FTurboSequence_MinimalMeshData_Lf& Other) const
 	{
 		return !Equals(Other);
 	}
 
-	bool Equals(const FTurboSequence_MinimalMeshData_Lf& Other) const
+	FORCEINLINE bool Equals(const FTurboSequence_MinimalMeshData_Lf& Other) const
 	{
 		return RootMotionMeshID == Other.RootMotionMeshID;
 	}
 
-	FString ToString() const
+	FORCEINLINE FString ToString() const
 	{
 		FString String = FString::Printf(
 			TEXT("bIsValid -> %s | Root Mesh ID -> %d"), IsMeshDataValid() ? TEXT("True") : TEXT("False"),
@@ -443,7 +443,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_PoseCurveData_Lf
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float CurveFrame_0 = GET0_NUMBER;
 
-	bool IsCurveValid() const
+	FORCEINLINE bool IsCurveValid() const
 	{
 		return IsValid(CurveAnimation);
 	}
