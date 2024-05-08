@@ -42,6 +42,11 @@ void ATurboSequence_Manager_Lf::EndPlay(const EEndPlayReason::Type EndPlayReason
 {
 	Super::EndPlay(EndPlayReason);
 
+	for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& FootprintAsset : FootprintAssetsInUse)
+	{
+		FootprintAsset.Key->OnManagerEndPlay_GameThread(EndPlayReason);
+	}
+
 	CleanManager_GameThread(true);
 }
 
@@ -146,6 +151,11 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 
 	GlobalLibrary.NumGroupsUpdatedThisFrame = GET0_NUMBER;
 
+	for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& FootprintAsset : FootprintAssetsInUse)
+	{
+		FootprintAsset.Key->OnManagerUpdated_GameThread(DeltaTime);
+	}
+
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Num())
 	{
 		// Otherwise the Critical Section grow in size until we run out of memory when we don't refresh it...
@@ -233,10 +243,10 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(const FTurb
 }
 
 int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
-	const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset, const FTransform& SpawnTransform,
-	const TObjectPtr<UWorld> InWorld,
+	const TObjectPtr<UTurboSequence_MeshAsset_Lf>& FromAsset, const FTransform& SpawnTransform,
+	const TObjectPtr<UWorld>& InWorld,
 	const TArray<TObjectPtr<UMaterialInterface>>& OverrideMaterials,
-	const TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset)
+	const TObjectPtr<UTurboSequence_FootprintAsset_Lf>& FootprintAsset)
 {
 	SCOPE_CYCLE_COUNTER(Add_TurboSequenceMeshInstances_Lf);
 	{
@@ -324,14 +334,15 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			return INDEX_NONE;
 		}
 
-		FCriticalSection CriticalSection;
+		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 		if (!GlobalLibrary.PerReferenceData.Contains(FromAsset))
 		{
 			GlobalLibrary_RenderThread.SkinWeightParams.ShaderID = GetTypeHash(Instance);
 			GlobalLibrary_RenderThread.BoneTransformParams.ShaderID = GetTypeHash(Instance->GlobalData);
 
 			FTurboSequence_Utility_Lf::CreateAsyncChunkedMeshData(FromAsset, Instance->GlobalData, GlobalLibrary,
-			                                                      GlobalLibrary_RenderThread, CriticalSection);
+			                                                      GlobalLibrary_RenderThread,
+			                                                      ThreadContext->CriticalSection);
 		}
 
 		FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[FromAsset];
@@ -371,9 +382,19 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 		Runtime.WorldSpaceTransform = SpawnTransform;
 		Runtime.MaterialsHash = MaterialsHash;
 		Runtime.bForceVisibilityUpdatingThisFrame = true;
-		if (IsValid(FootprintAsset) && !FootprintAsset->bExcludeFromSystem)
+		bool bIsFirstFootprintCall = false;
+		if (IsValid(FootprintAsset))
 		{
 			Runtime.FootprintAsset = FootprintAsset;
+			if (!FootprintAssetsInUse.Contains(FootprintAsset))
+			{
+				FootprintAssetsInUse.Add(FootprintAsset, GET1_NUMBER);
+				bIsFirstFootprintCall = true;
+			}
+			else
+			{
+				FootprintAssetsInUse[FootprintAsset]++;
+			}
 		}
 
 		// We need to define the start LOD so in this case we make a basic LOD calculation which requires
@@ -401,7 +422,8 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 		}
 		const FTransform& InstanceTransform = Runtime.WorldSpaceTransform;
 
-		FTurboSequence_Utility_Lf::AddRenderInstance(Reference, Runtime, CriticalSection, InstanceTransform);
+		FTurboSequence_Utility_Lf::AddRenderInstance(Reference, Runtime, ThreadContext->CriticalSection,
+		                                             InstanceTransform);
 
 
 		Runtime.LodIndex = INDEX_NONE;
@@ -410,13 +432,13 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 
 		FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(Runtime, Reference,
 		                                                         GlobalLibrary.CameraViews,
-		                                                         Instance->GetThreadContext(), false, GlobalLibrary);
+		                                                         Instance->GetThreadContext(), GlobalLibrary);
 
-		CriticalSection.Lock();
+		ThreadContext->CriticalSection.Lock();
 		GlobalLibrary.MeshIDToGlobalIndex.Add(Runtime.GetMeshID(), GlobalLibrary.RuntimeSkinnedMeshes.Num());
 		GlobalLibrary.RuntimeSkinnedMeshesHashMap.Add(Runtime.GetMeshID());
 		GlobalLibrary.RuntimeSkinnedMeshes.Add(Runtime.GetMeshID(), Runtime);
-		CriticalSection.Unlock();
+		ThreadContext->CriticalSection.Unlock();
 
 		FTurboSequence_AnimPlaySettings_Lf PlaySetting = FTurboSequence_AnimPlaySettings_Lf();
 		PlaySetting.ForceMode = ETurboSequence_AnimationForceMode_Lf::AllLayers;
@@ -435,6 +457,14 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 				Library_RenderThread.RuntimeSkinnedMeshesHashMap.Add(Runtime_RenderThread.GetMeshID());
 			});
 
+		if (IsValid(Runtime.FootprintAsset))
+		{
+			Runtime.FootprintAsset->OnAddedMeshInstance_GameThread(Runtime.GetMeshID(), FromAsset);
+			if (bIsFirstFootprintCall)
+			{
+				Runtime.FootprintAsset->OnFirstMeshAdded_GameThread();
+			}
+		}
 		return Runtime.GetMeshID();
 	}
 }
@@ -457,11 +487,22 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 		return false;
 	}
 
-	FCriticalSection CriticalSection;
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 	FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread = GlobalLibrary_RenderThread;
 
 	FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
-	FTurboSequence_Utility_Lf::ClearAnimations(CriticalSection, Runtime, GlobalLibrary, Library_RenderThread,
+	if (IsValid(Runtime.FootprintAsset))
+	{
+		Runtime.FootprintAsset->OnRemovedMeshInstance_GameThread(Runtime.GetMeshID(), Runtime.DataAsset);
+
+		FootprintAssetsInUse[Runtime.FootprintAsset]--;
+		if (FootprintAssetsInUse[Runtime.FootprintAsset] <= GET0_NUMBER)
+		{
+			FootprintAssetsInUse.Remove(Runtime.FootprintAsset);
+			Runtime.FootprintAsset->OnLastMeshRemoved_GameThread();
+		}
+	}
+	FTurboSequence_Utility_Lf::ClearAnimations(ThreadContext, Runtime, GlobalLibrary, Library_RenderThread,
 	                                           ETurboSequence_AnimationForceMode_Lf::AllLayers,
 	                                           TArray<FTurboSequence_BoneLayer_Lf>(),
 	                                           [](const FAnimationMetaData_Lf& Animation)
@@ -469,12 +510,13 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 		                                           return true;
 	                                           });
 	// Since we have the first animation as rest pose
-	FTurboSequence_Utility_Lf::RemoveAnimation(Runtime, CriticalSection, GlobalLibrary, Library_RenderThread,
+	FTurboSequence_Utility_Lf::RemoveAnimation(Runtime, ThreadContext, GlobalLibrary, Library_RenderThread,
 	                                           GET0_NUMBER);
-	FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(CriticalSection, GlobalLibrary, Library_RenderThread);
+	FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(ThreadContext->CriticalSection, GlobalLibrary,
+	                                                     Library_RenderThread);
 
 	FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, CriticalSection);
+	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection);
 
 	if (const FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash]; !RenderData.InstanceMap.Num())
 	{
@@ -546,7 +588,8 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 		}
 
 		FTurboSequence_Utility_Lf::RefreshAsyncChunkedMeshData(Instance->GlobalData, GlobalLibrary,
-		                                                       GlobalLibrary_RenderThread, CriticalSection);
+		                                                       GlobalLibrary_RenderThread,
+		                                                       ThreadContext->CriticalSection);
 	}
 
 	return true;
@@ -631,6 +674,11 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 					return;
 				}
 
+				if (IsValid(Runtime.FootprintAsset))
+				{
+					Runtime.FootprintAsset->OnMeshPreSolveAnimationMeta_Concurrent(Runtime.GetMeshID(), ThreadContext);
+				}
+
 				// Need to get always updated
 				FTurboSequence_Utility_Lf::SolveAnimations(Runtime,
 				                                           GlobalLibrary,
@@ -638,36 +686,60 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				                                           Reference,
 				                                           DeltaTime,
 				                                           CurrentFrameCount,
-				                                           ThreadContext->CriticalSection);
+				                                           ThreadContext);
 
 				// Update Visibility first because the LodElement.InstanceMap is maybe not correct if the LOD change
 				// and for the initial check we only need the LOD index
-				const bool bIsVisiblePrevious = Runtime.bIsVisible;
+				const bool bIsVisiblePrevious = FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference);
+				const int16 PreviousLodIndex = Runtime.LodIndex;
 				FTurboSequence_Utility_Lf::IsMeshVisible(Runtime, Reference, GlobalLibrary.CameraViews);
 
 				FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(
-					Runtime, Reference, GlobalLibrary.CameraViews, ThreadContext, bIsVisiblePrevious, GlobalLibrary);
+					Runtime, Reference, GlobalLibrary.CameraViews, ThreadContext, GlobalLibrary);
 				FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
 
 				FTurboSequence_Utility_Lf::UpdateDistanceUpdating(Runtime, DeltaTime);
 
-				bool bIsInTSMeshDrawRange = !IsValid(Runtime.FootprintAsset) ||
-				(IsValid(Runtime.FootprintAsset) && Runtime.ClosestCameraDistance >= Runtime.FootprintAsset->
-					HybridModeMeshDrawRangeUEInstance);
-
-				if (!LodElement.bIsFrustumCullingEnabled && bIsInTSMeshDrawRange)
+				if (IsValid(Runtime.FootprintAsset))
 				{
-					Runtime.bIsVisible = true;
+					Runtime.bIsVisible = !LodElement.bIsFrustumCullingEnabled || Runtime.bIsVisible;
+					Runtime.EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
+
+					Runtime.FootprintAsset->OnSetMeshIsVisible_Concurrent(
+						Runtime.EIsVisibleOverride, Runtime.bIsVisible, Runtime.GetMeshID(),
+						ThreadContext);
+
+					Runtime.bIsVisible = FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference);
 
 					FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(
 						Reference, Runtime, LodElement, Runtime.bIsVisible && LodElement.bIsRenderStateValid);
 				}
-				else if (!bIsInTSMeshDrawRange && Runtime.bSpawnedHybridActor)
+				else
 				{
-					Runtime.bIsVisible = false;
+					Runtime.EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
 
-					FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(
-						Reference, Runtime, LodElement, false);
+					if (!LodElement.bIsFrustumCullingEnabled)
+					{
+						Runtime.bIsVisible = true;
+
+						FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(
+							Reference, Runtime, LodElement, Runtime.bIsVisible && LodElement.bIsRenderStateValid);
+					}
+				}
+
+				if (IsValid(Runtime.FootprintAsset))
+				{
+					if (bIsVisiblePrevious != FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference))
+					{
+						Runtime.FootprintAsset->OnMeshVisibilityChanged_Concurrent(
+							FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference), Runtime.GetMeshID(),
+							ThreadContext);
+					}
+					if (PreviousLodIndex != Runtime.LodIndex)
+					{
+						Runtime.FootprintAsset->OnMeshLodChanged_Concurrent(
+							PreviousLodIndex, Runtime.LodIndex, Runtime.GetMeshID(), ThreadContext);
+					}
 				}
 
 				// Need to be at last because bIsVisible is updating later
@@ -692,6 +764,11 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						ThreadContext->CriticalSection.Lock();
 						bMeshIsVisible = true;
 						ThreadContext->CriticalSection.Unlock();
+						if (IsValid(Runtime.FootprintAsset))
+						{
+							Runtime.FootprintAsset->OnMeshFinalRenderingUpdate_Concurrent(
+								Runtime.GetMeshID(), ThreadContext);
+						}
 
 						const uint8 MeshIdx = LodElement.GPUMeshIndex;
 						const int32 MeshID = Runtime.GetMeshID();
@@ -728,57 +805,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 		FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(ThreadContext->CriticalSection, GlobalLibrary,
 		                                                     Library_RenderThread);
-
-		for (TTuple<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf>& ReferenceData : GlobalLibrary.
-		     PerReferenceData)
-		{
-			FSkinnedMeshReference_Lf& Reference = ReferenceData.Value;
-
-			for (const TTuple<int32, bool>& ManagementData : Reference.HybridMeshManagementData)
-			{
-				if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(ManagementData.Key))
-				{
-					FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[ManagementData.Key];
-					const FTurboSequence_MinimalMeshData_Lf& MeshData = GlobalLibrary.MeshIDToMinimalData[Runtime.
-						GetMeshID()];
-					if (IsValid(Runtime.FootprintAsset))
-					{
-						if (!Runtime.bSpawnedHybridActor)
-						{
-							Runtime.bSpawnedHybridActor = true;
-
-							GlobalLibrary.HybridMeshes.FindOrAdd(MeshData, false);
-
-							Runtime.FootprintAsset->OnHybridModeUEInstanceSpawn_GameThread_Override(
-								MeshData, InWorld);
-						}
-						else
-						{
-							Runtime.bSpawnedHybridActor = false;
-
-							Runtime.FootprintAsset->
-							        OnHybridModeUEInstanceDestroy_GameThread_Override(MeshData, InWorld);
-
-							GlobalLibrary.HybridMeshes.Remove(MeshData);
-						}
-					}
-
-					Reference.RenderData[Runtime.MaterialsHash].bCollectionDirty = true;
-				}
-			}
-			Reference.HybridMeshManagementData.Empty();
-		}
-
-		for (TTuple<FTurboSequence_MinimalMeshData_Lf, bool>& HybridMesh : GlobalLibrary.HybridMeshes)
-		{
-			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[HybridMesh.Key.RootMotionMeshID];
-
-			if (IsValid(Runtime.FootprintAsset))
-			{
-				Runtime.FootprintAsset->OnHybridModeUEInstanceTick_GameThread_Override(
-					HybridMesh.Key, InWorld, DeltaTime);
-			}
-		}
 
 		if (bMeshIsVisible && GlobalLibrary.PerReferenceData.Num() && IsValid(Instance->GlobalData) && IsValid(
 			Instance->GlobalData->TransformTexture_CurrentFrame))
@@ -1304,7 +1330,7 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataInUpdate
 }
 
 int32 ATurboSequence_Manager_Lf::GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex,
-	const int32 IndexInGroup)
+                                                                            const int32 IndexInGroup)
 {
 	//FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
 
@@ -1321,6 +1347,11 @@ int32 ATurboSequence_Manager_Lf::GetMeshIDInUpdateGroupFromIndex_Concurrent(cons
 	}
 
 	return Group.RawIDs[IndexInGroup];
+}
+
+FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(const int32 MeshID)
+{
+	return GlobalLibrary.MeshIDToMinimalData[MeshID];
 }
 
 void ATurboSequence_Manager_Lf::CleanManager_GameThread(bool bIsEndPlay)
@@ -1560,11 +1591,12 @@ FTurboSequence_AnimMinimalData_Lf ATurboSequence_Manager_Lf::PlayAnimation_RawID
 	{
 		bLoop = Animation->bLoop;
 	}
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 	FTurboSequence_AnimMinimalData_Lf MinimalAnimation = FTurboSequence_AnimMinimalData_Lf(true);
 	MinimalAnimation.BelongsToMeshID = MeshID;
 	MinimalAnimation.AnimationID = FTurboSequence_Utility_Lf::PlayAnimation(
 		Reference, GlobalLibrary, GlobalLibrary_RenderThread, Runtime,
-		Instance->GetThreadContext()->CriticalSection, Animation, AnimSettings, bLoop);
+		ThreadContext, Animation, AnimSettings, bLoop);
 	return MinimalAnimation;
 }
 
@@ -1602,8 +1634,9 @@ FTurboSequence_AnimMinimalBlendSpace_Lf ATurboSequence_Manager_Lf::PlayBlendSpac
 	FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 	const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 	return FTurboSequence_Utility_Lf::PlayBlendSpace(Reference, GlobalLibrary, GlobalLibrary_RenderThread, Runtime,
-	                                                 BlendSpace, Instance->GetThreadContext()->CriticalSection,
+	                                                 BlendSpace, ThreadContext,
 	                                                 AnimSettings);
 }
 
@@ -1638,7 +1671,8 @@ bool ATurboSequence_Manager_Lf::TweakAnimation_Concurrent(const FTurboSequence_A
 
 	FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[AnimationData.BelongsToMeshID];
 	const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-	return FTurboSequence_Utility_Lf::TweakAnimation(Runtime, Instance->GetThreadContext()->CriticalSection,
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
+	return FTurboSequence_Utility_Lf::TweakAnimation(Runtime, ThreadContext,
 	                                                 GlobalLibrary, GlobalLibrary_RenderThread, TweakSettings,
 	                                                 AnimationData.AnimationID, Reference);
 }
@@ -1784,11 +1818,12 @@ bool ATurboSequence_Manager_Lf::GetIKTransform_RawID_Concurrent(FTransform& OutI
 		FTurboSequence_Utility_Lf::GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndexFromName))
 	{
 		int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
+		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 
 		FTurboSequence_Utility_Lf::GetIKTransform(OutIKTransform, BoneIndexFromName, Runtime, Reference,
 		                                          GlobalLibrary, GlobalLibrary_RenderThread, Space,
 		                                          AnimationDeltaTime, CurrentFrameCount,
-		                                          Instance->GetThreadContext()->CriticalSection);
+		                                          ThreadContext);
 
 		return true;
 	}
@@ -1891,11 +1926,12 @@ bool ATurboSequence_Manager_Lf::GetSocketTransform_RawID_Concurrent(FTransform& 
 		ReferenceMeshNative->FindSocket(SocketName))
 	{
 		int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
+		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 
 		FTurboSequence_Utility_Lf::GetSocketTransform(OutSocketTransform, SocketName, Runtime, Reference,
 		                                              GlobalLibrary, GlobalLibrary_RenderThread, Space,
 		                                              AnimationDeltaTime, CurrentFrameCount,
-		                                              Instance->GetThreadContext()->CriticalSection);
+		                                              ThreadContext);
 
 		return true;
 	}
@@ -2048,10 +2084,11 @@ bool ATurboSequence_Manager_Lf::CustomizeMesh_RawID_GameThread(int32 MeshID, UTu
 		}
 	}
 
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
 	FTurboSequence_Utility_Lf::CustomizeMesh(Runtime, TargetMesh, Materials, Instance->NiagaraComponents,
 	                                         GlobalLibrary, GlobalLibrary_RenderThread,
 	                                         Instance->GetRootComponent(),
-	                                         Instance->GetThreadContext()->CriticalSection);
+	                                         ThreadContext);
 
 	return true;
 }
@@ -2181,4 +2218,51 @@ bool ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(const FTurboS
 	}
 
 	return bSuccess;
+}
+
+bool ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
+                                                            const float UEMeshPercentage,
+                                                            const float AnimationDeltaTime)
+{
+	if (!IsValid(UEMesh))
+	{
+		return false;
+	}
+	if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(TsMeshID))
+	{
+		return false;
+	}
+
+
+	const FReferenceSkeleton& ReferenceSkeleton =
+		FTurboSequence_Utility_Lf::GetReferenceSkeleton_Raw(
+			UEMesh->GetSkinnedAsset());
+
+	const int32 NumBones = ReferenceSkeleton.GetNum();
+	for (int32 BoneIdx = GET0_NUMBER; BoneIdx < NumBones; ++BoneIdx)
+	{
+		const FName& BoneName = UEMesh->GetBoneName(BoneIdx);
+
+		FTransform TurboSequenceIKTransform;
+		GetIKTransform_RawID_Concurrent(
+			TurboSequenceIKTransform, TsMeshID, BoneName, AnimationDeltaTime);
+
+		const FTransform& SkeletalMeshIKTransform = UEMesh->GetBoneTransform(BoneIdx);
+
+		TurboSequenceIKTransform.SetScale3D(FMath::Lerp(
+			TurboSequenceIKTransform.GetScale3D(), SkeletalMeshIKTransform.GetScale3D(),
+			UEMeshPercentage));
+		TurboSequenceIKTransform.SetLocation(FMath::Lerp(
+			TurboSequenceIKTransform.GetLocation(), SkeletalMeshIKTransform.GetLocation(),
+			UEMeshPercentage));
+		TurboSequenceIKTransform.SetRotation(FQuat::Slerp(
+			TurboSequenceIKTransform.GetRotation(), SkeletalMeshIKTransform.GetRotation(),
+			UEMeshPercentage));
+
+		SetIKTransform_RawID_Concurrent(
+			TsMeshID, BoneName,
+			TurboSequenceIKTransform);
+	}
+
+	return true;
 }

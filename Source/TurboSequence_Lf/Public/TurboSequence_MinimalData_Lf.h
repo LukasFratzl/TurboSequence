@@ -35,6 +35,14 @@ enum class ETurboSequence_ManagementMode_Lf : uint8
 	SelfManaged
 };
 
+UENUM(BlueprintType)
+enum class ETurboSequence_IsVisibleOverride_Lf : uint8
+{
+	Default,
+	IsVisible,
+	IsNotVisible
+};
+
 UCLASS(BlueprintType)
 class TURBOSEQUENCE_LF_API UTurboSequence_ThreadContext_Lf : public UObject
 {

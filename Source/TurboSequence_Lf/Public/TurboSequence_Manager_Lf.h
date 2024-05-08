@@ -54,9 +54,13 @@ public:
 	// The Rendering Part needs Niagara to draw the meshes: 1 Draw Call per Mesh | 1 Draw Call per Material
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf> NiagaraComponents;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	// The Global Data which keeps track of internal Texture Data
 	TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData;
+
+	// The Map with the footprint assets in the simulation
+	// < Asset | Number of Meshes which use it >
+	inline static TMap<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> FootprintAssetsInUse;
 
 protected:
 	UPROPERTY()
@@ -129,12 +133,12 @@ public:
 
 protected:
 	// NODE: Please use the versions with FTurboSequence_MeshSpawnData_Lf& FromSpawnData
-	static int32 AddSkinnedMeshInstance_GameThread(const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
+	static int32 AddSkinnedMeshInstance_GameThread(const TObjectPtr<UTurboSequence_MeshAsset_Lf>& FromAsset,
 	                                               const FTransform& SpawnTransform,
-	                                               const TObjectPtr<UWorld> InWorld,
+	                                               const TObjectPtr<UWorld>& InWorld,
 	                                               const TArray<TObjectPtr<UMaterialInterface>>& OverrideMaterials =
 		                                               TArray<TObjectPtr<UMaterialInterface>>(),
-	                                               const TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset =
+	                                               const TObjectPtr<UTurboSequence_FootprintAsset_Lf>& FootprintAsset =
 		                                               nullptr);
 
 	static bool RemoveSkinnedMeshInstance_GameThread(int32 MeshID, const TObjectPtr<UWorld> InWorld);
@@ -174,7 +178,7 @@ public:
 
 
 	/**
-	 * Removes a Instance in the Update Group
+	 * Removes an Instance in the Update Group
 	 * @param GroupIndex The Group Index which hosting the Mesh ID
 	 * @param MeshData The Mesh ID
 	 */
@@ -205,21 +209,31 @@ public:
 	 * Get the Mesh Data in a Update Group with the given Index, useful if you need iterate
 	 * @param GroupIndex The Group Index
 	 * @param IndexInGroup The Index in the Mesh Data Group
-	 * @return The Number of Mesh Collections in the Update Group
+	 * @return The Mesh Data
 	 */
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
-	static FTurboSequence_MinimalMeshData_Lf GetMeshDataInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex, const int32 IndexInGroup);
+	static FTurboSequence_MinimalMeshData_Lf GetMeshDataInUpdateGroupFromIndex_Concurrent(
+		const int32 GroupIndex, const int32 IndexInGroup);
 
 	/**
 	 * Get the Mesh ID in a Update Group with the given Index, useful if you need iterate
 	 * @param GroupIndex The Group Index
 	 * @param IndexInGroup The Index in the Mesh ID Group
-	 * @return The Number of Mesh Collections in the Update Group
+	 * @return The Mesh ID
 	 */
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
 	static int32 GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex, const int32 IndexInGroup);
+
+	/**
+ * Gets the Mesh Data from a Mesh ID
+ * @param MeshID The Group ID
+ * @return The Mesh Data
+ */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
+	static FTurboSequence_MinimalMeshData_Lf GetMeshDataFromMeshID_Concurrent(const int32 MeshID);
 
 
 	/**
@@ -238,6 +252,7 @@ public:
 		LastFrameCameraTransforms.Empty();
 		GlobalLibrary = FSkinnedMeshGlobalLibrary_Lf();
 		GlobalLibrary_RenderThread = FSkinnedMeshGlobalLibrary_RenderThread_Lf();
+		FootprintAssetsInUse.Empty();
 	}
 
 	/**
@@ -691,4 +706,18 @@ public:
 		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Custom, Data, Rendering, Per Instance"))
 	static bool SetCustomDataToInstance_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
 	                                               const uint8 CustomDataFractionIndex, const float CustomDataValue);
+
+
+	/**
+	 * Sets the Turbo Sequence Mesh to an equallent UE Mesh, make sure the UE Mesh has the same skeleton
+	 * @param TsMeshID The Mesh ID
+	 * @param UEMesh The Unreal Engine Mesh Instance, SkeletalMesh or PoseableMesh
+	 * @param UEMeshPercentage The Percentage between 0 = TS Mesh and 1 = UE Mesh
+	 * @param AnimationDeltaTime The TS Mesh Animation Delta Time
+	 * @return Ture if Successful
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, IK, Bones, Transition, Fade, Lerp"))
+	static bool SetTransitionTsMeshToUEMesh(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
+	                                    const float UEMeshPercentage, const float AnimationDeltaTime);
 };

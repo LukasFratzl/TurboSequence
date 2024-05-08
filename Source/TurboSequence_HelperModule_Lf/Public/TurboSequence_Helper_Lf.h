@@ -1945,39 +1945,6 @@ public:
 	}
 };
 
-UCLASS()
-class TURBOSEQUENCE_HELPERMODULE_LF_API ATurboSequence_Hidden_Actor_Lf : public AActor
-{
-	GENERATED_BODY()
-
-public:
-	// Sets default values for this actor's properties
-	ATurboSequence_Hidden_Actor_Lf()
-	{
-		// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-		PrimaryActorTick.bCanEverTick = true;
-
-#if WITH_EDITOR
-		// HIDE IT
-		bListedInSceneOutliner = false;
-#endif
-	}
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override
-	{
-		Super::BeginPlay();
-	}
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override
-	{
-		Super::Tick(DeltaTime);
-	}
-};
-
 USTRUCT()
 struct TURBOSEQUENCE_HELPERMODULE_LF_API FBool3_Lf
 {
@@ -2032,7 +1999,7 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FBool2_Lf
 };
 
 UCLASS()
-class UTurboSequence_Helper_BlueprintFunctions_Lf : public UObject
+class TURBOSEQUENCE_HELPERMODULE_LF_API UTurboSequence_Helper_BlueprintFunctions_Lf : public UObject
 {
 	GENERATED_BODY()
 

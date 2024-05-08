@@ -475,17 +475,10 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 					}
 				}
 
-				float HybridAnimationDistance = 0;
-				if (const TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset =
-					ATurboSequence_Manager_Lf::GetFootprintAsset_Concurrent(Mesh.MeshData); IsValid(FootprintAsset))
-				{
-					HybridAnimationDistance = FootprintAsset->HybridModeAnimationDrawRangeUEInstance;
-				}
-
 
 				// IK is expensive on the CPU, we only do IK for 100 Meters Radius around the camera
 				// and only if the mesh is visible by the Camera Frustum
-				if (AssetCustomData->bUseIK && CameraDistance > HybridAnimationDistance && CameraDistance < 10000 &&
+				if (AssetCustomData->bUseIK && CameraDistance < 10000 &&
 					ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(Mesh.MeshData))
 				{
 					const FTransform& OffsetTransform = AssetCustomData->SpawnOffsetTransform;

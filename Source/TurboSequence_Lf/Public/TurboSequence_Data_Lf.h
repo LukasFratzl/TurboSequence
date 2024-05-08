@@ -507,9 +507,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 
 	// < Material Hash | Data >
 	TMap<uint32, FRenderData_Lf> RenderData;
-
-	// < Mesh ID
-	TMap<int32, bool> HybridMeshManagementData;
 };
 
 /*	==============================================================================================================
@@ -540,6 +537,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 	bool bIsVisible = true;
+	ETurboSequence_IsVisibleOverride_Lf EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
 	uint8 CurrentGPUMeshIndex = GET0_NUMBER;
 
 	TArray<FAnimationMetaData_RenderThread_Lf> AnimationMetaData_RenderThread;
@@ -745,8 +743,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 	TArray<int32> RuntimeSkinnedMeshesHashMap;
 	// < MeshID | Data >
 	TMap<int32, FTurboSequence_MinimalMeshData_Lf> MeshIDToMinimalData;
-
-	TMap<FTurboSequence_MinimalMeshData_Lf, bool> HybridMeshes;
 
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf> PerReferenceData;
 
