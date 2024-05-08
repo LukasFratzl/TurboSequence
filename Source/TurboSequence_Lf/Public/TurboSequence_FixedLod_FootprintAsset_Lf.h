@@ -16,9 +16,22 @@ class TURBOSEQUENCE_LF_API UTurboSequence_FixedLod_FootprintAsset_Lf : public UT
 	GENERATED_BODY()
 
 public:
-	virtual void OnSetMeshLod_Concurrent(int16& OutLodIndex, const int32 MeshID,
+	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride,
+		const bool bDefaultVisibility, const int32 MeshID,
 		const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext) override;
+	virtual void OnSetMeshIsAnimated_Concurrent(ETurboSequence_IsAnimatedOverride_Lf& IsAnimatedOverride,
+		const bool bDefaultIsAnimated, const int32 MeshID,
+		const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext) override;
+	virtual void OnSetMeshLod_Concurrent(int16& LodIndexOverride, const int32 MeshID,
+		const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext) override;
+
 
 	UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="31"))
 	int32 LodIndex = 0;
+
+	UPROPERTY(EditAnywhere)
+	ETurboSequence_IsVisibleOverride_Lf IsVisible = ETurboSequence_IsVisibleOverride_Lf::Default;
+
+	UPROPERTY(EditAnywhere)
+	ETurboSequence_IsAnimatedOverride_Lf IsAnimated = ETurboSequence_IsAnimatedOverride_Lf::Default;
 };

@@ -197,6 +197,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoHybridMode_Lf : public FFeatureDemoBase_
 UENUM(BlueprintType)
 enum class EFeatureDemoEnableFeature_Lf : uint8
 {
+	None,
 	SimpleBlending,
 	LayerBlending,
 	Tweaking,

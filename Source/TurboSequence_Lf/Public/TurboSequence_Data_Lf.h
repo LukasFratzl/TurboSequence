@@ -538,6 +538,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 
 	bool bIsVisible = true;
 	ETurboSequence_IsVisibleOverride_Lf EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
+	ETurboSequence_IsAnimatedOverride_Lf EIsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::Default;
 	uint8 CurrentGPUMeshIndex = GET0_NUMBER;
 
 	TArray<FAnimationMetaData_RenderThread_Lf> AnimationMetaData_RenderThread;
@@ -582,7 +583,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 		DataAsset = Asset;
 	}
 
-private:
 	// uint32 SetHash(uint32 SecurityIndex) const
 	// {
 	// 	uint32 Hash = GET0_NUMBER;

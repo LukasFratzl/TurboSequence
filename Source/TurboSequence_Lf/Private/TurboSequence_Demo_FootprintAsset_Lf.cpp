@@ -15,31 +15,29 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerEndPlay_GameThread(const EE
 }
 
 void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsVisible_Concurrent(
-	ETurboSequence_IsVisibleOverride_Lf& IsVisible,
+	ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride,
 	const bool bDefaultVisibility, const int32 MeshID,
 	const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 {
-	Super::OnSetMeshIsVisible_Concurrent(IsVisible, bDefaultVisibility, MeshID, ThreadContext);
+	Super::OnSetMeshIsVisible_Concurrent(IsVisibleOverride, bDefaultVisibility, MeshID, ThreadContext);
 
 	if (MeshesOpen.Contains(MeshID) && MeshesOpen[MeshID].bIsInUERange && MeshesOpen[MeshID].
 		FadeTimeRuntime <= 0)
 	{
-		IsVisible = ETurboSequence_IsVisibleOverride_Lf::IsNotVisible;
+		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::IsNotVisible;
 	}
 }
 
 void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsUpdatingLod_Concurrent(
-	bool& bOutIsUpdatingLod, const int32 MeshID,
-	const TObjectPtr<
-		UTurboSequence_ThreadContext_Lf>&
-	ThreadContext)
+	bool& bIsUpdatingLodOverride, const int32 MeshID,
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 {
-	Super::OnSetMeshIsUpdatingLod_Concurrent(bOutIsUpdatingLod, MeshID, ThreadContext);
+	Super::OnSetMeshIsUpdatingLod_Concurrent(bIsUpdatingLodOverride, MeshID, ThreadContext);
 
 	if (MeshesOpen.Contains(MeshID) && MeshesOpen[MeshID].bIsInUERange && MeshesOpen[MeshID].
 		FadeTimeRuntime <= 0)
 	{
-		bOutIsUpdatingLod = false;
+		bIsUpdatingLodOverride = false;
 	}
 }
 

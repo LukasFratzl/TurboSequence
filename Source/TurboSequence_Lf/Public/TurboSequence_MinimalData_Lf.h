@@ -43,6 +43,14 @@ enum class ETurboSequence_IsVisibleOverride_Lf : uint8
 	IsNotVisible
 };
 
+UENUM(BlueprintType)
+enum class ETurboSequence_IsAnimatedOverride_Lf : uint8
+{
+	Default,
+	IsAnimated,
+	IsNotAnimated
+};
+
 UCLASS(BlueprintType)
 class TURBOSEQUENCE_LF_API UTurboSequence_ThreadContext_Lf : public UObject
 {

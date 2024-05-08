@@ -30,21 +30,25 @@ UCLASS(BlueprintType)
 class TURBOSEQUENCE_LF_API UTurboSequence_Demo_FootprintAsset_Lf : public UTurboSequence_FootprintAsset_Lf
 {
 public:
+	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride,
+	                                           const bool bDefaultVisibility, const int32 MeshID,
+	                                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
+	                                           ThreadContext) override;
+	virtual void OnSetMeshIsUpdatingLod_Concurrent(bool& bIsUpdatingLodOverride, const int32 MeshID,
+	                                               const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
+	                                               ThreadContext) override;
+
 	virtual void OnManagerEndPlay_GameThread(const EEndPlayReason::Type EndPlayReason) override;
 
-	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisible,
-											   const bool bDefaultVisibility, const int32 MeshID,
-											   const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext) override;
-	virtual void OnSetMeshIsUpdatingLod_Concurrent(bool& bOutIsUpdatingLod, const int32 MeshID,
-	                                             const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
-	                                             ThreadContext) override;
 	virtual void OnAddedMeshInstance_GameThread(const int32 MeshID,
-	                                          const TObjectPtr<UTurboSequence_MeshAsset_Lf>& FromAsset) override;
-	virtual void OnRemovedMeshInstance_GameThread(const int32 MeshID,
 	                                            const TObjectPtr<UTurboSequence_MeshAsset_Lf>& FromAsset) override;
+	virtual void OnRemovedMeshInstance_GameThread(const int32 MeshID,
+	                                              const TObjectPtr<UTurboSequence_MeshAsset_Lf>& FromAsset) override;
+
 	virtual void OnMeshPreSolveAnimationMeta_Concurrent(const int32 MeshID,
-	                                                  const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
-	                                                  ThreadContext) override;
+	                                                    const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
+	                                                    ThreadContext) override;
+
 	virtual void OnManagerUpdated_GameThread(const float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
@@ -64,7 +68,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MeshActor = nullptr;
 
-	void FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance, const TObjectPtr<USkinnedMeshComponent>& Mesh) const;
+	void FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance,
+	              const TObjectPtr<USkinnedMeshComponent>& Mesh) const;
 
 private:
 	GENERATED_BODY()

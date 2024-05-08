@@ -709,7 +709,7 @@ public:
 
 
 	/**
-	 * Sets the Turbo Sequence Mesh to an equallent UE Mesh, make sure the UE Mesh has the same skeleton
+	 * Sets the Turbo Sequence Mesh to an equallent UE Mesh using the Ts IK system, make sure the UE Mesh has the same skeleton
 	 * @param TsMeshID The Mesh ID
 	 * @param UEMesh The Unreal Engine Mesh Instance, SkeletalMesh or PoseableMesh
 	 * @param UEMeshPercentage The Percentage between 0 = TS Mesh and 1 = UE Mesh
@@ -719,5 +719,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, IK, Bones, Transition, Fade, Lerp"))
 	static bool SetTransitionTsMeshToUEMesh(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
-	                                    const float UEMeshPercentage, const float AnimationDeltaTime);
+	                                        const float UEMeshPercentage, const float AnimationDeltaTime);
 };

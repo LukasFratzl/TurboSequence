@@ -324,7 +324,8 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 				break;
 			}
 
-			const FTurboSequence_MinimalMeshData_Lf& MeshData = ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(GroupIndex, Index);
+			const FTurboSequence_MinimalMeshData_Lf& MeshData =
+				ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(GroupIndex, Index);
 
 			FDemoMeshWrapper_Lf& Mesh = Meshes[MeshData];
 			//

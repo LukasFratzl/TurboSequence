@@ -20,35 +20,48 @@ public:
 
 	/**
 	 * Overrides the Mesh Visibility
-	 * @param IsVisible Choose the Visibility of the Mesh
+	 * @param IsVisibleOverride Choose the Visibility of the Mesh
 	 * @param bDefaultVisibility The Current Visibility of this Mesh this Frame
 	 * @param MeshID The Mesh ID
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
-	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisible,
+	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride,
 	                                           const bool bDefaultVisibility, const int32 MeshID,
 	                                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}
 
 	/**
-	 * Gets the Final Visiblity of the Mesh
-	 * @param bIsVisible The Final Visibility this Frame
+	 * Gets the Final Visiblity of the Mesh and only calls when the visibility changes
+	 * @param bHasVisibilityChanged The Final Visibility
 	 * @param MeshID The Mesh ID
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
-	virtual void OnMeshVisibilityChanged_Concurrent(bool bIsVisible, const int32 MeshID,
-	                                                const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+	virtual void OnGetMeshVisibilityChanged_Concurrent(bool bHasVisibilityChanged, const int32 MeshID,
+	                                                   const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+	{
+	}
+
+	/**
+	 * Overrides the Mesh Is Animated State
+	 * @param IsAnimatedOverride Choose the Animated State of the Mesh
+	 * @param bDefaultIsAnimated The Current is Animated state of this Mesh this Frame
+	 * @param MeshID The Mesh ID
+	 * @param ThreadContext The Thread Context for using Critical Sections
+	 */
+	virtual void OnSetMeshIsAnimated_Concurrent(ETurboSequence_IsAnimatedOverride_Lf& IsAnimatedOverride,
+	                                          const bool bDefaultIsAnimated, const int32 MeshID,
+	                                          const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}
 
 	/**
 	 * Overrides the Auto Lod Update of the Mesh
-	 * @param bOutIsUpdatingLod Choose if the Mesh Should Auto Update the Lod
+	 * @param bIsUpdatingLodOverride Choose if the Mesh Should Auto Update the Lod
 	 * @param MeshID The Mesh ID
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
-	virtual void OnSetMeshIsUpdatingLod_Concurrent(bool& bOutIsUpdatingLod, const int32 MeshID,
+	virtual void OnSetMeshIsUpdatingLod_Concurrent(bool& bIsUpdatingLodOverride, const int32 MeshID,
 	                                               const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}
@@ -60,18 +73,18 @@ public:
 	 * @param MeshID The Mesh ID
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
-	virtual void OnMeshLodChanged_Concurrent(const int16 OldLodIndex, const int16 NewLodIndex, const int32 MeshID,
-	                                         const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+	virtual void OnGetMeshLodChanged_Concurrent(const int16 OldLodIndex, const int16 NewLodIndex, const int32 MeshID,
+	                                            const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}
 
 	/**
 	 * Sets the Lod Index of the Mesh Instance
-	 * @param OutLodIndex The Wanted Lod Index, by default it's the valid system Lod index
+	 * @param LodIndexOverride The Wanted Lod Index, by default it's the valid system Lod index
 	 * @param MeshID The Mesh ID
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
-	virtual void OnSetMeshLod_Concurrent(int16& OutLodIndex, const int32 MeshID,
+	virtual void OnSetMeshLod_Concurrent(int16& LodIndexOverride, const int32 MeshID,
 	                                     const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}

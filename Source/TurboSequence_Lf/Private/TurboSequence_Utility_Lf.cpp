@@ -494,10 +494,10 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 
 		LodElement.bIsFrustumCullingEnabled = FromAsset->InstancedMeshes[i].bIsFrustumCullingEnabled;
 
-		bool bIsIncluded = !FromAsset->InstancedMeshes[i].bExcludeLodFromSystem ||
+		const bool bIsIncluded = !FromAsset->InstancedMeshes[i].bExcludeLodFromSystem ||
 			bIsMeshDataEvaluationFunction;
 
-		bool bIsMeshVisible = IsValid(FromAsset->InstancedMeshes[i].StaticMesh) && FromAsset->InstancedMeshes
+		const bool bIsMeshVisible = IsValid(FromAsset->InstancedMeshes[i].StaticMesh) && FromAsset->InstancedMeshes
 			[i].bShowMesh;
 
 		if (bIsMeshVisible && bIsIncluded)
@@ -1575,8 +1575,8 @@ void FTurboSequence_Utility_Lf::SetCustomDataForInstance(FSkinnedMeshReference_L
 	bool bIsAnimated = GetIsMeshVisible(Runtime, Reference);
 	if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
 	{
-		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
-		bIsAnimated = LodElement.bIsAnimated && bIsAnimated;
+		//const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+		bIsAnimated = GetIsMeshAnimated(Runtime, Reference) && bIsAnimated;
 	}
 
 	const FIntVector2& BitValueSkinWeightOffset = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(
@@ -1655,6 +1655,26 @@ bool FTurboSequence_Utility_Lf::GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& R
 	return Runtime.bIsVisible;
 }
 
+bool FTurboSequence_Utility_Lf::GetIsMeshAnimated(const FSkinnedMeshRuntime_Lf& Runtime,
+                                                  const FSkinnedMeshReference_Lf& Reference)
+{
+	if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
+	{
+		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+
+		switch (Runtime.EIsAnimatedOverride)
+		{
+		case ETurboSequence_IsAnimatedOverride_Lf::Default:
+			return LodElement.bIsAnimated;
+		case ETurboSequence_IsAnimatedOverride_Lf::IsAnimated:
+			return true;
+		case ETurboSequence_IsAnimatedOverride_Lf::IsNotAnimated:
+			return false;
+		}
+	}
+	return false;
+}
+
 void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntime_Lf& Runtime,
                                                               FSkinnedMeshReference_Lf& Reference,
                                                               const TArray<FCameraView_Lf>& CameraViews,
@@ -1713,20 +1733,20 @@ void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntim
 			const FSkinnedMeshReferenceLodElement_Lf& NextLodElement = Reference.LevelOfDetails[
 				BestLodIndex];
 			UpdateRenderInstanceLod_Concurrent(Reference, Runtime, NextLodElement,
-											   GetIsMeshVisible(Runtime, Reference) && NextLodElement.
-											   bIsRenderStateValid);
+			                                   GetIsMeshVisible(Runtime, Reference) && NextLodElement.
+			                                   bIsRenderStateValid);
 			Runtime.LodIndex = BestLodIndex;
 		}
-		if (Runtime.LodIndex < 0)
+		if (Runtime.LodIndex < GET0_NUMBER)
 		{
 			Runtime.LodIndex = BestLodIndex;
 		}
 	}
 	else
 	{
-		if (Runtime.LodIndex < 0)
+		if (Runtime.LodIndex < GET0_NUMBER)
 		{
-			Runtime.LodIndex = 0;
+			Runtime.LodIndex = GET0_NUMBER;
 		}
 	}
 }

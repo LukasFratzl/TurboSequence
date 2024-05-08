@@ -713,10 +713,20 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 					FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(
 						Reference, Runtime, LodElement, Runtime.bIsVisible && LodElement.bIsRenderStateValid);
+
+					Runtime.EIsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::Default;
+					Runtime.FootprintAsset->OnSetMeshIsAnimated_Concurrent(
+						Runtime.EIsAnimatedOverride, FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference), Runtime.GetMeshID(),
+						ThreadContext);
+					if (FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference))
+					{
+						Runtime.bForceVisibilityUpdatingThisFrame = true;
+					}
 				}
 				else
 				{
 					Runtime.EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
+					Runtime.EIsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::Default;
 
 					if (!LodElement.bIsFrustumCullingEnabled)
 					{
@@ -731,13 +741,13 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				{
 					if (bIsVisiblePrevious != FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference))
 					{
-						Runtime.FootprintAsset->OnMeshVisibilityChanged_Concurrent(
+						Runtime.FootprintAsset->OnGetMeshVisibilityChanged_Concurrent(
 							FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference), Runtime.GetMeshID(),
 							ThreadContext);
 					}
 					if (PreviousLodIndex != Runtime.LodIndex)
 					{
-						Runtime.FootprintAsset->OnMeshLodChanged_Concurrent(
+						Runtime.FootprintAsset->OnGetMeshLodChanged_Concurrent(
 							PreviousLodIndex, Runtime.LodIndex, Runtime.GetMeshID(), ThreadContext);
 					}
 				}
@@ -755,7 +765,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				{
 					FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
 
-					if ((LodElement.bIsAnimated && Runtime.bIsDistanceUpdatingThisFrame && LodElement.
+					if ((FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference) && Runtime.bIsDistanceUpdatingThisFrame && LodElement.
 						bIsRenderStateValid) || (Runtime.bForceVisibilityUpdatingThisFrame && LodElement.
 						bIsRenderStateValid))
 					{

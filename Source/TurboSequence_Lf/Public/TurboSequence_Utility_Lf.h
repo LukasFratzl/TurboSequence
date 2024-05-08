@@ -225,10 +225,12 @@ public:
 
 	static void CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime, const TObjectPtr<UTurboSequence_MeshAsset_Lf> TargetMesh,
 	                          const TArray<TObjectPtr<UMaterialInterface>>& TargetMaterials,
-	                          TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>& NiagaraComponents, FSkinnedMeshGlobalLibrary_Lf
+	                          TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>&
+	                          NiagaraComponents, FSkinnedMeshGlobalLibrary_Lf
 	                          & Library,
 	                          FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                          const TObjectPtr<USceneComponent> RootComponent, const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
+	                          const TObjectPtr<USceneComponent> RootComponent,
+	                          const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	/**
 		* @brief Updates one instance in an instanced static mesh component
@@ -282,6 +284,7 @@ public:
 
 
 	static bool GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& Runtime, const FSkinnedMeshReference_Lf& Reference);
+	static bool GetIsMeshAnimated(const FSkinnedMeshRuntime_Lf& Runtime, const FSkinnedMeshReference_Lf& Reference);
 
 
 	static void UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntime_Lf& Runtime,
@@ -333,7 +336,8 @@ public:
 	                         const FSkinnedMeshReference_Lf& Reference,
 	                         FAnimationMetaData_Lf& Animation,
 	                         const FAnimationMetaData_RenderThread_Lf& Animation_RenderThread,
-	                         const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext, FSkinnedMeshGlobalLibrary_Lf& Library);
+	                         const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext,
+	                         FSkinnedMeshGlobalLibrary_Lf& Library);
 
 
 	static void RemoveAnimation(FSkinnedMeshRuntime_Lf& Runtime,
@@ -342,7 +346,8 @@ public:
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread, int32 Index);
 
 	template <typename Function>
-	static void ClearAnimations(const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext, FSkinnedMeshRuntime_Lf& Runtime,
+	static void ClearAnimations(const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext,
+	                            FSkinnedMeshRuntime_Lf& Runtime,
 	                            FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                            ETurboSequence_AnimationForceMode_Lf ForceMode,
@@ -401,7 +406,8 @@ public:
 	static void UpdateBlendSpaces(FSkinnedMeshRuntime_Lf& Runtime,
 	                              const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext, float DeltaTime,
 	                              FSkinnedMeshGlobalLibrary_Lf& Library,
-	                              FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread, const FSkinnedMeshReference_Lf& Reference);
+	                              FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
+	                              const FSkinnedMeshReference_Lf& Reference);
 
 	static bool TweakBlendSpace(FSkinnedMeshRuntime_Lf& Runtime,
 	                            FCriticalSection& CriticalSection,
@@ -418,7 +424,8 @@ public:
 	static void SolveAnimations(FSkinnedMeshRuntime_Lf& Runtime, FSkinnedMeshGlobalLibrary_Lf& Library,
 	                            FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                            const FSkinnedMeshReference_Lf& Reference, float DeltaTime,
-	                            int32 CurrentFrameCount, const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
+	                            int32 CurrentFrameCount,
+	                            const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	static FORCEINLINE FUintVector GetAnimationLibraryKey(const TObjectPtr<USkeleton> Skeleton,
 	                                                      const TObjectPtr<UTurboSequence_MeshAsset_Lf>
@@ -513,7 +520,8 @@ public:
 	                           FSkinnedMeshGlobalLibrary_Lf& Library,
 	                           FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                           const EBoneSpaces::Type Space, float AnimationDeltaTime,
-	                           int32 CurrentFrameCount, const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
+	                           int32 CurrentFrameCount,
+	                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	static bool SetIKTransform(const FTransform& Atom, uint16 BoneIndex,
 	                           FSkinnedMeshRuntime_Lf& Runtime,
@@ -535,7 +543,9 @@ public:
 	                               FSkinnedMeshRuntime_Lf& Runtime,
 	                               const FSkinnedMeshReference_Lf& Reference,
 	                               FSkinnedMeshGlobalLibrary_Lf& Library,
-	                               FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread, const EBoneSpaces::Type Space,
+	                               FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
+	                               const EBoneSpaces::Type Space,
 	                               float AnimationDeltaTime,
-	                               int32 CurrentFrameCount, const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
+	                               int32 CurrentFrameCount,
+	                               const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 };
