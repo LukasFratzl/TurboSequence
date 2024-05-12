@@ -591,7 +591,6 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	// 	return Hash;
 	// }
 
-public:
 	FORCEINLINE bool operator==(const FSkinnedMeshRuntime_Lf& Rhs) const
 	{
 		return this->MeshID == Rhs.MeshID;

@@ -716,7 +716,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 					Runtime.EIsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::Default;
 					Runtime.FootprintAsset->OnSetMeshIsAnimated_Concurrent(
-						Runtime.EIsAnimatedOverride, FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference), Runtime.GetMeshID(),
+						Runtime.EIsAnimatedOverride, FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference),
+						Runtime.GetMeshID(),
 						ThreadContext);
 					if (FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference))
 					{
@@ -765,7 +766,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				{
 					FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
 
-					if ((FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference) && Runtime.bIsDistanceUpdatingThisFrame && LodElement.
+					if ((FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference) && Runtime.
+						bIsDistanceUpdatingThisFrame && LodElement.
 						bIsRenderStateValid) || (Runtime.bForceVisibilityUpdatingThisFrame && LodElement.
 						bIsRenderStateValid))
 					{

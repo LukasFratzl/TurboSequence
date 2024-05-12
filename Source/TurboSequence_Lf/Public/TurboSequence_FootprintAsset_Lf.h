@@ -50,8 +50,8 @@ public:
 	 * @param ThreadContext The Thread Context for using Critical Sections
 	 */
 	virtual void OnSetMeshIsAnimated_Concurrent(ETurboSequence_IsAnimatedOverride_Lf& IsAnimatedOverride,
-	                                          const bool bDefaultIsAnimated, const int32 MeshID,
-	                                          const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+	                                            const bool bDefaultIsAnimated, const int32 MeshID,
+	                                            const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 	{
 	}
 

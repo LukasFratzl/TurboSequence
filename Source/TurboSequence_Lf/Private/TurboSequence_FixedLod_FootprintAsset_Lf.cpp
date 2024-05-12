@@ -22,7 +22,9 @@ void UTurboSequence_FixedLod_FootprintAsset_Lf::OnSetMeshIsAnimated_Concurrent(
 }
 
 void UTurboSequence_FixedLod_FootprintAsset_Lf::OnSetMeshLod_Concurrent(int16& LodIndexOverride, const int32 MeshID,
-	const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+                                                                        const TObjectPtr<
+	                                                                        UTurboSequence_ThreadContext_Lf>&
+                                                                        ThreadContext)
 {
 	Super::OnSetMeshLod_Concurrent(LodIndexOverride, MeshID, ThreadContext);
 
