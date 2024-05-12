@@ -84,12 +84,15 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	const FTurboSequence_MinimalMeshData_Lf& MeshData =
 		ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(MeshID);
 
-	const bool bIsInUERange = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID) < FadeDistance;
+	const bool bIsInUERange = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID) <
+		FadeDistance;
 	if (bIsInUERange != MeshOpen.bIsInUERange || !MeshOpen.bInit && bIsInUERange)
 	{
 		MeshOpen.FadeTimeRuntime = FadeTime;
 
+		ThreadContext->LockThread();
 		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed.FindOrAdd(MeshData.RootMotionMeshID);
+		ThreadContext->UnlockThread();
 		MeshClosed.FadeTimeRuntime = FadeTime;
 		//MeshClosed.FadeActiveCounter = 0;
 	}
@@ -98,6 +101,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	MeshOpen.bIsInUERange = bIsInUERange;
 	MeshOpen.bInit = true;
 
+	ThreadContext->LockThread();
 	if (MeshesClosed.Contains(MeshData.RootMotionMeshID))
 	{
 		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed.FindOrAdd(MeshData.RootMotionMeshID);
@@ -105,6 +109,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 		MeshClosed.bIsInUERange = bIsInUERange;
 		MeshClosed.bInit = true;
 	}
+	ThreadContext->UnlockThread();
 }
 
 void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const float DeltaTime)
