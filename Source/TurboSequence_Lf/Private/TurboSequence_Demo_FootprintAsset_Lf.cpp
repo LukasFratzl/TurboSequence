@@ -169,6 +169,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 						Component->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID)
 						->ReferenceMeshNative)
 					{
+						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, Component);
 						break;
 					}
 				}
