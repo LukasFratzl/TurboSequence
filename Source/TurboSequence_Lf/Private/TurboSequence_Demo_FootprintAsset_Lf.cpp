@@ -84,9 +84,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	const FTurboSequence_MinimalMeshData_Lf& MeshData =
 		ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(MeshID);
 
-	bool bIsInUERange = FVector::Distance(CameraLocation,
-	                                      ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(
-		                                      MeshID).GetLocation()) < FadeDistance;
+	const bool bIsInUERange = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID) < FadeDistance;
 	if (bIsInUERange != MeshOpen.bIsInUERange || !MeshOpen.bInit && bIsInUERange)
 	{
 		MeshOpen.FadeTimeRuntime = FadeTime;
@@ -113,14 +111,6 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 {
 	Super::OnManagerUpdated_GameThread(DeltaTime);
 
-	const TObjectPtr<APlayerController> PlayerController = UGameplayStatics::GetPlayerController(
-		UTurboSequence_Helper_BlueprintFunctions_Lf::TurboSequence_GetWorldFromStaticFunction(), 0);
-
-	if (IsValid(PlayerController) && IsValid(PlayerController->PlayerCameraManager))
-	{
-		const FMinimalViewInfo& PlayerMinimalViewInfo = PlayerController->PlayerCameraManager->ViewTarget.POV;
-		CameraLocation = PlayerMinimalViewInfo.Location;
-	}
 	LastDeltaTime = DeltaTime;
 
 	TArray<int32> MeshIDsToRemove;

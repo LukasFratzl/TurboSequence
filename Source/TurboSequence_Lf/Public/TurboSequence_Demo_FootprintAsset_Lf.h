@@ -57,9 +57,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	float FadeDistance = 1000;
 
-	UPROPERTY(EditAnywhere)
-	FVector CameraLocation = FVector::ZeroVector;
-
 	float LastDeltaTime = 0;
 
 	TMap<int32, FDemoMeshInstance_Lf> MeshesOpen;
