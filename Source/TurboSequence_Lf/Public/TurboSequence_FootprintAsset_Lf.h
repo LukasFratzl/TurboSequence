@@ -175,10 +175,48 @@ public:
 
 
 	/**
-	 * Getting called when the manager updates via Tick
+    * This function is called before a group of meshes is solved in the game thread.
+    *
+    * @param DeltaTime The time elapsed since the last frame.
+    * @param InWorld The world in which the meshes are being solved.
+    * @param UpdateContext The update context for the meshes.
+    */
+	virtual void OnPreUpdateGroupSolved_GameThread(float DeltaTime, UWorld* InWorld,
+	                                               FTurboSequence_UpdateContext_Lf UpdateContext)
+	{
+	}
+
+	/**
+	 * This function is called after a group of meshes is solved in the game thread.
+	 *
+	 * @param DeltaTime The time elapsed since the last frame.
+	 * @param InWorld The world in which the meshes are being solved.
+	 * @param UpdateContext The update context for the meshes.
+	 *
+	 * @return void
+	 *
+	 * @throws None
+	 */
+	virtual void OnPostUpdateGroupSolved_GameThread(float DeltaTime, UWorld* InWorld,
+	                                                FTurboSequence_UpdateContext_Lf UpdateContext)
+	{
+	}
+
+
+	/**
+ * Getting called when the manager pre updates via Tick
+ * @param DeltaTime The Delta Time of the Manager Tick Function
+ */
+	virtual void OnPreManagerUpdated_GameThread(const float DeltaTime)
+	{
+	}
+
+
+	/**
+	 * Getting called when the post manager updates via Tick
 	 * @param DeltaTime The Delta Time of the Manager Tick Function
 	 */
-	virtual void OnManagerUpdated_GameThread(const float DeltaTime)
+	virtual void OnPostManagerUpdated_GameThread(const float DeltaTime)
 	{
 	}
 

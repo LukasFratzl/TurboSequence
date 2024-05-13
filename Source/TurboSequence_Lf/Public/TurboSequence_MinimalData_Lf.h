@@ -40,7 +40,8 @@ enum class ETurboSequence_IsVisibleOverride_Lf : uint8
 {
 	Default,
 	IsVisible,
-	IsNotVisible
+	IsNotVisible,
+	ScaleToZero
 };
 
 UENUM(BlueprintType)

@@ -1454,9 +1454,9 @@ void FTurboSequence_Utility_Lf::CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime,
 		});
 }
 
-void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshReference_Lf& Reference,
-                                                                   const FSkinnedMeshRuntime_Lf& Runtime,
-                                                                   const FTransform& WorldSpaceTransform)
+void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Internal(FSkinnedMeshReference_Lf& Reference,
+                                                                 const FSkinnedMeshRuntime_Lf& Runtime,
+                                                                 const TArray<FCameraView_Lf>& PlayerViews)
 {
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
@@ -1464,11 +1464,30 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshR
 
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 
-	RenderData.ParticlePositions[InstanceIndex] = WorldSpaceTransform.GetLocation();
-	RenderData.ParticleRotations[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertQuaternionToVector4F(
-		WorldSpaceTransform.GetRotation());
-	RenderData.ParticleScales[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertVectorToVector3F(
-		WorldSpaceTransform.GetScale3D());
+	RenderData.ParticleScales[InstanceIndex] *= Runtime.EIsVisibleOverride !=
+		ETurboSequence_IsVisibleOverride_Lf::ScaleToZero;
+}
+
+void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshReference_Lf& Reference,
+                                                                   const FSkinnedMeshRuntime_Lf& Runtime,
+                                                                   const FTransform& WorldSpaceTransform,
+                                                                   const bool bForce)
+{
+	if (bForce || Runtime.EIsVisibleOverride !=
+		ETurboSequence_IsVisibleOverride_Lf::ScaleToZero)
+	{
+		FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
+
+		RenderData.bCollectionDirty = true;
+
+		const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
+
+		RenderData.ParticlePositions[InstanceIndex] = WorldSpaceTransform.GetLocation();
+		RenderData.ParticleRotations[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertQuaternionToVector4F(
+			WorldSpaceTransform.GetRotation());
+		RenderData.ParticleScales[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertVectorToVector3F(
+			WorldSpaceTransform.GetScale3D());
+	}
 }
 
 void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Reference,
@@ -1639,6 +1658,8 @@ bool FTurboSequence_Utility_Lf::GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& R
 			return true;
 		case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
 			return false;
+		case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
+			return true;
 		}
 
 		//return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
@@ -1651,6 +1672,8 @@ bool FTurboSequence_Utility_Lf::GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& R
 		return true;
 	case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
 		return false;
+	case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
+		return true;
 	}
 	return Runtime.bIsVisible;
 }

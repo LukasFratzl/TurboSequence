@@ -226,6 +226,33 @@ public:
 		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
 	static int32 GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex, const int32 IndexInGroup);
 
+
+	/**
+	 * Check if the given Mesh Data is present in the specified Update Group concurrently.
+	 *
+	 * @param MeshData The Mesh Data to check for in the Update Group
+	 * @param GroupIndex The index of the Update Group to search in
+	 *
+	 * @return true if the Mesh Data is found in the Update Group, false otherwise
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Contains"))
+	static bool ContainsMeshDataInUpdateGroup_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
+	                                                     const int32 GroupIndex);
+
+	/**
+	 * Checks if the given Mesh ID is present in the specified Update Group concurrently.
+	 *
+	 * @param MeshID The ID of the Mesh to check for in the Update Group
+	 * @param GroupIndex The index of the Update Group to search in
+	 *
+	 * @return true if the Mesh ID is found in the Update Group, false otherwise
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Contains"))
+	static bool ContainsMeshIDInUpdateGroup_Concurrent(const int32 MeshID,
+	                                                   const int32 GroupIndex);
+
 	/**
  * Gets the Mesh Data from a Mesh ID
  * @param MeshID The Group ID
@@ -292,12 +319,13 @@ public:
 		meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
 	static void SetMeshWorldSpaceLocationRotationScale_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
 	                                                              const FVector Location, const FQuat Rotation,
-	                                                              const FVector Scale);
+	                                                              const FVector Scale, const bool bForce = false);
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
 	static void SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(int32 MeshID, const FVector Location,
-	                                                                    const FQuat Rotation, const FVector Scale);
+	                                                                    const FQuat Rotation, const FVector Scale,
+	                                                                    const bool bForce = false);
 
 	/**
 	 * Set a Transform to the World Space Mesh Instance Transform
@@ -307,11 +335,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
 	static void SetMeshWorldSpaceTransform_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
-	                                                  const FTransform Transform);
+	                                                  const FTransform Transform, const bool bForce = false);
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(Keywords="Turbo, Sequence, TS, Set, Animation, Mesh, Motion, Transform"))
-	static void SetMeshWorldSpaceTransform_RawID_Concurrent(int32 MeshID, const FTransform Transform);
+	static void SetMeshWorldSpaceTransform_RawID_Concurrent(int32 MeshID, const FTransform Transform,
+	                                                        const bool bForce = false);
 
 	/**
 	 * Gets the Root Motion Transforms based on all animation which are playing, accurate blended with the Animation Weights

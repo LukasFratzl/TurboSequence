@@ -9,10 +9,10 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnSetMeshIsVisible_Concurrent(
 	ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride, const bool bDefaultVisibility, const int32 MeshID,
 	const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 {
-	if (MeshDataCollection.Contains(MeshID) && IsValid(MeshDataCollection[MeshID]) && MeshDataCollection[MeshID]->
-		IsVisible())
+	if (MeshDataCollection.Contains(MeshID) && IsValid(MeshDataCollection[MeshID].Mesh) && MeshDataCollection[MeshID].
+		bIsUEVisible)
 	{
-		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::IsNotVisible;
+		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::ScaleToZero;
 	}
 
 	Super::OnSetMeshIsVisible_Concurrent(IsVisibleOverride, bDefaultVisibility, MeshID, ThreadContext);
@@ -21,8 +21,8 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnSetMeshIsVisible_Concurrent(
 void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnSetMeshIsUpdatingLod_Concurrent(bool& bIsUpdatingLodOverride,
 	const int32 MeshID, const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 {
-	if (MeshDataCollection.Contains(MeshID) && IsValid(MeshDataCollection[MeshID]) && MeshDataCollection[MeshID]->
-		IsVisible())
+	if (MeshDataCollection.Contains(MeshID) && IsValid(MeshDataCollection[MeshID].Mesh) && MeshDataCollection[MeshID].
+		bIsUEVisible)
 	{
 		bIsUpdatingLodOverride = false;
 	}
@@ -47,7 +47,10 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnAddedMeshInstance_GameThread
 
 			if (IsValid(MeshComponent))
 			{
-				MeshDataCollection.Add(MeshID, MeshComponent);
+				FDemoMeshData_Lf MeshData;
+				MeshData.Mesh = MeshComponent;;
+				MeshData.FrameDelay = 0;
+				MeshDataCollection.Add(MeshID, MeshData);
 			}
 		}
 	}
@@ -60,7 +63,10 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnRemovedMeshInstance_GameThre
 {
 	if (MeshDataCollection.Contains(MeshID))
 	{
-		MeshDataCollection[MeshID]->GetOwner()->Destroy();
+		if (IsValid(MeshDataCollection[MeshID].Mesh))
+		{
+			MeshDataCollection[MeshID].Mesh->GetOwner()->Destroy();
+		}
 
 		MeshDataCollection.Remove(MeshID);
 	}
@@ -68,30 +74,52 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnRemovedMeshInstance_GameThre
 	Super::OnRemovedMeshInstance_GameThread(MeshID, FromAsset);
 }
 
-void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnManagerUpdated_GameThread(const float DeltaTime)
+void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(const float DeltaTime)
 {
-	for (const TTuple<uint32, TObjectPtr<USkinnedMeshComponent>> Mesh : MeshDataCollection)
+	for (TTuple<int32, FDemoMeshData_Lf>& Mesh : MeshDataCollection)
 	{
-		if (IsValid(Mesh.Value))
+		if (IsValid(Mesh.Value.Mesh))
 		{
 			const float CameraDistance =
 				ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(Mesh.Key);
 
-			const bool bShouldDrawUEMesh = CanShowUEMesh(CameraDistance);
+			Mesh.Value.bIsUEVisible = CanShowUEMesh(Mesh.Key, CameraDistance);
 
-			Mesh.Value->SetVisibility(bShouldDrawUEMesh);
 
-			if (bShouldDrawUEMesh)
+			if (Mesh.Value.bIsUEVisible)
 			{
 				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(
-					Mesh.Key, Mesh.Value->GetComponentTransform());
+					Mesh.Key, Mesh.Value.Mesh->GetComponentTransform());
+
+				Mesh.Value.Mesh->SetVisibility(true);
+				Mesh.Value.FrameDelay = 0;
 			}
 			else
 			{
-				Mesh.Value->SetWorldTransform(ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(Mesh.Key));
+				FTransform Transform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(Mesh.Key);
+				Transform.SetScale3D(Mesh.Value.Mesh->GetComponentScale());
+				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(
+					Mesh.Key, Transform);
+
+				if (Mesh.Value.FrameDelay < 3)
+				{
+					Mesh.Value.Mesh->SetVisibility(true);
+					Mesh.Value.FrameDelay++;
+				}
+				else
+				{
+					Mesh.Value.Mesh->SetVisibility(false);
+				}
 			}
 		}
 	}
 
-	Super::OnManagerUpdated_GameThread(DeltaTime);
+	Super::OnPostManagerUpdated_GameThread(DeltaTime);
+}
+
+void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnManagerEndPlay_GameThread(const EEndPlayReason::Type EndPlayReason)
+{
+	MeshDataCollection.Empty();
+
+	Super::OnManagerEndPlay_GameThread(EndPlayReason);
 }

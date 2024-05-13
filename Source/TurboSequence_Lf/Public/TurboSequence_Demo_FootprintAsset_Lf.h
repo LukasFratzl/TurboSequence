@@ -14,9 +14,9 @@ struct TURBOSEQUENCE_LF_API FDemoMeshInstance_Lf
 	GENERATED_BODY()
 
 	float FadeTimeRuntime = 0.3f;
-	//uint8 FadeActiveCounter = 0;
 	bool bIsInUERange = true;
 	bool bInit = false;
+	int32 NumFrames = 0;
 
 	UPROPERTY()
 	TObjectPtr<AActor> Mesh;
@@ -30,6 +30,8 @@ UCLASS(BlueprintType)
 class TURBOSEQUENCE_LF_API UTurboSequence_Demo_FootprintAsset_Lf : public UTurboSequence_FootprintAsset_Lf
 {
 public:
+	GENERATED_BODY()
+
 	virtual void OnSetMeshIsVisible_Concurrent(ETurboSequence_IsVisibleOverride_Lf& IsVisibleOverride,
 	                                           const bool bDefaultVisibility, const int32 MeshID,
 	                                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
@@ -37,6 +39,11 @@ public:
 	virtual void OnSetMeshIsUpdatingLod_Concurrent(bool& bIsUpdatingLodOverride, const int32 MeshID,
 	                                               const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
 	                                               ThreadContext) override;
+
+	virtual void OnSetMeshIsAnimated_Concurrent(ETurboSequence_IsAnimatedOverride_Lf& IsAnimatedOverride,
+	                                            const bool bDefaultIsAnimated, const int32 MeshID,
+	                                            const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
+	                                            ThreadContext) override;
 
 	virtual void OnManagerEndPlay_GameThread(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -49,7 +56,7 @@ public:
 	                                                    const TObjectPtr<UTurboSequence_ThreadContext_Lf>&
 	                                                    ThreadContext) override;
 
-	virtual void OnManagerUpdated_GameThread(const float DeltaTime) override;
+	virtual void OnPostManagerUpdated_GameThread(const float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
 	float FadeTime = 0.5f;
@@ -65,9 +72,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MeshActor = nullptr;
 
-	void FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance,
-	              const TObjectPtr<USkinnedMeshComponent>& Mesh) const;
+	virtual bool CanShowUEMesh(const int32 MeshID, const float MeshDistanceToCamera) const
+	{
+		return MeshDistanceToCamera < FadeDistance;
+	}
 
-private:
-	GENERATED_BODY()
+	virtual void FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance,
+	                      const TObjectPtr<USkinnedMeshComponent>& Mesh);
 };

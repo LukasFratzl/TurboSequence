@@ -446,6 +446,19 @@ public:
 	                          const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	/**
+     * Updates the instance transform of a skinned mesh reference based on the provided player views.
+     *
+     * @param Reference The skinned mesh reference to update.
+     * @param Runtime The runtime data of the skinned mesh.
+     * @param PlayerViews An array of camera views representing the player's perspective.
+     *
+     * @throws None
+     */
+	static void UpdateInstanceTransform_Internal(FSkinnedMeshReference_Lf& Reference,
+	                                             const FSkinnedMeshRuntime_Lf& Runtime,
+	                                             const TArray<FCameraView_Lf>& PlayerViews);
+
+	/**
 		* @brief Updates one instance in an instanced static mesh component
 		* @param Reference The Reference to get the instance index
 		* @param Runtime The Mesh of the Instance we like to update
@@ -453,7 +466,7 @@ public:
 		*/
 	static void UpdateInstanceTransform_Concurrent(
 		FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime,
-		const FTransform& WorldSpaceTransform);
+		const FTransform& WorldSpaceTransform, const bool bForce);
 
 	/**
 	 * @brief Adds an instance to the given renderer with custom data

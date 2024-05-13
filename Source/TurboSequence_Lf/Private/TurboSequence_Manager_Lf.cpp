@@ -55,6 +55,11 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& FootprintAsset : FootprintAssetsInUse)
+	{
+		FootprintAsset.Key->OnPreManagerUpdated_GameThread(DeltaTime);
+	}
+
 
 	for (TTuple<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf>& ReferenceData : GlobalLibrary.
 	     PerReferenceData)
@@ -153,7 +158,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 
 	for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& FootprintAsset : FootprintAssetsInUse)
 	{
-		FootprintAsset.Key->OnManagerUpdated_GameThread(DeltaTime);
+		FootprintAsset.Key->OnPostManagerUpdated_GameThread(DeltaTime);
 	}
 
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Num())
@@ -634,6 +639,14 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 			return;
 		}
 
+		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> Footprint : FootprintAssetsInUse)
+		{
+			if (IsValid(Footprint.Key))
+			{
+				Footprint.Key->OnPreUpdateGroupSolved_GameThread(DeltaTime, InWorld, UpdateContext);
+			}
+		}
+
 		int64 CurrentFrameCount = UKismetSystemLibrary::GetFrameCount();
 
 		const TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext = Instance->GetThreadContext();
@@ -764,6 +777,9 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				if (FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference) || Runtime.
 					bForceVisibilityUpdatingThisFrame)
 				{
+					FTurboSequence_Utility_Lf::UpdateInstanceTransform_Internal(
+						Reference, Runtime, GlobalLibrary.CameraViews);
+
 					FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
 
 					if ((FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference) && Runtime.
@@ -842,6 +858,14 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 						Library_RenderThread.AnimationLibraryMaxNum = AnimationMaxNum;
 					});
+			}
+		}
+
+		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> Footprint : FootprintAssetsInUse)
+		{
+			if (IsValid(Footprint.Key))
+			{
+				Footprint.Key->OnPostUpdateGroupSolved_GameThread(DeltaTime, InWorld, UpdateContext);
 			}
 		}
 
@@ -1324,7 +1348,7 @@ int32 ATurboSequence_Manager_Lf::GetNumMeshIDsInUpdateGroup_RawID_Concurrent(con
 FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(
 	const int32 GroupIndex, const int32 IndexInGroup)
 {
-	//FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+	FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
 
 	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
 	{
@@ -1344,7 +1368,7 @@ FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataInUpdate
 int32 ATurboSequence_Manager_Lf::GetMeshIDInUpdateGroupFromIndex_Concurrent(const int32 GroupIndex,
                                                                             const int32 IndexInGroup)
 {
-	//FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+	FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
 
 	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
 	{
@@ -1359,6 +1383,45 @@ int32 ATurboSequence_Manager_Lf::GetMeshIDInUpdateGroupFromIndex_Concurrent(cons
 	}
 
 	return Group.RawIDs[IndexInGroup];
+}
+
+bool ATurboSequence_Manager_Lf::ContainsMeshDataInUpdateGroup_Concurrent(
+	const FTurboSequence_MinimalMeshData_Lf& MeshData, const int32 GroupIndex)
+{
+	FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+
+	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
+	{
+		return false;
+	}
+
+	FTurboSequence_UpdateGroup_Lf& Group = GlobalLibrary.UpdateGroups[GroupIndex];
+
+	if (!Group.RawIDData.Contains(MeshData.RootMotionMeshID))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool ATurboSequence_Manager_Lf::ContainsMeshIDInUpdateGroup_Concurrent(const int32 MeshID, const int32 GroupIndex)
+{
+	FScopeLock Lock(&Instance->GetThreadContext()->CriticalSection);
+
+	if (!GlobalLibrary.UpdateGroups.IsValidIndex(GroupIndex))
+	{
+		return false;
+	}
+
+	FTurboSequence_UpdateGroup_Lf& Group = GlobalLibrary.UpdateGroups[GroupIndex];
+
+	if (!Group.RawIDData.Contains(MeshID))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 FTurboSequence_MinimalMeshData_Lf ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(const int32 MeshID)
@@ -1424,21 +1487,21 @@ float ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(i
 
 void ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_Concurrent(
 	const FTurboSequence_MinimalMeshData_Lf& MeshData, const FVector Location, const FQuat Rotation,
-	const FVector Scale)
+	const FVector Scale, const bool bForce)
 {
 	if (MeshData.IsMeshDataValid())
 	{
 		SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshData.RootMotionMeshID, Location, Rotation,
-		                                                        Scale);
+		                                                        Scale, bForce);
 		for (int32 MeshID : MeshData.CustomizableMeshIDs)
 		{
-			SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshID, Location, Rotation, Scale);
+			SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(MeshID, Location, Rotation, Scale, bForce);
 		}
 	}
 }
 
 void ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_RawID_Concurrent(int32 MeshID,
-	const FVector Location, const FQuat Rotation, const FVector Scale)
+	const FVector Location, const FQuat Rotation, const FVector Scale, const bool bForce)
 {
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 	{
@@ -1451,25 +1514,26 @@ void ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_RawID_Con
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform);
+				Runtime.WorldSpaceTransform, bForce);
 		}
 	}
 }
 
 void ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
-                                                                      const FTransform Transform)
+                                                                      const FTransform Transform, const bool bForce)
 {
 	if (MeshData.IsMeshDataValid())
 	{
-		SetMeshWorldSpaceTransform_RawID_Concurrent(MeshData.RootMotionMeshID, Transform);
+		SetMeshWorldSpaceTransform_RawID_Concurrent(MeshData.RootMotionMeshID, Transform, bForce);
 		for (int32 MeshID : MeshData.CustomizableMeshIDs)
 		{
-			SetMeshWorldSpaceTransform_RawID_Concurrent(MeshID, Transform);
+			SetMeshWorldSpaceTransform_RawID_Concurrent(MeshID, Transform, bForce);
 		}
 	}
 }
 
-void ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(int32 MeshID, const FTransform Transform)
+void ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(
+	int32 MeshID, const FTransform Transform, const bool bForce)
 {
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 	{
@@ -1480,7 +1544,7 @@ void ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(int3
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform);
+				Runtime.WorldSpaceTransform, bForce);
 		}
 	}
 }
@@ -1560,7 +1624,7 @@ void ATurboSequence_Manager_Lf::MoveMeshWithRootMotion_RawID_Concurrent(int32 Me
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform);
+				Runtime.WorldSpaceTransform, false);
 		}
 	}
 }

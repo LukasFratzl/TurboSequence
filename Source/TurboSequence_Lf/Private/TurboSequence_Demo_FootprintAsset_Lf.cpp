@@ -24,7 +24,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsVisible_Concurrent(
 	if (MeshesOpen.Contains(MeshID) && MeshesOpen[MeshID].bIsInUERange && MeshesOpen[MeshID].
 		FadeTimeRuntime <= 0)
 	{
-		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::IsNotVisible;
+		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::ScaleToZero;
 	}
 }
 
@@ -38,6 +38,19 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsUpdatingLod_Concurrent(
 		FadeTimeRuntime <= 0)
 	{
 		bIsUpdatingLodOverride = false;
+	}
+}
+
+void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsAnimated_Concurrent(
+	ETurboSequence_IsAnimatedOverride_Lf& IsAnimatedOverride, const bool bDefaultIsAnimated, const int32 MeshID,
+	const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
+{
+	Super::OnSetMeshIsAnimated_Concurrent(IsAnimatedOverride, bDefaultIsAnimated, MeshID, ThreadContext);
+
+	if (MeshesOpen.Contains(MeshID) && MeshesOpen[MeshID].bIsInUERange && MeshesOpen[MeshID].
+		FadeTimeRuntime <= 0)
+	{
+		IsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::IsAnimated;
 	}
 }
 
@@ -84,8 +97,8 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	const FTurboSequence_MinimalMeshData_Lf& MeshData =
 		ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(MeshID);
 
-	const bool bIsInUERange = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID) <
-		FadeDistance;
+	const bool bIsInUERange = CanShowUEMesh(
+		MeshID, ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID));
 	if (bIsInUERange != MeshOpen.bIsInUERange || !MeshOpen.bInit && bIsInUERange)
 	{
 		MeshOpen.FadeTimeRuntime = FadeTime;
@@ -94,7 +107,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed.FindOrAdd(MeshData.RootMotionMeshID);
 		ThreadContext->UnlockThread();
 		MeshClosed.FadeTimeRuntime = FadeTime;
-		//MeshClosed.FadeActiveCounter = 0;
+		MeshClosed.NumFrames = 0;
 	}
 
 	MeshOpen.FadeTimeRuntime -= LastDeltaTime;
@@ -104,7 +117,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	ThreadContext->LockThread();
 	if (MeshesClosed.Contains(MeshData.RootMotionMeshID))
 	{
-		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed.FindOrAdd(MeshData.RootMotionMeshID);
+		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed[MeshData.RootMotionMeshID];
 		MeshClosed.FadeTimeRuntime -= LastDeltaTime;
 		MeshClosed.bIsInUERange = bIsInUERange;
 		MeshClosed.bInit = true;
@@ -112,25 +125,17 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	ThreadContext->UnlockThread();
 }
 
-void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const float DeltaTime)
+void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(const float DeltaTime)
 {
-	Super::OnManagerUpdated_GameThread(DeltaTime);
+	Super::OnPostManagerUpdated_GameThread(DeltaTime);
 
 	LastDeltaTime = DeltaTime;
 
 	TArray<int32> MeshIDsToRemove;
 	for (TTuple<int32, FDemoMeshInstance_Lf>& Mesh : MeshesClosed)
 	{
-		if (Mesh.Value.FadeTimeRuntime <= 0 && !Mesh.Value.bIsInUERange)
-		{
-			if (IsValid(Mesh.Value.Mesh))
-			{
-				Mesh.Value.Mesh->Destroy();
-			}
-			MeshIDsToRemove.Add(Mesh.Key);
-			continue;
-		}
-
+		const FTurboSequence_MinimalMeshData_Lf& MeshData =
+			ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(Mesh.Key);
 
 		if (IsValid(MeshActor) && !IsValid(Mesh.Value.Mesh))
 		{
@@ -140,7 +145,6 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 				SpawnActor<AActor>(MeshActor, SpawnLocation);
 		}
 
-		//Mesh.Value.FadeActiveCounter = FMath::Clamp(Mesh.Value.FadeActiveCounter++, 0, 5);
 		if (IsValid(Mesh.Value.Mesh))
 		{
 			TArray<USkinnedMeshComponent*> SkinnedMeshRenderers;
@@ -148,14 +152,19 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 
 			if (!SkinnedMeshRenderers.Num())
 			{
-				return;
+				continue;
 			}
-
-			const FTurboSequence_MinimalMeshData_Lf& MeshData =
-				ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(Mesh.Key);
 
 			ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
 				MeshData, SkinnedMeshRenderers[0]->GetComponentTransform());
+
+
+			if (Mesh.Value.FadeTimeRuntime <= 0 && !Mesh.Value.bIsInUERange)
+			{
+				Mesh.Value.Mesh->Destroy();
+				MeshIDsToRemove.Add(Mesh.Key);
+				continue;
+			}
 
 
 			// 1 for the root mesh
@@ -169,11 +178,13 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 						Component->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID)
 						->ReferenceMeshNative)
 					{
-						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, Component);
+						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, SkinnedMeshRenderers[0]);
 						break;
 					}
 				}
 			}
+
+			Mesh.Value.NumFrames++;
 		}
 	}
 
@@ -184,22 +195,22 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnManagerUpdated_GameThread(const fl
 }
 
 void UTurboSequence_Demo_FootprintAsset_Lf::FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance,
-                                                     const TObjectPtr<USkinnedMeshComponent>& Mesh) const
+                                                     const TObjectPtr<USkinnedMeshComponent>& Mesh)
 {
 	if (IsValid(Mesh))
 	{
 		const bool FadeActive = Instance.FadeTimeRuntime > 0;
-		Mesh->SetVisibility(!FadeActive/* || (Instance.FadeActiveCounter <= 1 && !Instance.bIsInUERange)*/);
+		Mesh->SetVisibility(!FadeActive || (Instance.NumFrames < 3 && !Instance.bIsInUERange));
 
 		if (FadeActive)
 		{
 			float Percentage = FTurboSequence_Helper_Lf::GetPercentageBetweenMinMax(
 				FMath::Max(Instance.FadeTimeRuntime, 0), 0, FadeTime);
-
 			if (Instance.bIsInUERange)
 			{
 				Percentage = 1.0f - Percentage;
 			}
+			Percentage = FTurboSequence_Helper_Lf::Clamp01(Percentage);
 
 			ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh(MeshID, Mesh, Percentage, LastDeltaTime);
 		}
