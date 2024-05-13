@@ -7,11 +7,15 @@
 #include "Engine/DataAsset.h"
 #include "TurboSequence_DemoSimple_FootprintAsset_Lf.generated.h"
 
-struct FDemoMeshData_Lf
+USTRUCT()
+struct TURBOSEQUENCE_LF_API FDemoMeshData_Lf
 {
-public:
+	GENERATED_BODY()
+
+	UPROPERTY()
 	TObjectPtr<USkinnedMeshComponent> Mesh;
-	int32 FrameDelay = 0;
+
+	int8 FrameDelay = 0;
 	bool bIsUEVisible = false;
 };
 

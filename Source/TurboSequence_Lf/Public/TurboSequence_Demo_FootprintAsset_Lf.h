@@ -16,7 +16,7 @@ struct TURBOSEQUENCE_LF_API FDemoMeshInstance_Lf
 	float FadeTimeRuntime = 0.3f;
 	bool bIsInUERange = true;
 	bool bInit = false;
-	int32 NumFrames = 0;
+	int8 NumFrames = 0;
 
 	UPROPERTY()
 	TObjectPtr<AActor> Mesh;

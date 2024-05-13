@@ -147,6 +147,13 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 
 		if (IsValid(Mesh.Value.Mesh))
 		{
+			if (Mesh.Value.FadeTimeRuntime <= 0 && !Mesh.Value.bIsInUERange)
+			{
+				Mesh.Value.Mesh->Destroy();
+				MeshIDsToRemove.Add(Mesh.Key);
+				continue;
+			}
+
 			TArray<USkinnedMeshComponent*> SkinnedMeshRenderers;
 			Mesh.Value.Mesh->GetComponents(USkinnedMeshComponent::StaticClass(), SkinnedMeshRenderers);
 
@@ -159,14 +166,6 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 				MeshData, SkinnedMeshRenderers[0]->GetComponentTransform());
 
 
-			if (Mesh.Value.FadeTimeRuntime <= 0 && !Mesh.Value.bIsInUERange)
-			{
-				Mesh.Value.Mesh->Destroy();
-				MeshIDsToRemove.Add(Mesh.Key);
-				continue;
-			}
-
-
 			// 1 for the root mesh
 			FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, SkinnedMeshRenderers[0]);
 
@@ -174,17 +173,17 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 			{
 				for (USkinnedMeshComponent* MeshComponent : SkinnedMeshRenderers)
 				{
-					if (const TObjectPtr<USkinnedMeshComponent> Component = Cast<USkinnedMeshComponent>(MeshComponent);
-						Component->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID)
+					if (MeshComponent->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID)
 						->ReferenceMeshNative)
 					{
-						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, SkinnedMeshRenderers[0]);
+						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, MeshComponent);
 						break;
 					}
 				}
 			}
 
 			Mesh.Value.NumFrames++;
+			Mesh.Value.NumFrames = FMath::Clamp(Mesh.Value.NumFrames, 0, 10);
 		}
 	}
 
