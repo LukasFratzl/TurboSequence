@@ -2,6 +2,7 @@
 
 struct TurboSequenceVSFunctions_Lf
 {
+
 	int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
 	{
 		//int TexPow = TextureSizeX * TextureSizeY;
@@ -14,14 +15,15 @@ struct TurboSequenceVSFunctions_Lf
 		// #endif
 	}
 	
-	void VertexSkin(inout float3 FinalCurrentBlendPosition, inout float3 FinalPreviousBlendPosition,
+	void VertexSkinNormal( inout float3 Normal,
 	                in Texture2DArray<float4> TransformTexture_Current,
-	                in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture,
+	                in Texture2DArray<float4> SkinWeightTexture,
 	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
-	                in int2 MaterialSettings0, in float3 VertexPosition)
+	                in int2 MaterialSettings0, in float3 SourceNormal)
 	{
 		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
 		int TransformTexPow = Settings1.z * Settings1.w;
+		
 		//float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
 
 		//min16int QualityLevel = (min16int)CustomData.x;
@@ -53,31 +55,26 @@ struct TurboSequenceVSFunctions_Lf
 					TransformTexture_Current[BoneMatrixIndices[2]]
 				);
 
-				float3x4 BoneMatrix_Previous = float3x4(
-					TransformTexture_Previous[BoneMatrixIndices[0]],
-					TransformTexture_Previous[BoneMatrixIndices[1]],
-					TransformTexture_Previous[BoneMatrixIndices[2]]
-				);
-
+				
 				float Weight = (float)Weights[W] / (float)0xFF;
-				FinalCurrentBlendPosition += (mul(BoneMatrix_Current, float4(VertexPosition, 1.0f)).xyz -
-					VertexPosition) * Weight;
-				FinalPreviousBlendPosition += (mul(BoneMatrix_Previous, float4(VertexPosition, 1.0f)).xyz -
-					VertexPosition) * Weight;
+				Normal += mul(BoneMatrix_Current, float4(SourceNormal, 0.0f)).xyz * Weight;
+				
 			}
 		}
 	}
 };
 
-float3 FinalCurrentFrameBlendPosition = float3(0, 0, 0);
-
 TurboSequenceVSFunctions_Lf f;
 
 	#include "/TurboSequence_Shaders/GPU_TS_VertexSkinning.ush"
 
-	f.VertexSkin(FinalCurrentFrameBlendPosition, FinalPreviousBlendPosition, TransformTexture_CurrentFrame,
-	             TransformTexture_PreviousFrame, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w,
-	             Settings1, MaterialSettings0, VertexPosition);
-}
+	float3 FinalNormal = float3(0, 0, 0);
+	f.VertexSkinNormal(FinalNormal, TransformTexture_CurrentFrame,
+				 SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w,
+				 Settings1, MaterialSettings0, Normal);
 
-return FinalCurrentFrameBlendPosition;
+	return FinalNormal;
+}
+return Normal;
+
+

@@ -1,0 +1,41 @@
+struct TurboSequenceEncodeFunctions_Lf
+{
+	// Might Change to Non Bit Shifting Version if compiler <= ES3.2
+	int EncodeUInt16ToUInt32_Int(in uint XValue, in uint YValue)
+	{
+		return YValue * 0xFFFF + XValue;
+	}
+
+	int EncodeUInt16ToUInt32_Float(in float XValue, in float YValue)
+	{
+		return int(YValue) * 0xFFFF + int(XValue);
+	}
+
+	int EncodeUInt32ToColor_Int(in int4 Color)
+	{
+		// return (float)(((int)(Color.x) << 24) | ((int)(Color.y) << 16) | ((int)(Color.z) <<8) | (int)Color.w);
+		return (Color.r << 24) | (Color.g << 16) | (Color.b << 8) | Color.a;
+	}
+
+	int EncodeUInt32ToColor_Float(in float4 Color)
+	{
+		// return (float)(((int)(Color.x) << 24) | ((int)(Color.y) << 16) | ((int)(Color.z) <<8) | (int)Color.w);
+		return (int(Color.r) << 24) | (int(Color.g) << 16) | (int(Color.b) << 8) | int(Color.a);
+	}
+};
+
+TurboSequenceEncodeFunctions_Lf EncodeFunction;
+
+int SwTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.x, CustomData.y);
+if (SwTextureOffset)
+{
+	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
+
+	float2 UVs = Parameters.TexCoords[NUM_MATERIAL_TEXCOORDS_VERTEX - 1];
+	int VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
+	// Setting0.z -> Custom States offset
+
+	int TTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.z, CustomData.w);
+	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];
+	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
+								  (int)MeshDataTextureDimension.y);

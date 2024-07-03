@@ -60,21 +60,11 @@ struct TurboSequencePSFunctions_Lf
 };
 
 
-if
-(SmoothDistance<SmoothThreshold)
-                {
+if (SmoothDistance < SmoothThreshold)
+{
 	TurboSequencePSFunctions_Lf f;
 
-	                //return f.SolveNormal(PreLocation, PostLocation, NormalInput);
-
-	float3x3 PostMatrix = f.LookAt(ddx(PostLocation), ddy(PostLocation));
-	float3x3 PreMatrix = f.LookAt(ddx(PreLocation), ddy(PreLocation));
-		
-	                f.Inverse(PreMatrix);
-		
-	float3x3 NormalMatrix = mul(PostMatrix, PreMatrix);
-
-	return mul(NormalMatrix, NormalInput);
-                }
+	return f.SolveNormal(PreLocation, PostLocation, NormalInput);
+}
 	
 return TransformLocalVectorToWorld(Parameters, cross(ddx(PostLocation), ddy(PostLocation)));
