@@ -99,7 +99,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 
 	const bool bIsInUERange = CanShowUEMesh(
 		MeshID, ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID));
-	if (bIsInUERange != MeshOpen.bIsInUERange || !MeshOpen.bInit && bIsInUERange)
+	if (bIsInUERange != MeshOpen.bIsInUERange || (!MeshOpen.bInit && bIsInUERange))
 	{
 		MeshOpen.FadeTimeRuntime = FadeTime;
 

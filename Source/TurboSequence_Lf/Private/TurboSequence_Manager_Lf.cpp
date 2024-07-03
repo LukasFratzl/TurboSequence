@@ -639,7 +639,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 			return;
 		}
 
-		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> Footprint : FootprintAssetsInUse)
+		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& Footprint : FootprintAssetsInUse)
 		{
 			if (IsValid(Footprint.Key))
 			{
@@ -861,7 +861,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 			}
 		}
 
-		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> Footprint : FootprintAssetsInUse)
+		for (const TTuple<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32>& Footprint : FootprintAssetsInUse)
 		{
 			if (IsValid(Footprint.Key))
 			{
