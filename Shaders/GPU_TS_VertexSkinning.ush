@@ -39,3 +39,5 @@ if (SwTextureOffset)
 	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];
 	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
 								  (int)MeshDataTextureDimension.y);
+
+	bool bEarlyOutInfluences = EarlyOutInfluences > 0.1f;

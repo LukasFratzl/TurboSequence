@@ -18,7 +18,7 @@ struct TurboSequenceVSFunctions_Lf
 	                in Texture2DArray<float4> TransformTexture_Current,
 	                in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture,
 	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
-	                in int2 MaterialSettings0, in float3 VertexPosition)
+	                in int2 MaterialSettings0, in float3 VertexPosition, in bool bEarlyOutInfluences)
 	{
 		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
 		int TransformTexPow = Settings1.z * Settings1.w;
@@ -35,11 +35,11 @@ struct TurboSequenceVSFunctions_Lf
 
 			for (min16int W = 0; W < 4; ++W)
 			{
-				// Since we have Skin Weight Culling Automated
-				//if (QualityLevel < i * 4 + W)
-				//{
-				//	return;
-				//}
+				// Lets early out
+				if (bEarlyOutInfluences && !Weights[W])
+				{
+					return;
+				}
 
 				int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
 				int3x3 BoneMatrixIndices = int3x3(
@@ -77,7 +77,7 @@ TurboSequenceVSFunctions_Lf f;
 
 	f.VertexSkin(FinalCurrentFrameBlendPosition, FinalPreviousBlendPosition, TransformTexture_CurrentFrame,
 	             TransformTexture_PreviousFrame, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w,
-	             Settings1, MaterialSettings0, VertexPosition);
+	             Settings1, MaterialSettings0, VertexPosition, bEarlyOutInfluences);
 }
 
 return FinalCurrentFrameBlendPosition;
