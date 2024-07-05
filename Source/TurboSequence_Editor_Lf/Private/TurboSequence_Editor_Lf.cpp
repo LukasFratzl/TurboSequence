@@ -416,6 +416,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		FString EmitterName = FString("");
 		FString MeshName = FString("");
 		FString MaterialsName = FString("");
+		FString IDName = FString("");
 		FString PositionName = FString("");
 		FString RotationName = FString("");
 		FString ScaleName = FString("");
@@ -432,8 +433,12 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		                                                 TEXT("NameNiagaraMeshObject"));
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(MaterialsName,
 		                                                 TEXT(
-			                                                 "/Script/TurboSequence_Editor_Lf	.TurboSequence_NiagaraSettings_Lf"),
+			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
 		                                                 TEXT("NameNiagaraMaterialObject"));
+		FTurboSequence_Helper_Lf::GetStringConfigSetting(IDName,
+														 TEXT(
+															 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
+														 TEXT("NameNiagaraParticleIDs"));
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(PositionName,
 		                                                 TEXT(
 			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
@@ -469,6 +474,10 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		if (MaterialsName.IsEmpty())
 		{
 			MaterialsName = FTurboSequence_Helper_Lf::NameNiagaraMaterialObject;
+		}
+		if (IDName.IsEmpty())
+		{
+			IDName = FTurboSequence_Helper_Lf::NameNiagaraParticleIDs;
 		}
 		if (PositionName.IsEmpty())
 		{
@@ -507,6 +516,10 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		{
 			bAssetEdited = true;
 		}
+		if (GlobalData->NameNiagaraParticleIDMap != IDName)
+		{
+			bAssetEdited = true;
+		}
 		if (GlobalData->NameNiagaraParticleLocations.ToString() != PositionName)
 		{
 			bAssetEdited = true;
@@ -542,6 +555,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		GlobalData->NameNiagaraEmitter = FName(EmitterName);
 		GlobalData->NameNiagaraMeshObject = MeshName;
 		GlobalData->NameNiagaraMaterialObject = MaterialsName;
+		GlobalData->NameNiagaraParticleIDMap = FName(IDName);
 		GlobalData->NameNiagaraParticleLocations = FName(PositionName);
 		GlobalData->NameNiagaraParticleRotations = FName(RotationName);
 		GlobalData->NameNiagaraParticleScales = FName(ScaleName);

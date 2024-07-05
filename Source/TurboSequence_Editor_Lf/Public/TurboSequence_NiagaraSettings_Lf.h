@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Niagara Material Object Name"))
 	FString NameNiagaraMaterialObject = FString("User.Material_{0}");
 
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Niagara Particle ID Name"))
+	FString NameNiagaraParticleIDs = FString("User.Particle_ID_To_Index");
+
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Niagara Particle Position Name"))
 	FString NameNiagaraParticleLocations = FString("User.Particle_Position");
 

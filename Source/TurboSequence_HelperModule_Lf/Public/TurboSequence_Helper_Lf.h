@@ -359,6 +359,7 @@ public:
 	// Example User.Material_0 -> For the first Material, We have max 15 Materials per system
 	inline static const FString NameNiagaraMaterialObject = FString("User.Material_{0}");
 	//inline static const FName NameNiagaraParticleSpawnAmount = FName("User.Particle_Spawn_Amount");
+	inline static const FString NameNiagaraParticleIDs = FString("User.Particle_ID_To_Index");
 	inline static const FString NameNiagaraParticleLocations = FString("User.Particle_Position");
 	inline static const FString NameNiagaraParticleRotations = FString("User.Particle_Rotation");
 	inline static const FString NameNiagaraParticleScales = FString("User.Particle_Scale");

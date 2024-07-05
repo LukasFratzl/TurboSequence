@@ -80,9 +80,11 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
 				NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
-			RenderData.Value.ParticlesToRemove.Empty();
 			if (RenderData.Value.bCollectionDirty)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector2D(
+					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
 					NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
@@ -95,6 +97,23 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
 					NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			}
+			// ParticleIDs needs to have the last frame valid Indices
+			if (RenderData.Value.ParticlesToRemove.Num())
+			{
+				for (const int32 ParticleIndexToRemove : RenderData.Value.ParticlesToRemove)
+				{
+					RenderData.Value.ParticleIDs.RemoveAt(ParticleIndexToRemove);
+					const int32 NumParticleIDs = RenderData.Value.ParticleIDs.Num();
+					for (int32 i = GET0_NUMBER; i < NumParticleIDs; ++i)
+					{
+						if (RenderData.Value.ParticleIDs[i].Y > ParticleIndexToRemove)
+						{
+							RenderData.Value.ParticleIDs[i].Y -= GET1_NUMBER;
+						}
+					}
+				}
+			}
+			RenderData.Value.ParticlesToRemove.Empty();
 
 			const FBox RendererBounds = FBox(RenderData.Value.MinBounds, RenderData.Value.MaxBounds);
 			NiagaraComponent->SetEmitterFixedBounds(RenderData.Value.GetEmitterName(), RendererBounds);

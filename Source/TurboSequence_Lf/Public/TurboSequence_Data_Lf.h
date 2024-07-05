@@ -55,10 +55,11 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 {
 	GENERATED_BODY()
 
-	explicit FRenderData_Lf(const FName& EmitterName, const FName& PositionName, const FName& RotationName,
+	explicit FRenderData_Lf(const FName& EmitterName, const FName& ParticleIDName, const FName& PositionName, const FName& RotationName,
 	                        const FName& ScaleName, const FString& MeshName, const FString& MaterialsName,
 	                        const FName& LodName, const FName& CustomDataName, const FName& ParticleRemoveName)
 		: EmitterName(EmitterName),
+		  IDName(ParticleIDName),
 		  PositionName(PositionName),
 		  RotationName(RotationName),
 		  ScaleName(ScaleName),
@@ -86,6 +87,7 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 	// ID
 	TMap<int32, int32> InstanceMap; // < MeshID | Renderer Instance Index >
+	TArray<FVector2f> ParticleIDs; // < Unique ID | Index > -> Used internally for Niagara finding the Index
 
 	// Transform
 	TArray<FVector> ParticlePositions;
@@ -108,6 +110,7 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 private:
 	FName EmitterName;
+	FName IDName;
 	FName PositionName;
 	FName RotationName;
 	FName ScaleName;
@@ -117,7 +120,19 @@ private:
 	FName CustomDataName;
 	FName ParticleRemoveName;
 
+	int32 UniqueID = 0;
+
 public:
+	FORCEINLINE int32 GetUniqueID() const
+	{
+		return UniqueID;
+	}
+
+	FORCEINLINE void IncrementUniqueID()
+	{
+		UniqueID++;
+	}
+
 	FORCEINLINE FName& GetEmitterName()
 	{
 		return EmitterName;
@@ -126,6 +141,11 @@ public:
 	FORCEINLINE FName& GetPositionName()
 	{
 		return PositionName;
+	}
+
+	FORCEINLINE FName& GetParticleIDName()
+	{
+		return IDName;
 	}
 
 	FORCEINLINE FName& GetRotationName()
