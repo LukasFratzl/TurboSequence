@@ -1504,7 +1504,7 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 
 	const int32 InstanceIndex = RenderData.InstanceMap.Num();
 	RenderData.InstanceMap.Add(Runtime.GetMeshID(), InstanceIndex);
-	RenderData.ParticleIDs.Add(FVector2f(RenderData.GetUniqueID(), InstanceIndex));
+	RenderData.ParticleIDs.Add(RenderData.GetUniqueID());
 
 	RenderData.ParticlePositions.Add(WorldSpaceTransform.GetLocation());
 	RenderData.ParticleRotations.Add(
@@ -1517,6 +1517,8 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 	RenderData.ParticleCustomData.AddDefaulted(FTurboSequence_Helper_Lf::NumInstanceCustomData);
 
 	RenderData.IncrementUniqueID(); // Use the same ID as Niagara
+
+	RenderData.bChangedCollectionSizeThisFrame = true;
 }
 
 void FTurboSequence_Utility_Lf::CleanNiagaraRenderer(
@@ -1565,7 +1567,8 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
 		int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
 		RenderData.ParticleCustomData.RemoveAt(CustomDataIndex);
 	}
-	//CriticalSection.Unlock();
+
+	RenderData.bChangedCollectionSizeThisFrame = true;
 }
 
 void FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(FSkinnedMeshReference_Lf& Reference,

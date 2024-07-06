@@ -78,11 +78,14 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			const TObjectPtr<UNiagaraComponent> NiagaraComponent = Instance->NiagaraComponents[Asset].
 				NiagaraRenderer[RenderData.Key].NiagaraRenderer;
 
+			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame", RenderData.Value.bChangedCollectionSizeThisFrame);
+			RenderData.Value.bChangedCollectionSizeThisFrame = false;
+
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
 				NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			if (RenderData.Value.bCollectionDirty)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector2D(
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
 					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
 
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
@@ -103,14 +106,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				for (const int32 ParticleIndexToRemove : RenderData.Value.ParticlesToRemove)
 				{
 					RenderData.Value.ParticleIDs.RemoveAt(ParticleIndexToRemove);
-					const int32 NumParticleIDs = RenderData.Value.ParticleIDs.Num();
-					for (int32 i = GET0_NUMBER; i < NumParticleIDs; ++i)
-					{
-						if (RenderData.Value.ParticleIDs[i].Y > ParticleIndexToRemove)
-						{
-							RenderData.Value.ParticleIDs[i].Y -= GET1_NUMBER;
-						}
-					}
 				}
 			}
 			RenderData.Value.ParticlesToRemove.Empty();
