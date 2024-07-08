@@ -105,10 +105,14 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 	FVector MinBounds = FVector::ZeroVector;
 	FVector MaxBounds = FVector::ZeroVector;
 
-	// We only need update the data when it's actually Dirty
-	bool bCollectionDirty = false;
-
 	bool bChangedCollectionSizeThisFrame = false;
+	bool bChangedCollectionSizePreviousFrame = false;
+	bool bChangedPositionCollectionThisFrame = false;
+	bool bChangedRotationCollectionThisFrame = false;
+	bool bChangedScaleCollectionThisFrame = false;
+	bool bChangedLodCollectionThisFrame = false;
+	bool bChangedCustomDataCollectionThisFrame = false;
+
 
 private:
 	FName EmitterName;

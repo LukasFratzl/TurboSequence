@@ -44,6 +44,11 @@ Base mesh data -> Draw call
 
 TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, Turbo Sequence is built to combine Animation Quality with Modern Rendering which means it is just as fast as the Quality of Bone joint bending allows it.
 
+## Nanite
+
+Unreal Engine release in UE 5.5 Nanite Skeletal Meshes, before using Turbo Sequence, UEs Skeletal Mesh system for crowds can be a good option when using Nanite.
+
+
 ## Features
 
 * Playing Animations
@@ -63,7 +68,6 @@ TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, T
 * Get Animation Curves
 * Root Motion
 * Animation Layer Masks Per Bone
-* Optimization: 16 or 32 bit Textures
 * Optimization: Smart Vertex iterations on the Material
 * Optimization: Update Groups
 * Smooth, Flat Normals
@@ -94,7 +98,7 @@ Navigate to the [Releases](https://github.com/LukasFratzl/Turbo-Sequence/release
 #### Install Turbo Sequence:
 
 - Extract the TS Release on your Computer
-- Copy the extracted Root folder to the Plugin folder of your UE project.
+- Copy the extracted Root folder to the Plugin folder of your **Games** UE project ( Not in the Engine ).
 - Compile the Project and open it in Unreal Engine
 
 #### Demo

@@ -24,47 +24,47 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 	TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 )
 {
-	PreCall(RHICmdList);
-
-	if (!Params.NumMeshes)
-	{
-		return;
-	}
-
-	if (!AnimationOutputTextureCurrent->SizeX || !AnimationOutputTextureCurrent->SizeY || !AnimationOutputTextureCurrent
-		->Slices)
-	{
-		return;
-	}
-
-	if (!IsValid(Params.AnimationOutputTexturePrevious))
-	{
-		return;
-	}
-
-	if (AnimationOutputTextureCurrent->SizeX != Params.AnimationOutputTexturePrevious->SizeX ||
-		AnimationOutputTextureCurrent->SizeY != Params.AnimationOutputTexturePrevious->SizeY ||
-		AnimationOutputTextureCurrent->Slices != Params.AnimationOutputTexturePrevious->Slices ||
-		AnimationOutputTextureCurrent->GetFormat() != Params.AnimationOutputTexturePrevious->GetFormat())
-	{
-		UE_LOG(LogTurboSequence_Lf, Error,
-		       TEXT(
-			       "The Transform Texture Current and the Transform Texture Previous are not the same size or format ... Please use the Control Panel Texture Generator in the Tweaks section to sync it, CurrentTexture -> %d, %d, %d, %hhd | PreviousTexture -> %d, %d, %d, %hhd"
-		       ), AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY,
-		       AnimationOutputTextureCurrent->Slices, AnimationOutputTextureCurrent->GetFormat(),
-		       Params.AnimationOutputTexturePrevious->SizeX, Params.AnimationOutputTexturePrevious->SizeY,
-		       Params.AnimationOutputTexturePrevious->Slices, Params.AnimationOutputTexturePrevious->GetFormat());
-		return;
-	}
-
-	if (!IsValid(Params.AnimationLibraryTexture))
-	{
-		return;
-	}
-
 	SCOPED_DRAW_EVENT(RHICmdList, TurboSequence_Animation_ComputeShader);
 	SCOPED_GPU_STAT(RHICmdList, TurboSequence_Animation_ComputeShader);
 	{
+		PreCall(RHICmdList);
+
+		if (!Params.NumMeshes)
+		{
+			return;
+		}
+
+		if (!AnimationOutputTextureCurrent->SizeX || !AnimationOutputTextureCurrent->SizeY || !
+			AnimationOutputTextureCurrent
+			->Slices)
+		{
+			return;
+		}
+
+		if (!IsValid(Params.AnimationOutputTexturePrevious))
+		{
+			return;
+		}
+
+		if (AnimationOutputTextureCurrent->SizeX != Params.AnimationOutputTexturePrevious->SizeX ||
+			AnimationOutputTextureCurrent->SizeY != Params.AnimationOutputTexturePrevious->SizeY ||
+			AnimationOutputTextureCurrent->Slices != Params.AnimationOutputTexturePrevious->Slices ||
+			AnimationOutputTextureCurrent->GetFormat() != Params.AnimationOutputTexturePrevious->GetFormat())
+		{
+			UE_LOG(LogTurboSequence_Lf, Error,
+			       TEXT(
+				       "The Transform Texture Current and the Transform Texture Previous are not the same size or format ... Please use the Control Panel Texture Generator in the Tweaks section to sync it, CurrentTexture -> %d, %d, %d, %hhd | PreviousTexture -> %d, %d, %d, %hhd"
+			       ), AnimationOutputTextureCurrent->SizeX, AnimationOutputTextureCurrent->SizeY,
+			       AnimationOutputTextureCurrent->Slices, AnimationOutputTextureCurrent->GetFormat(),
+			       Params.AnimationOutputTexturePrevious->SizeX, Params.AnimationOutputTexturePrevious->SizeY,
+			       Params.AnimationOutputTexturePrevious->Slices, Params.AnimationOutputTexturePrevious->GetFormat());
+			return;
+		}
+
+		if (!IsValid(Params.AnimationLibraryTexture))
+		{
+			return;
+		}
 		int32 NumDebugData = FMath::Max(Params.NumDebugData, 1);
 		DebugData.SetNum(NumDebugData);
 

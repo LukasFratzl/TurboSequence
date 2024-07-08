@@ -78,28 +78,70 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			const TObjectPtr<UNiagaraComponent> NiagaraComponent = Instance->NiagaraComponents[Asset].
 				NiagaraRenderer[RenderData.Key].NiagaraRenderer;
 
-			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame", RenderData.Value.bChangedCollectionSizeThisFrame);
-			RenderData.Value.bChangedCollectionSizeThisFrame = false;
-
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-				NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
-			if (RenderData.Value.bCollectionDirty)
+			if (RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+						NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+				RenderData.Value.bChangedCollectionSizePreviousFrame = true;
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+					NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
+			}
+
+			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame",
+											  RenderData.Value.bChangedCollectionSizeThisFrame || RenderData.Value.
+											  bChangedCollectionSizePreviousFrame);
+
+			if (RenderData.Value.bChangedCollectionSizePreviousFrame && !RenderData.Value.
+				bChangedCollectionSizeThisFrame)
+			{
+				RenderData.Value.bChangedCollectionSizePreviousFrame = false;
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
 					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
 
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+					NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
+			}
+
+			if (RenderData.Value.bChangedLodCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
+			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
 					NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
+			}
+
+			if (RenderData.Value.bChangedCustomDataCollectionThisFrame || RenderData.Value.
+				bChangedCollectionSizeThisFrame)
+			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
 					NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
+			}
 
+			if (RenderData.Value.bChangedPositionCollectionThisFrame || RenderData.Value.
+				bChangedCollectionSizeThisFrame)
+			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
 					NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
+			}
+
+			if (RenderData.Value.bChangedRotationCollectionThisFrame || RenderData.Value.
+				bChangedCollectionSizeThisFrame)
+			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
 					NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
+			}
+
+			if (RenderData.Value.bChangedScaleCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
+			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
 					NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			}
+
+			RenderData.Value.bChangedLodCollectionThisFrame = false;
+			RenderData.Value.bChangedCustomDataCollectionThisFrame = false;
+			RenderData.Value.bChangedPositionCollectionThisFrame = false;
+			RenderData.Value.bChangedRotationCollectionThisFrame = false;
+			RenderData.Value.bChangedScaleCollectionThisFrame = false;
+
+			RenderData.Value.bChangedCollectionSizeThisFrame = false;
 			// ParticleIDs needs to have the last frame valid Indices
 			if (RenderData.Value.ParticlesToRemove.Num())
 			{
@@ -117,9 +159,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			// so we add a default camera bounds extend to it for the next frame
 			FTurboSequence_Utility_Lf::UpdateCameraRendererBounds(RenderData.Value, GlobalLibrary.CameraViews,
 			                                                      GET100_NUMBER * GET10_NUMBER);
-
-
-			RenderData.Value.bCollectionDirty = false;
 		}
 	}
 
@@ -822,6 +861,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 							IK_RenderThread = Runtime.IKData;
 						}
 						const bool bUseIK = Runtime.bIKDataInUse;
+
 						ENQUEUE_RENDER_COMMAND(TurboSequence_UpdateRenderInstance_Lf)(
 							[&Library_RenderThread = GlobalLibrary_RenderThread, MeshID, MeshIdx, bUseIK,
 								Animations_RenderThread,
@@ -1061,7 +1101,119 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationRotationWeights_RenderThread, 24);
 	//FTurboSequence_Helper_Lf::CheckArrayHasSize(MeshParams.AnimationScaleWeights_RenderThread, 25);
 
-	constexpr uint8 NumOperations = GET4_NUMBER;
+	// int32 CurrentAnimationIndex = GET0_NUMBER;
+	// int32 CurrentIKIndex = GET0_NUMBER;
+	// int32 CurrentIKDataIndex = GET0_NUMBER;
+	// for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
+	// {
+	// 	int32 CPUIndex = MeshParams.PerMeshCustomDataIndex_RenderThread[i];
+	// 	MeshParams.PerMeshCustomDataIndex_Global_RenderThread[i] = CPUIndex;
+	//
+	// 	const int32 LastAnimationIndex = CurrentAnimationIndex;
+	// 	MeshParams.AnimationStartIndex_RenderThread[i] = LastAnimationIndex;
+	//
+	// 	const int32 LastIKDataIndex = CurrentIKDataIndex;
+	// 	int16 NumIKBones = GET0_NUMBER;
+	//
+	// 	FSkinnedMeshRuntime_RenderThread_Lf& Runtime = GlobalLibrary_RenderThread.RuntimeSkinnedMeshes[
+	// 		GlobalLibrary_RenderThread.RuntimeSkinnedMeshesHashMap[CPUIndex]];
+	// 	const FSkinnedMeshReference_RenderThread_Lf& Reference = GlobalLibrary_RenderThread.PerReferenceData[
+	// 		Runtime.DataAsset];
+	//
+	// 	MeshParams.PerMeshCustomDataLod_RenderThread[i] = Runtime.CurrentGPUMeshIndex;
+	// 	MeshParams.PerMeshCustomDataCollectionIndex_RenderThread[i] = Reference.ReferenceCollectionIndex;
+	//
+	// 	int32 NumAnimations = Runtime.AnimationMetaData_RenderThread.Num();
+	// 	for (int32 AnimIdx = GET0_NUMBER; AnimIdx < NumAnimations; ++AnimIdx)
+	// 	{
+	// 		const FAnimationMetaData_RenderThread_Lf& Animation = Runtime.AnimationMetaData_RenderThread[
+	// 			AnimIdx];
+	//
+	// 		int32 BufferIndex = CurrentAnimationIndex;
+	//
+	// 		MeshParams.AnimationFramePose0_RenderThread[BufferIndex] = Animation.GPUAnimationIndex_0;
+	// 		MeshParams.AnimationWeights_RenderThread[BufferIndex] = Animation.FinalAnimationWeight;
+	// 		MeshParams.AnimationLayerIndex_RenderThread[BufferIndex] = Animation.LayerMaskIndex;
+	//
+	// 		CurrentAnimationIndex++;
+	// 	}
+	//
+	// 	MeshParams.AnimationEndIndex_RenderThread[i] = NumAnimations;
+	//
+	// 	// Really important to keep it INDEX_NONE otherwise it goes out of bounds when index
+	// 	// smoothing is activated
+	// 	if (int32 IKIndex = MeshParams.BoneSpaceAnimationIKIndex_RenderThread[CPUIndex]; IKIndex >
+	// 		INDEX_NONE)
+	// 	{
+	// 		// FSkinnedMeshRuntime_RenderThread_Lf& Runtime = GlobalLibrary_RenderThread.RuntimeSkinnedMeshes[
+	// 		// 	GlobalLibrary_RenderThread.RuntimeSkinnedMeshesHashMap[CPUIndex]];
+	// 		// const FSkinnedMeshReference_RenderThread_Lf& Reference = GlobalLibrary_RenderThread.
+	// 		// 	PerReferenceData[Runtime.DataAsset];
+	//
+	// 		for (const TTuple<uint16, uint16>& BoneIdx : Reference.FirstLodGPUBonesCollection)
+	// 		{
+	// 			if (Runtime.IKData.Contains(BoneIdx.Key) && Runtime.IKData[BoneIdx.Key].
+	// 				bIsInUsingWriteDataThisFrame && BoneIdx.Value != INDEX_NONE)
+	// 			{
+	// 				MeshParams.BoneSpaceAnimationIKData_RenderThread[CurrentIKDataIndex] = BoneIdx.Value;
+	//
+	// 				const FMatrix& BoneMatrix = Runtime.IKData[BoneIdx.Key].IKWriteTransform.
+	// 				                                                        ToMatrixWithScale();
+	//
+	// 				for (int32 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
+	// 				{
+	// 					FVector4f BoneData;
+	// 					BoneData.X = BoneMatrix.M[GET0_NUMBER][M];
+	// 					BoneData.Y = BoneMatrix.M[GET1_NUMBER][M];
+	// 					BoneData.Z = BoneMatrix.M[GET2_NUMBER][M];
+	// 					BoneData.W = BoneMatrix.M[GET3_NUMBER][M];
+	//
+	// 					MeshParams.BoneSpaceAnimationIKInput_RenderThread[CurrentIKIndex] = BoneData;
+	//
+	// 					CurrentIKIndex++;
+	// 				}
+	//
+	// 				CurrentIKDataIndex++;
+	// 				NumIKBones++;
+	//
+	// 				// Runtime.IKData.Empty(); Replaced now without disposing the memory
+	// 				// Because we will write the new data anyway every IK frame
+	// 				Runtime.IKData[BoneIdx.Key].bIsInUsingWriteDataThisFrame = false;
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	// If valid data or not, the loop in the compute shader will sort it out
+	// 	// it's a ranged loop which mean if the LastIKDataIndex == CurrentIKDataIndex
+	// 	// it will never enter, because i < Count
+	// 	// otherwise if the data is writable the indices may always change
+	// 	MeshParams.BoneSpaceAnimationIKStartIndex_RenderThread[i] = LastIKDataIndex;
+	// 	MeshParams.BoneSpaceAnimationIKEndIndex_RenderThread[i] = NumIKBones;
+	// }
+	//
+	// if (!MeshParams.NumAnimations)
+	// {
+	// 	for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
+	// 	{
+	// 		MeshParams.AnimationStartIndex_RenderThread[i] = GET0_NUMBER;
+	// 		MeshParams.AnimationEndIndex_RenderThread[i] = GET0_NUMBER;
+	// 	}
+	// }
+	// if (!MeshParams.NumIKData)
+	// {
+	// 	for (int32 i = GET0_NUMBER; i < NumMeshes_RenderThread; ++i)
+	// 	{
+	// 		MeshParams.BoneSpaceAnimationIKStartIndex_RenderThread[i] = GET0_NUMBER;
+	// 		MeshParams.BoneSpaceAnimationIKEndIndex_RenderThread[i] = GET0_NUMBER;
+	// 	}
+	// }
+	//
+	// for (uint16 i = GET0_NUMBER; i < NumReferences_RenderThread; ++i)
+	// {
+	// 	MeshParams.ReferenceNumCPUBones_RenderThread[i] = MeshParams.ReferenceNumCPUBones[i];
+	// }
+
+	constexpr uint8 NumOperations = GET3_NUMBER;
 	ParallelFor(NumOperations, [&](int32 ThreadsIndex)
 	{
 		if (ThreadsIndex == GET0_NUMBER)
@@ -1078,6 +1230,11 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 
 				MeshParams.PerMeshCustomDataLod_RenderThread[i] = Runtime.CurrentGPUMeshIndex;
 				MeshParams.PerMeshCustomDataCollectionIndex_RenderThread[i] = Reference.ReferenceCollectionIndex;
+			}
+
+			for (uint16 i = GET0_NUMBER; i < NumReferences_RenderThread; ++i)
+			{
+				MeshParams.ReferenceNumCPUBones_RenderThread[i] = MeshParams.ReferenceNumCPUBones[i];
 			}
 		}
 		else if (ThreadsIndex == GET1_NUMBER)
@@ -1196,13 +1353,6 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 					MeshParams.BoneSpaceAnimationIKStartIndex_RenderThread[i] = GET0_NUMBER;
 					MeshParams.BoneSpaceAnimationIKEndIndex_RenderThread[i] = GET0_NUMBER;
 				}
-			}
-		}
-		else if (ThreadsIndex == GET3_NUMBER)
-		{
-			for (uint16 i = GET0_NUMBER; i < NumReferences_RenderThread; ++i)
-			{
-				MeshParams.ReferenceNumCPUBones_RenderThread[i] = MeshParams.ReferenceNumCPUBones[i];
 			}
 		}
 	}, EParallelForFlags::BackgroundPriority);

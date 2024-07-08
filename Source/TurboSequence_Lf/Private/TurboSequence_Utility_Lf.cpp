@@ -32,7 +32,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 	// Create the Render Data first
 
 	FRenderData_Lf RenderData = FRenderData_Lf(GlobalData->NameNiagaraEmitter,
-											   GlobalData->NameNiagaraParticleIDMap,
+	                                           GlobalData->NameNiagaraParticleIDMap,
 	                                           GlobalData->NameNiagaraParticleLocations,
 	                                           GlobalData->NameNiagaraParticleRotations,
 	                                           GlobalData->NameNiagaraParticleScales,
@@ -1461,12 +1461,17 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Internal(FSkinnedMeshRef
 {
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
-	RenderData.bCollectionDirty = true;
-
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
+
+	const FVector3f PreviousScale = RenderData.ParticleScales[InstanceIndex];
 
 	RenderData.ParticleScales[InstanceIndex] *= Runtime.EIsVisibleOverride !=
 		ETurboSequence_IsVisibleOverride_Lf::ScaleToZero;
+
+	if (!PreviousScale.Equals(RenderData.ParticleScales[InstanceIndex]))
+	{
+		RenderData.bChangedScaleCollectionThisFrame = true;
+	}
 }
 
 void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshReference_Lf& Reference,
@@ -1479,15 +1484,29 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshR
 	{
 		FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
-		RenderData.bCollectionDirty = true;
-
 		const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 
-		RenderData.ParticlePositions[InstanceIndex] = WorldSpaceTransform.GetLocation();
-		RenderData.ParticleRotations[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertQuaternionToVector4F(
-			WorldSpaceTransform.GetRotation());
-		RenderData.ParticleScales[InstanceIndex] = FTurboSequence_Helper_Lf::ConvertVectorToVector3F(
-			WorldSpaceTransform.GetScale3D());
+		const FVector& Position = WorldSpaceTransform.GetLocation();
+		if (!Position.Equals(RenderData.ParticlePositions[InstanceIndex]))
+		{
+			RenderData.bChangedPositionCollectionThisFrame = true;
+		}
+		RenderData.ParticlePositions[InstanceIndex] = Position;
+
+		const FVector4f& Rotation = FTurboSequence_Helper_Lf::ConvertQuaternionToVector4F(
+			WorldSpaceTransform.GetRotation());;
+		if (!Rotation.Equals(RenderData.ParticleRotations[InstanceIndex]))
+		{
+			RenderData.bChangedRotationCollectionThisFrame = true;
+		}
+		RenderData.ParticleRotations[InstanceIndex] = Rotation;
+
+		const FVector3f& Scale = FTurboSequence_Helper_Lf::ConvertVectorToVector3F(WorldSpaceTransform.GetScale3D());
+		if (!Scale.Equals(RenderData.ParticleScales[InstanceIndex]))
+		{
+			RenderData.bChangedScaleCollectionThisFrame = true;
+		}
+		RenderData.ParticleScales[InstanceIndex] = Scale;
 	}
 }
 
@@ -1499,8 +1518,6 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 	FScopeLock Lock(&CriticalSection);
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
-
-	RenderData.bCollectionDirty = true;
 
 	const int32 InstanceIndex = RenderData.InstanceMap.Num();
 	RenderData.InstanceMap.Add(Runtime.GetMeshID(), InstanceIndex);
@@ -1542,8 +1559,6 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
-	RenderData.bCollectionDirty = true;
-
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 	RenderData.InstanceMap.Remove(Runtime.GetMeshID());
 	for (TTuple<int32, int32>& Instance : RenderData.InstanceMap)
@@ -1578,12 +1593,15 @@ void FTurboSequence_Utility_Lf::UpdateRenderInstanceLod_Concurrent(FSkinnedMeshR
 {
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
-	RenderData.bCollectionDirty = true;
-
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 
-	RenderData.ParticleLevelOfDetails[InstanceIndex] = bIsVisible * LodElement.GPUMeshIndex + !bIsVisible *
+	const uint8 Lod = bIsVisible * LodElement.GPUMeshIndex + !bIsVisible *
 		FTurboSequence_Helper_Lf::NotVisibleMeshIndex;
+	if (Lod != RenderData.ParticleLevelOfDetails[InstanceIndex])
+	{
+		RenderData.bChangedLodCollectionThisFrame = true;
+	}
+	RenderData.ParticleLevelOfDetails[InstanceIndex] = Lod;
 }
 
 void FTurboSequence_Utility_Lf::SetCustomDataForInstance(FSkinnedMeshReference_Lf& Reference, int32 CPUIndex,
@@ -1591,8 +1609,6 @@ void FTurboSequence_Utility_Lf::SetCustomDataForInstance(FSkinnedMeshReference_L
                                                          const FSkinnedMeshGlobalLibrary_Lf& Library)
 {
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
-
-	RenderData.bCollectionDirty = true;
 
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 
@@ -1607,12 +1623,22 @@ void FTurboSequence_Utility_Lf::SetCustomDataForInstance(FSkinnedMeshReference_L
 
 	const FIntVector2& BitValueSkinWeightOffset = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(
 		(SkinWeightOffset + FTurboSequence_Helper_Lf::NumCustomStates) * bIsAnimated);
-	RenderData.ParticleCustomData[CustomDataBaseIndex + GET0_NUMBER] = BitValueSkinWeightOffset.X;
-	RenderData.ParticleCustomData[CustomDataBaseIndex + GET1_NUMBER] = BitValueSkinWeightOffset.Y;
-
 	const FIntVector2& BitValuesTransformIndex = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(
 		CPUIndex * Library.MaxNumGPUBones *
 		FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer + GET2_NUMBER);
+
+	if (RenderData.ParticleCustomData[CustomDataBaseIndex + GET0_NUMBER] != BitValueSkinWeightOffset.X || RenderData.
+		ParticleCustomData[CustomDataBaseIndex + GET1_NUMBER] != BitValueSkinWeightOffset.Y ||
+		RenderData.ParticleCustomData[CustomDataBaseIndex + GET2_NUMBER] != BitValuesTransformIndex.X || RenderData.
+		ParticleCustomData[CustomDataBaseIndex + GET3_NUMBER] != BitValuesTransformIndex.Y)
+	{
+		RenderData.bChangedCustomDataCollectionThisFrame = true;
+	}
+
+	RenderData.ParticleCustomData[CustomDataBaseIndex + GET0_NUMBER] = BitValueSkinWeightOffset.X;
+	RenderData.ParticleCustomData[CustomDataBaseIndex + GET1_NUMBER] = BitValueSkinWeightOffset.Y;
+
+
 	RenderData.ParticleCustomData[CustomDataBaseIndex + GET2_NUMBER] = BitValuesTransformIndex.X;
 	RenderData.ParticleCustomData[CustomDataBaseIndex + GET3_NUMBER] = BitValuesTransformIndex.Y;
 }
@@ -1644,8 +1670,11 @@ bool FTurboSequence_Utility_Lf::SetCustomDataForInstance_User(FSkinnedMeshRefere
 		return false;
 	}
 
+	if (RenderData.ParticleCustomData[CustomDataIndex] != CustomDataValue)
+	{
+		RenderData.bChangedCustomDataCollectionThisFrame = true;
+	}
 	RenderData.ParticleCustomData[CustomDataIndex] = CustomDataValue;
-	RenderData.bCollectionDirty = true;
 
 	return true;
 }

@@ -62,6 +62,8 @@ inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 #define GET11_NUMBER ( static_cast<uint8>(11) )
 //         creates 12 AS 1 Byte value
 #define GET12_NUMBER ( static_cast<uint8>(12) )
+//         creates 13 AS 1 Byte value
+#define GET13_NUMBER ( static_cast<uint8>(13) )
 //         creates 16 AS 1 Byte value -> It'S a power of 2 value
 #define GET16_NUMBER ( static_cast<uint8>(16) )
 //         creates 17 AS 1 Byte value
@@ -378,7 +380,7 @@ public:
 	inline static const FString ReferenceTurboSequenceDataTexture = FString(
 		"/Script/Engine.TextureRenderTarget2DArray'/TurboSequence_Lf/Resources/T_TurboSequence_DataTexture_Lf.T_TurboSequence_DataTexture_Lf'");
 
-	static constexpr uint8 NotVisibleMeshIndex = GET32_NUMBER;
+	static constexpr uint8 NotVisibleMeshIndex = GET13_NUMBER;
 
 	inline static const FName NameMaterialParameterMeshDataTexture = FName("SkinWeight_Texture2DArray");
 	inline static const FName NameMaterialParameterMeshDataTextureSizeX = FName("SkinWeight_TexX");
