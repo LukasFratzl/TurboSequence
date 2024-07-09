@@ -24,7 +24,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnSetMeshIsVisible_Concurrent(
 	if (MeshesOpen.Contains(MeshID) && MeshesOpen[MeshID].bIsInUERange && MeshesOpen[MeshID].
 		FadeTimeRuntime <= 0)
 	{
-		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::ScaleToZero;
+		IsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::IsNotVisible;
 	}
 }
 
