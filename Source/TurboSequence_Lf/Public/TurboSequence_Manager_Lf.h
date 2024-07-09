@@ -519,6 +519,12 @@ public:
 	static bool GetAnimationCollectionSettings_Concurrent(TArray<FTurboSequence_AnimPlaySettings_Lf>& AnimationSettings,
 	                                                      const FTurboSequence_AnimMinimalCollection_Lf& AnimationData);
 
+	static bool GetAnimationMetaData_Concurrent(FAnimationMetaData_Lf& AnimationMetaData,
+	                                     const FTurboSequence_AnimMinimalData_Lf& AnimationData);
+
+	static bool GetAnimationCollectionMetaData_Concurrent(TArray<FAnimationMetaData_Lf>& AnimationSettings,
+														  const FTurboSequence_AnimMinimalCollection_Lf& AnimationData);
+
 	/**
 	 * Get the IK Transform of a Bone by Ref
 	 * @param OutIKTransform The IK Transform which getting created

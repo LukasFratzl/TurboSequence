@@ -2015,6 +2015,46 @@ bool ATurboSequence_Manager_Lf::GetAnimationCollectionSettings_Concurrent(
 	return false;
 }
 
+bool ATurboSequence_Manager_Lf::GetAnimationMetaData_Concurrent(FAnimationMetaData_Lf& AnimationMetaData,
+																const FTurboSequence_AnimMinimalData_Lf& AnimationData)
+{
+	if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(AnimationData.BelongsToMeshID))
+	{
+		return false;
+	}
+
+	const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[AnimationData.BelongsToMeshID];
+	if (!Runtime.AnimationIDs.Contains(AnimationData.AnimationID))
+	{
+		return false;
+	}
+
+	const FAnimationMetaData_Lf& AnimationFrame = Runtime.AnimationMetaData[Runtime.AnimationIDs[AnimationData.
+		AnimationID]];
+	AnimationMetaData = AnimationFrame;
+	return true;
+}
+
+bool ATurboSequence_Manager_Lf::GetAnimationCollectionMetaData_Concurrent(
+	TArray<FAnimationMetaData_Lf>& AnimationMetaDatas,
+	const FTurboSequence_AnimMinimalCollection_Lf& AnimationData)
+{
+	FAnimationMetaData_Lf RootMetaData;
+	if (GetAnimationMetaData_Concurrent(RootMetaData, AnimationData.RootMotionMesh))
+	{
+		AnimationMetaDatas.Reset();
+		AnimationMetaDatas.Add(RootMetaData);
+		for (const FTurboSequence_AnimMinimalData_Lf& Data : AnimationData.CustomizableMeshes)
+		{
+			FAnimationMetaData_Lf CustomizableMetaData;
+			GetAnimationMetaData_Concurrent(CustomizableMetaData, Data);
+			AnimationMetaDatas.Add(CustomizableMetaData);
+		}
+		return true;
+	}
+	return false;
+}
+
 bool ATurboSequence_Manager_Lf::GetIKTransform_Concurrent(FTransform& OutIKTransform,
                                                           const FTurboSequence_MinimalMeshData_Lf& MeshData,
                                                           const FName BoneName, const float AnimationDeltaTime,
