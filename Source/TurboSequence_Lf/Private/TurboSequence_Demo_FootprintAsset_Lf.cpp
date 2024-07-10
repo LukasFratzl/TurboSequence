@@ -139,7 +139,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 
 		if (IsValid(MeshActor) && !IsValid(Mesh.Value.Mesh))
 		{
-			const FTransform& SpawnLocation =
+			const FTransform& SpawnLocation = FTransform(ActorSpawnRotationOffset.Quaternion()) *
 				ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(Mesh.Key);
 			Mesh.Value.Mesh = UTurboSequence_Helper_BlueprintFunctions_Lf::TurboSequence_GetWorldFromStaticFunction()->
 				SpawnActor<AActor>(MeshActor, SpawnLocation);
@@ -162,8 +162,16 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 				continue;
 			}
 
-			ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
-				MeshData, SkinnedMeshRenderers[0]->GetComponentTransform());
+			if (bUseActorRootTransform)
+			{
+				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
+					MeshData, Mesh.Value.Mesh->GetActorTransform());
+			}
+			else
+			{
+				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
+					MeshData, SkinnedMeshRenderers[0]->GetComponentTransform());
+			}
 
 
 			// 1 for the root mesh
@@ -173,7 +181,8 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 			{
 				for (USkinnedMeshComponent* MeshComponent : SkinnedMeshRenderers)
 				{
-					if (MeshComponent->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID)
+					if (MeshComponent->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(
+							MeshID)
 						->ReferenceMeshNative)
 					{
 						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, MeshComponent);

@@ -192,6 +192,10 @@ public:
 	bool bUpdateManager = false;
 
 	UPROPERTY(EditAnywhere)
+	bool bKeepHeightOnSpawnLevel = false;
+	float DemoComponentHeight = 0;
+
+	UPROPERTY(EditAnywhere)
 	int32 NumInstancesPerUpdateGroup = 21000;
 
 	UPROPERTY(EditAnywhere)

@@ -24,6 +24,7 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 	if (AssetData.Num())
 	{
 		UpdateGroupIndex = QualityGroupIndex + 1;
+		DemoComponentHeight = GetActorTransform().GetLocation().Z;
 
 		AssetDataRuntime.Empty();
 		for (FDemoAssetData_Lf& Asset : AssetData)
@@ -378,6 +379,17 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 
 						ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
 					}
+				}
+				if (bKeepHeightOnSpawnLevel)
+				{
+					FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
+							Mesh.MeshData);
+
+					FVector Location = MeshTransform.GetLocation();
+					Location.Z = DemoComponentHeight;
+					MeshTransform.SetLocation(Location);
+
+					ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
 				}
 
 				if (AssetCustomData->bUseRandomRotation)

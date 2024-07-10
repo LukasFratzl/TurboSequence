@@ -113,6 +113,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		const FName& WantedMaterialName = FName(FString::Format(
 			*Reference.RenderData[MaterialsHash].GetMaterialsName(), {*FString::FormatAsNumber(MaterialIdx)}));
 
+
 		TObjectPtr<UMaterialInstanceDynamic> MaterialInstance = UMaterialInstanceDynamic::Create(
 			Materials[MaterialIdx], nullptr);
 
@@ -163,7 +164,15 @@ void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, c
 	{
 		const TObjectPtr<APlayerController> PlayerController = UGameplayStatics::GetPlayerController(
 			InWorld, ViewIdx);
+		if (!IsValid(PlayerController))
+		{
+			continue;
+		}
 		const TObjectPtr<ULocalPlayer> LocalPlayer = PlayerController->GetLocalPlayer();
+		if (!IsValid(LocalPlayer))
+		{
+			continue;
+		}
 
 		PlayerController->PlayerCameraManager->UpdateCamera(GET0_NUMBER);
 

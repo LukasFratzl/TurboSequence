@@ -64,6 +64,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float FadeDistance = 1000;
 
+	UPROPERTY(EditAnywhere)
+	bool bUseActorRootTransform = false;
+
+	UPROPERTY(EditAnywhere)
+	FRotator ActorSpawnRotationOffset = FRotator(0, 0, 0);
+
 	float LastDeltaTime = 0;
 
 	TMap<int32, FDemoMeshInstance_Lf> MeshesOpen;
