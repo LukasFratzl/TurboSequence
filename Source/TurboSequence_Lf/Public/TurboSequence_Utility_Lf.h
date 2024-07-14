@@ -148,16 +148,16 @@ public:
 	 * @throws None
 	 */
 	static uint32 CreateRenderer(FSkinnedMeshReference_Lf& Reference,
-	                             const TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData,
-	                             const TObjectPtr<UNiagaraSystem> RenderReference,
-	                             const TMap<uint8, FSkinnedMeshReferenceLodElement_Lf>&
-	                             LevelOfDetails,
-	                             const TObjectPtr<USceneComponent> InstanceSceneComponent,
-	                             TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
-	                                  FRenderingMaterialMap_Lf>& RenderComponents,
-	                             const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
-	                             const TArray<TObjectPtr<UMaterialInterface>>& Materials,
-	                             uint32 MaterialsHash);
+								 const TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData,
+								 const TObjectPtr<UNiagaraSystem> RenderReference,
+								 const TMap<uint8, FSkinnedMeshReferenceLodElement_Lf>&
+								 LevelOfDetails,
+								 const TObjectPtr<USceneComponent> InstanceSceneComponent,
+								 TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
+									  FRenderingMaterialMap_Lf>& RenderComponents,
+								 const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
+								 const TArray<TObjectPtr<UMaterialInterface>>& Materials,
+								 uint32 MaterialsHash);
 	/**
 	 * Updates the cameras in the given array with the views from the world.
 	 *
@@ -177,8 +177,8 @@ public:
  * @throws None
  */
 	static void UpdateCameras_1(TArray<FCameraView_Lf>& OutViews,
-	                            const TMap<uint8, FTransform>& LastFrameCameraTransforms,
-	                            const UWorld* InWorld, float DeltaTime);
+								const TMap<uint8, FTransform>& LastFrameCameraTransforms,
+								const UWorld* InWorld, float DeltaTime);
 
 	/**
  * Updates the last frame camera transforms based on the provided camera views.
@@ -189,7 +189,7 @@ public:
  * @throws None
  */
 	static void UpdateCameras_2(TMap<uint8, FTransform>& OutLastFrameCameraTransforms,
-	                            const TArray<FCameraView_Lf>& CameraViews);
+								const TArray<FCameraView_Lf>& CameraViews);
 
 	/**
  * Determines if a skinned mesh is visible to any of the player cameras.
@@ -202,9 +202,29 @@ public:
  *
  * @throws None
  */
-	static void IsMeshVisible(FSkinnedMeshRuntime_Lf& Runtime,
-	                          const FSkinnedMeshReference_Lf& Reference,
-	                          const TArray<FCameraView_Lf>& PlayerViews);
+	static FORCEINLINE_DEBUGGABLE void IsMeshVisible(FSkinnedMeshRuntime_Lf& Runtime,
+							  const FSkinnedMeshReference_Lf& Reference,
+							  const TArray<FCameraView_Lf>& PlayerViews)
+{
+	const FVector& MeshLocation = Runtime.WorldSpaceTransform.GetLocation();
+	const FBoxSphereBounds& Bounds = Reference.FirstValidMeshLevelOfDetail->GetBounds();
+	const FBox Box(MeshLocation - Bounds.BoxExtent, MeshLocation + Bounds.BoxExtent);
+
+	bool bIsVisibleOnAnyCamera = false;
+	for (const FCameraView_Lf& View : PlayerViews)
+	{
+		if (FTurboSequence_Helper_Lf::Box_Intersects_With_Frustum(Box, View.Planes_Internal,
+																  View.InterpolatedCameraTransform_Internal,
+																  Bounds.SphereRadius))
+		{
+			bIsVisibleOnAnyCamera = true;
+			break;
+		}
+	}
+
+	Runtime.bIsVisibleInFrustum = bIsVisibleOnAnyCamera;
+	Runtime.bIsVisible = bIsVisibleOnAnyCamera;
+}
 	/**
 	 * Retrieves the bone map index for a given raw index from the specified section.
 	 *
@@ -560,7 +580,45 @@ public:
 	 *
 	 * @throws None
 	 */
-	static bool GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& Runtime, const FSkinnedMeshReference_Lf& Reference);
+	static FORCEINLINE_DEBUGGABLE bool GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& Runtime,
+												 const FSkinnedMeshReference_Lf& Reference, const bool bPureFrustumCheck = false)
+	{
+		if (bPureFrustumCheck)
+		{
+			return Runtime.bIsVisibleInFrustum;
+		}
+
+		if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
+		{
+			const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+
+			switch (Runtime.EIsVisibleOverride)
+			{
+			case ETurboSequence_IsVisibleOverride_Lf::Default:
+				return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
+			case ETurboSequence_IsVisibleOverride_Lf::IsVisible:
+				return true;
+			case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
+				return false;
+			case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
+				return true;
+			}
+
+			//return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
+		}
+		switch (Runtime.EIsVisibleOverride)
+		{
+		case ETurboSequence_IsVisibleOverride_Lf::Default:
+			return Runtime.bIsVisible;
+		case ETurboSequence_IsVisibleOverride_Lf::IsVisible:
+			return true;
+		case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
+			return false;
+		case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
+			return true;
+		}
+		return Runtime.bIsVisible;
+	}
 	/**
  * Determines if a skinned mesh is animated.
  *
@@ -571,7 +629,25 @@ public:
  *
  * @throws None
  */
-	static bool GetIsMeshAnimated(const FSkinnedMeshRuntime_Lf& Runtime, const FSkinnedMeshReference_Lf& Reference);
+	static FORCEINLINE_DEBUGGABLE bool GetIsMeshAnimated(const FSkinnedMeshRuntime_Lf& Runtime,
+												  const FSkinnedMeshReference_Lf& Reference)
+	{
+		if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
+		{
+			const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
+
+			switch (Runtime.EIsAnimatedOverride)
+			{
+			case ETurboSequence_IsAnimatedOverride_Lf::Default:
+				return LodElement.bIsAnimated;
+			case ETurboSequence_IsAnimatedOverride_Lf::IsAnimated:
+				return true;
+			case ETurboSequence_IsAnimatedOverride_Lf::IsNotAnimated:
+				return false;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Updates the culling and level of detail for a skinned mesh based on the provided camera views.
@@ -597,7 +673,23 @@ public:
 	 *
 	 * @throws None
 	 */
-	static void UpdateDistanceUpdating(FSkinnedMeshRuntime_Lf& Runtime, float DeltaTime);
+	static FORCEINLINE_DEBUGGABLE void UpdateDistanceUpdating(FSkinnedMeshRuntime_Lf& Runtime, float DeltaTime)
+{
+	{
+		Runtime.bIsDistanceUpdatingThisFrame = false;
+		if (Runtime.DataAsset->bUseDistanceUpdating)
+		{
+			float DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->
+				DistanceUpdatingRatio;
+			Runtime.DeltaTimeAccumulator -= DeltaTime;
+			if (Runtime.DeltaTimeAccumulator < DistanceRatioSeconds)
+			{
+				Runtime.DeltaTimeAccumulator = DistanceRatioSeconds;
+				Runtime.bIsDistanceUpdatingThisFrame = true;
+			}
+		}
+	}
+}
 	/**
 	 * Updates the renderer bounds of a skinned mesh based on the provided reference and runtime.
 	 *
@@ -1151,7 +1243,28 @@ public:
 *
 * @throws None
 */
-	static void ClearIKState(FSkinnedMeshRuntime_Lf& Runtime, FCriticalSection& CriticalSection);
+	static FORCEINLINE_DEBUGGABLE void ClearIKState(FSkinnedMeshRuntime_Lf& Runtime, FCriticalSection& CriticalSection)
+	{
+		TArray<uint16> ToRemove;
+		for (TTuple<uint16, FIKBoneData_Lf>& Bone : Runtime.IKData)
+		{
+			Bone.Value.bIsInUsingWriteDataThisFrame = false;
+			Bone.Value.AliveCount++;
+			if (Bone.Value.AliveCount > GET2_NUMBER)
+			{
+				CriticalSection.Lock();
+				ToRemove.Add(Bone.Key);
+				CriticalSection.Unlock();
+			}
+		}
+		Runtime.bIKDataInUse = false;
+		for (uint16 Remove : ToRemove)
+		{
+			CriticalSection.Lock();
+			Runtime.IKData.Remove(Remove);
+			CriticalSection.Unlock();
+		}
+	}
 	/**
 * Retrieves the animation curve data for a given animation.
 *

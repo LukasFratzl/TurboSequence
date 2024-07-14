@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "TurboSequence_FootprintAsset_Lf.h"
+#include "TurboSequence_MeshActorConnection_Lf.h"
 #include "Engine/DataAsset.h"
 #include "TurboSequence_Demo_FootprintAsset_Lf.generated.h"
-
 
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FDemoMeshInstance_Lf
@@ -17,9 +17,18 @@ struct TURBOSEQUENCE_LF_API FDemoMeshInstance_Lf
 	bool bIsInUERange = true;
 	bool bInit = false;
 	int8 NumFrames = 0;
+	// bool bCallDelegateNextFrame = false;
+
+	float MinFadeExitTime = 0;
 
 	UPROPERTY()
 	TObjectPtr<AActor> Mesh;
+
+	UPROPERTY()
+	TArray<USkinnedMeshComponent*> SkinnedComponents;
+
+	UPROPERTY()
+	TObjectPtr<UTurboSequence_MeshActorConnection_Lf> ActorConnection;
 };
 
 
@@ -65,10 +74,10 @@ public:
 	float FadeDistance = 1000;
 
 	UPROPERTY(EditAnywhere)
-	bool bUseActorRootTransform = false;
+	FRotator ActorSpawnRotationOffset = FRotator(0, 0, 0);
 
 	UPROPERTY(EditAnywhere)
-	FRotator ActorSpawnRotationOffset = FRotator(0, 0, 0);
+	float MinTimeBeforeFadingAgain = 0;
 
 	float LastDeltaTime = 0;
 
@@ -78,9 +87,23 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MeshActor = nullptr;
 
-	virtual bool CanShowUEMesh(const int32 MeshID, const float MeshDistanceToCamera) const
+	virtual bool CanShowUEMesh(const int32 MeshID, const float MeshDistanceToCamera, const int32 MeshClosedID,
+	                           TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext)
 	{
-		return MeshDistanceToCamera < FadeDistance;
+		const bool bIsInRange = MeshDistanceToCamera < FadeDistance;
+		bool bIsFadeTimeActive = false;
+		ThreadContext->LockThread();
+		if (MeshesClosed.Contains(MeshID))
+		{
+			FDemoMeshInstance_Lf& MeshClosed = MeshesClosed[MeshID];
+			if (bIsInRange)
+			{
+				MeshClosed.MinFadeExitTime = MinTimeBeforeFadingAgain;
+			}
+			bIsFadeTimeActive = MeshClosed.MinFadeExitTime > 0 && MeshClosed.bIsInUERange;
+		}
+		ThreadContext->UnlockThread();
+		return bIsInRange || bIsFadeTimeActive;
 	}
 
 	virtual void FadeMesh(const int32 MeshID, const FDemoMeshInstance_Lf& Instance,

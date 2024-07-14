@@ -51,6 +51,16 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnAddedMeshInstance_GameThread
 				MeshData.Mesh = MeshComponent;;
 				MeshData.FrameDelay = 0;
 				MeshDataCollection.Add(MeshID, MeshData);
+
+				MeshData.ActorConnection = Cast<UTurboSequence_MeshActorConnection_Lf>(Mesh->
+					GetComponentByClass(
+						UTurboSequence_MeshActorConnection_Lf::StaticClass()));
+
+				if (IsValid(MeshData.ActorConnection))
+				{
+					MeshData.ActorConnection->OnMeshDataIDSend_GameThread(
+						ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(MeshID));
+				}
 			}
 		}
 	}
@@ -80,6 +90,11 @@ void UTurboSequence_DemoSimple_FootprintAsset_Lf::OnPostManagerUpdated_GameThrea
 	{
 		if (IsValid(Mesh.Value.Mesh))
 		{
+			if (IsValid(Mesh.Value.ActorConnection))
+			{
+				Mesh.Value.ActorConnection->OnFootprintAssetTick_GameThread(DeltaTime);
+			}
+
 			const float CameraDistance =
 				ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(Mesh.Key);
 

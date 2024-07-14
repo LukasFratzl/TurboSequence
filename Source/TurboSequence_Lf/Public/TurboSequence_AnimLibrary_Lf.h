@@ -40,4 +40,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<FAnimationLibraryItem_Lf> Animations;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TObjectPtr<UBlendSpace>> BlendSpaces;
 };

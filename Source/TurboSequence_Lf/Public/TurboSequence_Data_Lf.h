@@ -563,6 +563,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 	bool bIsVisible = true;
+	bool bIsVisibleInFrustum = true;
 	ETurboSequence_IsVisibleOverride_Lf EIsVisibleOverride = ETurboSequence_IsVisibleOverride_Lf::Default;
 	ETurboSequence_IsAnimatedOverride_Lf EIsAnimatedOverride = ETurboSequence_IsAnimatedOverride_Lf::Default;
 	uint8 CurrentGPUMeshIndex = GET0_NUMBER;

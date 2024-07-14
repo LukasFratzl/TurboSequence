@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TurboSequence_FootprintAsset_Lf.h"
+#include "TurboSequence_MeshActorConnection_Lf.h"
 #include "Engine/DataAsset.h"
 #include "TurboSequence_DemoSimple_FootprintAsset_Lf.generated.h"
 
@@ -17,6 +18,9 @@ struct TURBOSEQUENCE_LF_API FDemoMeshData_Lf
 
 	int8 FrameDelay = 0;
 	bool bIsUEVisible = false;
+
+	UPROPERTY()
+	TObjectPtr<UTurboSequence_MeshActorConnection_Lf> ActorConnection;
 };
 
 /**

@@ -282,29 +282,6 @@ void FTurboSequence_Utility_Lf::UpdateCameras_2(TMap<uint8, FTransform>& OutLast
 	}
 }
 
-void FTurboSequence_Utility_Lf::IsMeshVisible(FSkinnedMeshRuntime_Lf& Runtime,
-                                              const FSkinnedMeshReference_Lf& Reference,
-                                              const TArray<FCameraView_Lf>& PlayerViews)
-{
-	const FVector& MeshLocation = Runtime.WorldSpaceTransform.GetLocation();
-	const FBoxSphereBounds& Bounds = Reference.FirstValidMeshLevelOfDetail->GetBounds();
-	const FBox Box(MeshLocation - Bounds.BoxExtent, MeshLocation + Bounds.BoxExtent);
-
-	bool bIsVisibleOnAnyCamera = false;
-	for (const FCameraView_Lf& View : PlayerViews)
-	{
-		if (FTurboSequence_Helper_Lf::Box_Intersects_With_Frustum(Box, View.Planes_Internal,
-		                                                          View.InterpolatedCameraTransform_Internal,
-		                                                          Bounds.SphereRadius))
-		{
-			bIsVisibleOnAnyCamera = true;
-			break;
-		}
-	}
-
-	Runtime.bIsVisible = bIsVisibleOnAnyCamera;
-}
-
 int32 FTurboSequence_Utility_Lf::GetBoneMapIndex_CPU(const TArray<FBoneIndexType>& FromSection, int32 RawIndex)
 {
 	if (!FromSection.IsValidIndex(RawIndex))
@@ -1688,61 +1665,6 @@ bool FTurboSequence_Utility_Lf::SetCustomDataForInstance_User(FSkinnedMeshRefere
 	return true;
 }
 
-bool FTurboSequence_Utility_Lf::GetIsMeshVisible(const FSkinnedMeshRuntime_Lf& Runtime,
-                                                 const FSkinnedMeshReference_Lf& Reference)
-{
-	if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
-	{
-		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
-
-		switch (Runtime.EIsVisibleOverride)
-		{
-		case ETurboSequence_IsVisibleOverride_Lf::Default:
-			return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
-		case ETurboSequence_IsVisibleOverride_Lf::IsVisible:
-			return true;
-		case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
-			return false;
-		case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
-			return true;
-		}
-
-		//return Runtime.bIsVisible || !LodElement.bIsFrustumCullingEnabled;
-	}
-	switch (Runtime.EIsVisibleOverride)
-	{
-	case ETurboSequence_IsVisibleOverride_Lf::Default:
-		return Runtime.bIsVisible;
-	case ETurboSequence_IsVisibleOverride_Lf::IsVisible:
-		return true;
-	case ETurboSequence_IsVisibleOverride_Lf::IsNotVisible:
-		return false;
-	case ETurboSequence_IsVisibleOverride_Lf::ScaleToZero:
-		return true;
-	}
-	return Runtime.bIsVisible;
-}
-
-bool FTurboSequence_Utility_Lf::GetIsMeshAnimated(const FSkinnedMeshRuntime_Lf& Runtime,
-                                                  const FSkinnedMeshReference_Lf& Reference)
-{
-	if (Reference.LevelOfDetails.Contains(Runtime.LodIndex))
-	{
-		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Reference.LevelOfDetails[Runtime.LodIndex];
-
-		switch (Runtime.EIsAnimatedOverride)
-		{
-		case ETurboSequence_IsAnimatedOverride_Lf::Default:
-			return LodElement.bIsAnimated;
-		case ETurboSequence_IsAnimatedOverride_Lf::IsAnimated:
-			return true;
-		case ETurboSequence_IsAnimatedOverride_Lf::IsNotAnimated:
-			return false;
-		}
-	}
-	return false;
-}
-
 void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntime_Lf& Runtime,
                                                               FSkinnedMeshReference_Lf& Reference,
                                                               const TArray<FCameraView_Lf>& CameraViews,
@@ -1816,29 +1738,6 @@ void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntim
 		{
 			Runtime.LodIndex = GET0_NUMBER;
 		}
-	}
-}
-
-void FTurboSequence_Utility_Lf::UpdateDistanceUpdating(FSkinnedMeshRuntime_Lf& Runtime, float DeltaTime)
-{
-	if (Runtime.DataAsset->bUseDistanceUpdating)
-	{
-		float DistanceRatioSeconds = Runtime.ClosestCameraDistance / 250000 * Runtime.DataAsset->
-			DistanceUpdatingRatio;
-		Runtime.DeltaTimeAccumulator -= DeltaTime;
-		if (Runtime.DeltaTimeAccumulator < DistanceRatioSeconds)
-		{
-			Runtime.DeltaTimeAccumulator = DistanceRatioSeconds;
-			Runtime.bIsDistanceUpdatingThisFrame = true;
-		}
-		else
-		{
-			Runtime.bIsDistanceUpdatingThisFrame = false;
-		}
-	}
-	else
-	{
-		Runtime.bIsDistanceUpdatingThisFrame = true;
 	}
 }
 
@@ -3279,28 +3178,6 @@ bool FTurboSequence_Utility_Lf::SetIKTransform(const FTransform& Atom, uint16 Bo
 	return true;
 }
 
-void FTurboSequence_Utility_Lf::ClearIKState(FSkinnedMeshRuntime_Lf& Runtime, FCriticalSection& CriticalSection)
-{
-	TArray<uint16> ToRemove;
-	for (TTuple<uint16, FIKBoneData_Lf>& Bone : Runtime.IKData)
-	{
-		Bone.Value.bIsInUsingWriteDataThisFrame = false;
-		Bone.Value.AliveCount++;
-		if (Bone.Value.AliveCount > GET2_NUMBER)
-		{
-			CriticalSection.Lock();
-			ToRemove.Add(Bone.Key);
-			CriticalSection.Unlock();
-		}
-	}
-	Runtime.bIKDataInUse = false;
-	for (uint16 Remove : ToRemove)
-	{
-		CriticalSection.Lock();
-		Runtime.IKData.Remove(Remove);
-		CriticalSection.Unlock();
-	}
-}
 
 FTurboSequence_PoseCurveData_Lf FTurboSequence_Utility_Lf::GetAnimationCurveByAnimation(
 	const FSkinnedMeshRuntime_Lf& Runtime, const FAnimationMetaData_Lf& Animation,

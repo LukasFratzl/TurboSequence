@@ -520,10 +520,10 @@ public:
 	                                                      const FTurboSequence_AnimMinimalCollection_Lf& AnimationData);
 
 	static bool GetAnimationMetaData_Concurrent(FAnimationMetaData_Lf& AnimationMetaData,
-	                                     const FTurboSequence_AnimMinimalData_Lf& AnimationData);
+	                                            const FTurboSequence_AnimMinimalData_Lf& AnimationData);
 
 	static bool GetAnimationCollectionMetaData_Concurrent(TArray<FAnimationMetaData_Lf>& AnimationSettings,
-														  const FTurboSequence_AnimMinimalCollection_Lf& AnimationData);
+	                                                      const FTurboSequence_AnimMinimalCollection_Lf& AnimationData);
 
 	/**
 	 * Get the IK Transform of a Bone by Ref
@@ -601,21 +601,29 @@ public:
 	/**
 	 * Detects if the Mesh is visible this frame in the Camera Frustum
 	 * @param MeshData The Mesh ID
+	 * @param bDetectBoundsCheckOnly if True -> The Check does not care if the mesh is Visible, it checks the bounds
 	 * @return True if Visible in the Camera
 	 */
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Is Visisble", Keywords="Turbo, Sequence, TS, Get, Visible, Camera, Frustum"))
-	static bool GetIsMeshVisibleInCameraFrustum_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData);
+	static bool GetIsMeshVisibleInCameraFrustum_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
+	                                                       const bool bDetectBoundsCheckOnly);
 
+	/**
+ * Detects if the Mesh is visible this frame in the Camera Frustum
+ * @param MeshID The Mesh ID
+ * @param bDetectBoundsCheckOnly if True -> The Check does not care if the mesh is Visible, it checks the bounds
+ * @return True if Visible in the Camera
+ */
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Is Visisble", Keywords="Turbo, Sequence, TS, Get, Visible, Camera, Frustum"))
-	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID)
+	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID, const bool bDetectBoundsCheckOnly)
 	{
 		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
 		{
 			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
 			const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-			return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference);
+			return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference, bDetectBoundsCheckOnly);
 		}
 		return false;
 	}
@@ -747,12 +755,12 @@ public:
 	 * Sets the Turbo Sequence Mesh to an equallent UE Mesh using the Ts IK system, make sure the UE Mesh has the same skeleton
 	 * @param TsMeshID The Mesh ID
 	 * @param UEMesh The Unreal Engine Mesh Instance, SkeletalMesh or PoseableMesh
-	 * @param UEMeshPercentage The Percentage between 0 = TS Mesh and 1 = UE Mesh
-	 * @param AnimationDeltaTime The TS Mesh Animation Delta Time
+	 * @param BoneSetCallback
 	 * @return Ture if Successful
 	 */
-	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
-		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, IK, Bones, Transition, Fade, Lerp"))
-	static bool SetTransitionTsMeshToUEMesh(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
-	                                        const float UEMeshPercentage, const float AnimationDeltaTime);
+	// UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+	// 	meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, IK, Bones, Transition, Fade, Lerp"))
+	static bool SetTransitionTsMeshToUEMesh_Concurrent(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
+	                                                   TFunction<void(const FName& BoneName, const int32 BoneIndex)>
+	                                                   BoneSetCallback);
 };

@@ -7,6 +7,24 @@
 #include "UObject/Object.h"
 #include "TurboSequence_FootprintAsset_Lf.generated.h"
 
+USTRUCT(BlueprintType)
+struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSyncData_Lf
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTurboSequence_MeshAsset_Lf> SyncsTo = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	bool bIsBoneTransformSync = false;
+
+	UPROPERTY(EditAnywhere)
+	bool bIsWorldTransformSync = false;
+
+	UPROPERTY(EditAnywhere)
+	bool bHideMeshOnFade = false;
+};
+
 /**
  * 
  */
@@ -17,6 +35,9 @@ class TURBOSEQUENCE_LF_API UTurboSequence_FootprintAsset_Lf : public UDataAsset
 
 public:
 	UTurboSequence_FootprintAsset_Lf();
+
+	UPROPERTY(EditAnywhere)
+	TMap<TObjectPtr<USkinnedAsset>, FTurboSequence_MeshSyncData_Lf> SyncData;
 
 	/**
 	 * Overrides the Mesh Visibility

@@ -81,15 +81,15 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			if (RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-						NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
 				RenderData.Value.bChangedCollectionSizePreviousFrame = true;
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
 					NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			}
 
 			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame",
-											  RenderData.Value.bChangedCollectionSizeThisFrame || RenderData.Value.
-											  bChangedCollectionSizePreviousFrame);
+			                                  RenderData.Value.bChangedCollectionSizeThisFrame || RenderData.Value.
+			                                  bChangedCollectionSizePreviousFrame);
 
 			if (RenderData.Value.bChangedCollectionSizePreviousFrame && !RenderData.Value.
 				bChangedCollectionSizeThisFrame)
@@ -666,7 +666,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 	SCOPE_CYCLE_COUNTER(STAT_Solve_TurboSequenceMeshes_Lf);
 	{
 		// When we are actually have any data, otherwise there is nothing to compute and we can return
-		if (!GlobalLibrary.RuntimeSkinnedMeshes.Num())
+		if (!GlobalLibrary.RuntimeSkinnedMeshes.Num() || !IsValid(Instance))
 		{
 			bMeshesSolvingAtTheMoment = false;
 			return;
@@ -674,21 +674,12 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 		bMeshesSolvingAtTheMoment = true;
 
-		if (!IsValid(Instance))
-		{
-			return;
-		}
-
 		FTurboSequence_Utility_Lf::UpdateCameras_1(GlobalLibrary.CameraViews, LastFrameCameraTransforms, InWorld,
 		                                           DeltaTime);
 
-		if (!GlobalLibrary.CameraViews.Num())
+		if (!GlobalLibrary.CameraViews.Num() || !GlobalLibrary.UpdateGroups.IsValidIndex(UpdateContext.GroupIndex))
 		{
-			return;
-		}
-
-		if (!GlobalLibrary.UpdateGroups.IsValidIndex(UpdateContext.GroupIndex))
-		{
+			bMeshesSolvingAtTheMoment = false;
 			return;
 		}
 
@@ -730,13 +721,14 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 				FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 				//CriticalSection.Unlock();
-				if (!IsValid(Reference.FirstValidMeshLevelOfDetail))
+				if (!IsValid(Instance) || !IsValid(Reference.FirstValidMeshLevelOfDetail))
 				{
-					return;
-				}
+					if (!IsValid(Reference.FirstValidMeshLevelOfDetail))
+					{
+						continue;
+					}
 
-				if (!IsValid(Instance))
-				{
+					bMeshesSolvingAtTheMoment = false;
 					return;
 				}
 
@@ -2016,7 +2008,7 @@ bool ATurboSequence_Manager_Lf::GetAnimationCollectionSettings_Concurrent(
 }
 
 bool ATurboSequence_Manager_Lf::GetAnimationMetaData_Concurrent(FAnimationMetaData_Lf& AnimationMetaData,
-																const FTurboSequence_AnimMinimalData_Lf& AnimationData)
+                                                                const FTurboSequence_AnimMinimalData_Lf& AnimationData)
 {
 	if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(AnimationData.BelongsToMeshID))
 	{
@@ -2220,17 +2212,17 @@ bool ATurboSequence_Manager_Lf::GetSocketTransform_RawID_Concurrent(FTransform& 
 }
 
 bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(
-	const FTurboSequence_MinimalMeshData_Lf& MeshData)
+	const FTurboSequence_MinimalMeshData_Lf& MeshData, const bool bDetectBoundsCheckOnly)
 {
 	if (MeshData.IsMeshDataValid())
 	{
-		if (GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(MeshData.RootMotionMeshID))
+		if (GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(MeshData.RootMotionMeshID, bDetectBoundsCheckOnly))
 		{
 			return true;
 		}
 		for (int32 MeshID : MeshData.CustomizableMeshIDs)
 		{
-			if (GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(MeshID))
+			if (GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(MeshID, bDetectBoundsCheckOnly))
 			{
 				return true;
 			}
@@ -2500,9 +2492,10 @@ bool ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(const FTurboS
 	return bSuccess;
 }
 
-bool ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh(const int32 TsMeshID, USkinnedMeshComponent* UEMesh,
-                                                            const float UEMeshPercentage,
-                                                            const float AnimationDeltaTime)
+bool ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh_Concurrent(const int32 TsMeshID,
+                                                                       USkinnedMeshComponent* UEMesh,
+                                                                       TFunction<void(const FName& BoneName,
+	                                                                       const int32 BoneIndex)> BoneSetCallback)
 {
 	if (!IsValid(UEMesh))
 	{
@@ -2523,25 +2516,7 @@ bool ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh(const int32 TsMeshID
 	{
 		const FName& BoneName = UEMesh->GetBoneName(BoneIdx);
 
-		FTransform TurboSequenceIKTransform;
-		GetIKTransform_RawID_Concurrent(
-			TurboSequenceIKTransform, TsMeshID, BoneName, AnimationDeltaTime);
-
-		const FTransform& SkeletalMeshIKTransform = UEMesh->GetBoneTransform(BoneIdx);
-
-		TurboSequenceIKTransform.SetScale3D(FMath::Lerp(
-			TurboSequenceIKTransform.GetScale3D(), SkeletalMeshIKTransform.GetScale3D(),
-			UEMeshPercentage));
-		TurboSequenceIKTransform.SetLocation(FMath::Lerp(
-			TurboSequenceIKTransform.GetLocation(), SkeletalMeshIKTransform.GetLocation(),
-			UEMeshPercentage));
-		TurboSequenceIKTransform.SetRotation(FQuat::Slerp(
-			TurboSequenceIKTransform.GetRotation(), SkeletalMeshIKTransform.GetRotation(),
-			UEMeshPercentage));
-
-		SetIKTransform_RawID_Concurrent(
-			TsMeshID, BoneName,
-			TurboSequenceIKTransform);
+		BoneSetCallback(BoneName, BoneIdx);
 	}
 
 	return true;

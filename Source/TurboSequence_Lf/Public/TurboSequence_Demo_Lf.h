@@ -101,6 +101,9 @@ struct TURBOSEQUENCE_LF_API FDemoAssetData_Lf
 	bool bUseIK = true;
 
 	UPROPERTY(EditAnywhere, Category="Demo")
+	bool bUseBlendSpaces = false;
+
+	UPROPERTY(EditAnywhere, Category="Demo")
 	FName HeadBone = FName("head");
 
 	UPROPERTY(EditAnywhere, Category="Demo", meta=(ClampMin="0", ClampMax="1"))

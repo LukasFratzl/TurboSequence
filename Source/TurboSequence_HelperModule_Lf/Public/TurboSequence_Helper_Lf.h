@@ -883,21 +883,21 @@ public:
 			return true;
 		}
 
-		// When the Camera is inside the box we count it as Intersecting
-		if (Box.IsInside(CameraLocation))
-		{
-			return true;
-		}
-
-		// Sometimes the Box is so bounds is that huge to not fit inside the camera frustum,
-		// here we assume the bounds is at the same rotation than the camera which mean,
-		// it would choose the shortest path to reach the camera which is what we want,
-		// and it would work with large bounces too
-		if (Point_Intersects_With_Frustum(Box.GetClosestPointTo(CameraLocation), ObjectSpace_PlanesInput,
-		                                  CameraTransform))
-		{
-			return true;
-		}
+		// // When the Camera is inside the box we count it as Intersecting
+		// if (Box.IsInside(CameraLocation))
+		// {
+		// 	return true;
+		// }
+		//
+		// // Sometimes the Box is so bounds is that huge to not fit inside the camera frustum,
+		// // here we assume the bounds is at the same rotation than the camera which mean,
+		// // it would choose the shortest path to reach the camera which is what we want,
+		// // and it would work with large bounces too
+		// if (Point_Intersects_With_Frustum(Box.GetClosestPointTo(CameraLocation), ObjectSpace_PlanesInput,
+		//                                   CameraTransform))
+		// {
+		// 	return true;
+		// }
 
 		// Get the verts of the box
 		FVector Verts[GET8_NUMBER];

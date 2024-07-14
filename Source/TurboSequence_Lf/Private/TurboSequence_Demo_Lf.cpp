@@ -383,7 +383,7 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 				if (bKeepHeightOnSpawnLevel)
 				{
 					FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
-							Mesh.MeshData);
+						Mesh.MeshData);
 
 					FVector Location = MeshTransform.GetLocation();
 					Location.Z = DemoComponentHeight;
@@ -423,43 +423,81 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 					{
 						if (IsValid(MeshAsset->AnimationLibrary)) // TODO: Remove
 						{
-							if (int32 NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
+							if (AssetCustomData->bUseBlendSpaces && CameraDistance < 15000)
 							{
-								int32 RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
-								if (NumAnimations > 1)
+								if (int32 NumBlendSpaces = MeshAsset->AnimationLibrary->BlendSpaces.Num())
 								{
-									while (ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
-											Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[RandomAnimation].
-										Animation)
-									{
-										RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
-									}
-								}
-								FTurboSequence_AnimPlaySettings_Lf PlaySettings = FTurboSequence_AnimPlaySettings_Lf();
-								Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-									Mesh.MeshData, MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
-									PlaySettings);
+									int32 RandomBlendSpace = FMath::RandRange(0, NumBlendSpaces - 1);
+									FTurboSequence_AnimPlaySettings_Lf PlaySettings =
+										FTurboSequence_AnimPlaySettings_Lf();
 
-								if (AssetCustomData->bUseLayer)
+									if (!Mesh.CurrentBlendSpace.IsAnimCollectionValid() || Mesh.CurrentBlendSpace.
+										RootMotionMesh.BlendSpace != MeshAsset->AnimationLibrary->BlendSpaces[
+											RandomBlendSpace])
+									{
+										Mesh.CurrentBlendSpace = ATurboSequence_Manager_Lf::PlayBlendSpace_Concurrent(
+											Mesh.MeshData, MeshAsset->AnimationLibrary->BlendSpaces[RandomBlendSpace],
+											PlaySettings);
+									}
+
+									Mesh.RandomBlendSpacePosition = FVector3f(
+										FMath::RandRange(-200.0, 200.0), FMath::RandRange(-200.0, 200.0), 0);
+									if (FVector3f::Distance(Mesh.RandomBlendSpacePosition, FVector3f::ZeroVector) < 100)
+									{
+										Mesh.RandomBlendSpacePosition = FVector3f::ZeroVector;
+									}
+									else
+									{
+										Mesh.RandomBlendSpacePosition = Mesh.RandomBlendSpacePosition.GetUnsafeNormal() * 200;
+									}
+
+									ATurboSequence_Manager_Lf::TweakBlendSpace_Concurrent(
+										Mesh.CurrentBlendSpace, Mesh.RandomBlendSpacePosition);
+								}
+							}
+							else
+							{
+								if (int32 NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
 								{
-									int32 RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
+									int32 RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
 									if (NumAnimations > 1)
 									{
-										while (
-											ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
+										while (ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
 												Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[
-												RandomAnimation2].Animation)
+												RandomAnimation].
+											Animation)
 										{
-											RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
+											RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
 										}
 									}
-									PlaySettings.AnimationPlayTimeInSeconds = FMath::RandRange(0.0f, 0.5f);
-									PlaySettings.BoneLayerMasks = AssetCustomData->BoneLayers;
-									//PlaySettings.Animation = MeshAsset->AnimationLibrary->Animations[RandomAnimation2];
-									Mesh.CurrentAnimation_1 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
+									FTurboSequence_AnimPlaySettings_Lf PlaySettings =
+										FTurboSequence_AnimPlaySettings_Lf();
+									Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
 										Mesh.MeshData,
-										MeshAsset->AnimationLibrary->Animations[RandomAnimation2].Animation,
+										MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
 										PlaySettings);
+
+									if (AssetCustomData->bUseLayer)
+									{
+										int32 RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
+										if (NumAnimations > 1)
+										{
+											while (
+												ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
+													Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[
+													RandomAnimation2].Animation)
+											{
+												RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
+											}
+										}
+										PlaySettings.AnimationPlayTimeInSeconds = FMath::RandRange(0.0f, 0.5f);
+										PlaySettings.BoneLayerMasks = AssetCustomData->BoneLayers;
+										//PlaySettings.Animation = MeshAsset->AnimationLibrary->Animations[RandomAnimation2];
+										Mesh.CurrentAnimation_1 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
+											Mesh.MeshData,
+											MeshAsset->AnimationLibrary->Animations[RandomAnimation2].Animation,
+											PlaySettings);
+									}
 								}
 							}
 						}
@@ -492,7 +530,7 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 				// IK is expensive on the CPU, we only do IK for 100 Meters Radius around the camera
 				// and only if the mesh is visible by the Camera Frustum
 				if (AssetCustomData->bUseIK && CameraDistance < 10000 &&
-					ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(Mesh.MeshData))
+					ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(Mesh.MeshData, false))
 				{
 					const FTransform& OffsetTransform = AssetCustomData->SpawnOffsetTransform;
 

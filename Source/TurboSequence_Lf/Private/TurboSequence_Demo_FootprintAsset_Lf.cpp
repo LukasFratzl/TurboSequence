@@ -65,6 +65,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnAddedMeshInstance_GameThread(const
 	Instance.bInit = false;
 	Instance.bIsInUERange = false;
 	Instance.FadeTimeRuntime = 0;
+	Instance.MinFadeExitTime = 0;
 }
 
 void UTurboSequence_Demo_FootprintAsset_Lf::OnRemovedMeshInstance_GameThread(const int32 MeshID,
@@ -98,7 +99,8 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 		ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(MeshID);
 
 	const bool bIsInUERange = CanShowUEMesh(
-		MeshID, ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID));
+		MeshID, ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_RawID_Concurrent(MeshID),
+		MeshData.RootMotionMeshID, ThreadContext);
 	if (bIsInUERange != MeshOpen.bIsInUERange || (!MeshOpen.bInit && bIsInUERange))
 	{
 		MeshOpen.FadeTimeRuntime = FadeTime;
@@ -107,6 +109,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed.FindOrAdd(MeshData.RootMotionMeshID);
 		ThreadContext->UnlockThread();
 		MeshClosed.FadeTimeRuntime = FadeTime;
+		MeshClosed.MinFadeExitTime = MinTimeBeforeFadingAgain;
 		MeshClosed.NumFrames = 0;
 	}
 
@@ -119,6 +122,7 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnMeshPreSolveAnimationMeta_Concurre
 	{
 		FDemoMeshInstance_Lf& MeshClosed = MeshesClosed[MeshData.RootMotionMeshID];
 		MeshClosed.FadeTimeRuntime -= LastDeltaTime;
+		MeshClosed.MinFadeExitTime -= LastDeltaTime;
 		MeshClosed.bIsInUERange = bIsInUERange;
 		MeshClosed.bInit = true;
 	}
@@ -134,19 +138,34 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 	TArray<int32> MeshIDsToRemove;
 	for (TTuple<int32, FDemoMeshInstance_Lf>& Mesh : MeshesClosed)
 	{
-		const FTurboSequence_MinimalMeshData_Lf& MeshData =
-			ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(Mesh.Key);
-
 		if (IsValid(MeshActor) && !IsValid(Mesh.Value.Mesh))
 		{
 			const FTransform& SpawnLocation = FTransform(ActorSpawnRotationOffset.Quaternion()) *
 				ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_RawID_Concurrent(Mesh.Key);
 			Mesh.Value.Mesh = UTurboSequence_Helper_BlueprintFunctions_Lf::TurboSequence_GetWorldFromStaticFunction()->
 				SpawnActor<AActor>(MeshActor, SpawnLocation);
+
+			Mesh.Value.Mesh->GetComponents(USkinnedMeshComponent::StaticClass(), Mesh.Value.SkinnedComponents);
+
+			Mesh.Value.ActorConnection = Cast<
+				UTurboSequence_MeshActorConnection_Lf>(Mesh.Value.Mesh->
+				                                            GetComponentByClass(
+					                                            UTurboSequence_MeshActorConnection_Lf::StaticClass()));
+
+			if (IsValid(Mesh.Value.ActorConnection))
+			{
+				Mesh.Value.ActorConnection->OnMeshDataIDSend_GameThread(
+					ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(Mesh.Key));
+			}
 		}
 
 		if (IsValid(Mesh.Value.Mesh))
 		{
+			if (IsValid(Mesh.Value.ActorConnection))
+			{
+				Mesh.Value.ActorConnection->OnFootprintAssetTick_GameThread(DeltaTime);
+			}
+
 			if (Mesh.Value.FadeTimeRuntime <= 0 && !Mesh.Value.bIsInUERange)
 			{
 				Mesh.Value.Mesh->Destroy();
@@ -154,39 +173,43 @@ void UTurboSequence_Demo_FootprintAsset_Lf::OnPostManagerUpdated_GameThread(cons
 				continue;
 			}
 
-			TArray<USkinnedMeshComponent*> SkinnedMeshRenderers;
-			Mesh.Value.Mesh->GetComponents(USkinnedMeshComponent::StaticClass(), SkinnedMeshRenderers);
+			const FTurboSequence_MinimalMeshData_Lf& MeshData =
+				ATurboSequence_Manager_Lf::GetMeshDataFromMeshID_Concurrent(Mesh.Key);
 
-			if (!SkinnedMeshRenderers.Num())
+			if (!Mesh.Value.SkinnedComponents.Num())
 			{
 				continue;
 			}
 
-			if (bUseActorRootTransform)
+			for (USkinnedMeshComponent* MeshComponent : Mesh.Value.SkinnedComponents)
 			{
-				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
-					MeshData, Mesh.Value.Mesh->GetActorTransform());
-			}
-			else
-			{
-				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
-					MeshData, SkinnedMeshRenderers[0]->GetComponentTransform());
-			}
-
-
-			// 1 for the root mesh
-			FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, SkinnedMeshRenderers[0]);
-
-			for (const int32 MeshID : MeshData.CustomizableMeshIDs)
-			{
-				for (USkinnedMeshComponent* MeshComponent : SkinnedMeshRenderers)
+				if (SyncData.Contains(MeshComponent->GetSkinnedAsset()))
 				{
-					if (MeshComponent->GetSkinnedAsset() == ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(
-							MeshID)
-						->ReferenceMeshNative)
+					const FTurboSequence_MeshSyncData_Lf& Data = SyncData[MeshComponent->GetSkinnedAsset()];
+					// Synced in UTurboSequence_MeshActorConnection_Lf for better control over time of the Tick
+					// if (Data.bIsWorldTransformSync)
+					// {
+					// 	ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(
+					// 		MeshData, MeshComponent->GetComponentTransform());
+					// }
+					if (Data.bHideMeshOnFade)
+					{
+						const bool FadeActive = Mesh.Value.FadeTimeRuntime > 0;
+						MeshComponent->SetVisibility(!FadeActive);
+					}
+					if (Data.bIsBoneTransformSync && SyncData[MeshComponent->GetSkinnedAsset()].SyncsTo ==
+						ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshData.RootMotionMeshID))
 					{
 						FadeMesh(MeshData.RootMotionMeshID, Mesh.Value, MeshComponent);
-						break;
+					}
+					for (const int32 MeshID : MeshData.CustomizableMeshIDs)
+					{
+						if (Data.bIsBoneTransformSync && SyncData[MeshComponent->GetSkinnedAsset()].SyncsTo ==
+							ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(MeshID))
+						{
+							FadeMesh(MeshID, Mesh.Value, MeshComponent);
+							break;
+						}
 					}
 				}
 			}
@@ -220,7 +243,31 @@ void UTurboSequence_Demo_FootprintAsset_Lf::FadeMesh(const int32 MeshID, const F
 			}
 			Percentage = FTurboSequence_Helper_Lf::Clamp01(Percentage);
 
-			ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh(MeshID, Mesh, Percentage, LastDeltaTime);
+			float Delta = LastDeltaTime;
+			const auto& BoneSetFunction = [MeshID, &Mesh, Percentage, Delta](const FName& BoneName, const int32 BoneIdx)
+			{
+				FTransform TurboSequenceIKTransform;
+				ATurboSequence_Manager_Lf::GetIKTransform_RawID_Concurrent(
+					TurboSequenceIKTransform, MeshID, BoneName, Delta);
+
+				const FTransform& SkeletalMeshIKTransform = Mesh->GetBoneTransform(BoneIdx);
+
+				TurboSequenceIKTransform.SetScale3D(FMath::Lerp(
+					TurboSequenceIKTransform.GetScale3D(), SkeletalMeshIKTransform.GetScale3D(),
+					Percentage));
+				TurboSequenceIKTransform.SetLocation(FMath::Lerp(
+					TurboSequenceIKTransform.GetLocation(), SkeletalMeshIKTransform.GetLocation(),
+					Percentage));
+				TurboSequenceIKTransform.SetRotation(FQuat::Slerp(
+					TurboSequenceIKTransform.GetRotation(), SkeletalMeshIKTransform.GetRotation(),
+					Percentage));
+
+				ATurboSequence_Manager_Lf::SetIKTransform_RawID_Concurrent(
+					MeshID, BoneName,
+					TurboSequenceIKTransform);
+			};
+
+			ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh_Concurrent(MeshID, Mesh, BoneSetFunction);
 		}
 	}
 }
