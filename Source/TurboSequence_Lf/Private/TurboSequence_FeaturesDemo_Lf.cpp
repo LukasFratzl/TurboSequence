@@ -386,10 +386,13 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 
 	if (IKDemo.bEnable && IKDemo.MeshData.Num())
 	{
-		const FVector& CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->
-		                                            GetCameraLocation();
-		const FRotator& CameraRotation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->
-		                                             GetCameraRotation();
+		FVector CameraLocation = FVector::ZeroVector;
+		FRotator CameraRotation = FRotator::ZeroRotator;
+		if (IsValid(UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)))
+		{
+			CameraLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
+			CameraRotation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
+		}
 
 		const FTransform& OffsetTransform = IKDemo.SpawnOffset;
 

@@ -178,8 +178,6 @@ protected:
 
 public:
 	void SpawnCharactersDelayed();
-	void BindToInput();
-	void LeftMouseButtonPressed();
 
 	void SolveGroup(int32 GroupIndex, float DeltaTime, const FRotator& CameraRotation, const FVector& CameraLocation,
 	                TMap<FTurboSequence_MinimalMeshData_Lf, bool>& SwitchingGroups);

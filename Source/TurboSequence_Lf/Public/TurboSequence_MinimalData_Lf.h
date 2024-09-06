@@ -494,6 +494,26 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateGroup_Lf
 };
 
 USTRUCT(BlueprintType)
+struct TURBOSEQUENCE_LF_API FTurboSequence_CameraInfo_Lf
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FMinimalViewInfo ViewInfo = FMinimalViewInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// The size of the primary viewport subregion allocated to this player. 0-1
+	FVector2D LocalPlayerSize = FVector2D::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Fov = GET0_NUMBER;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<enum EAspectRatioAxisConstraint> AspectRatioAxisConstraint;
+};
+
+USTRUCT(BlueprintType)
 struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 {
 	GENERATED_BODY()
@@ -513,4 +533,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 GroupIndex = GET0_NUMBER;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FTurboSequence_CameraInfo_Lf> CustomCameraInfo;
 };

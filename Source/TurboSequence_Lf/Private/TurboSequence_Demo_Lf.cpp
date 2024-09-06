@@ -19,8 +19,6 @@ void ATurboSequence_Demo_Lf::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BindToInput();
-
 	if (AssetData.Num())
 	{
 		UpdateGroupIndex = QualityGroupIndex + 1;
@@ -117,10 +115,13 @@ void ATurboSequence_Demo_Lf::Tick(float DeltaTime)
 			Delta += DeltaTime;
 		}
 
-		const FVector& CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->
-		                                            GetCameraLocation();
-		const FRotator& CameraRotation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->
-		                                             GetCameraRotation();
+		FVector CameraLocation = FVector::ZeroVector;
+		FRotator CameraRotation = FRotator::ZeroRotator;
+		if (IsValid(UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)))
+		{
+			CameraLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
+			CameraRotation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation();
+		}
 
 		TMap<FTurboSequence_MinimalMeshData_Lf, bool> SwitchingGroups;
 
@@ -267,36 +268,36 @@ void ATurboSequence_Demo_Lf::SpawnCharactersDelayed()
 }
 
 
-void ATurboSequence_Demo_Lf::BindToInput()
-{
-	// Initialize our component
-	InputComponent = NewObject<UInputComponent>(this);
-	InputComponent->RegisterComponent();
-	if (InputComponent)
-	{
-		// Bind inputs here
-		// InputComponent->BindAction("Jump", IE_Pressed, this, &AUnrealisticPawn::Jump);
-		// etc...
-
-		// Now hook up our InputComponent to one in a Player
-		// Controller, so that input flows down to us
-		EnableInput(GetWorld()->GetFirstPlayerController());
-
-		// Bind an action to it
-		InputComponent->BindAction
-		(
-			"Test_LeftMouseButton", // The input identifier (specified in DefaultInput.ini)
-			IE_Pressed, // React when button pressed (or on release, etc., if desired)
-			this, // The object instance that is going to react to the input
-			&ATurboSequence_Demo_Lf::LeftMouseButtonPressed // The function that will fire when input is received
-		);
-	}
-}
-
-void ATurboSequence_Demo_Lf::LeftMouseButtonPressed()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Pressed"));
-}
+// void ATurboSequence_Demo_Lf::BindToInput()
+// {
+// 	// Initialize our component
+// 	InputComponent = NewObject<UInputComponent>(this);
+// 	InputComponent->RegisterComponent();
+// 	if (InputComponent)
+// 	{
+// 		// Bind inputs here
+// 		// InputComponent->BindAction("Jump", IE_Pressed, this, &AUnrealisticPawn::Jump);
+// 		// etc...
+//
+// 		// Now hook up our InputComponent to one in a Player
+// 		// Controller, so that input flows down to us
+// 		EnableInput(GetWorld()->GetFirstPlayerController());
+//
+// 		// Bind an action to it
+// 		InputComponent->BindAction
+// 		(
+// 			"Test_LeftMouseButton", // The input identifier (specified in DefaultInput.ini)
+// 			IE_Pressed, // React when button pressed (or on release, etc., if desired)
+// 			this, // The object instance that is going to react to the input
+// 			&ATurboSequence_Demo_Lf::LeftMouseButtonPressed // The function that will fire when input is received
+// 		);
+// 	}
+// }
+//
+// void ATurboSequence_Demo_Lf::LeftMouseButtonPressed()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Pressed"));
+// }
 
 void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
                                         float DeltaTime, const FRotator& CameraRotation,
@@ -327,6 +328,11 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 
 			const FTurboSequence_MinimalMeshData_Lf& MeshData =
 				ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(GroupIndex, Index);
+
+			if (!MeshData.IsMeshDataValid() || (MeshData.IsMeshDataValid() && !Meshes.Contains(MeshData)))
+			{
+				continue;
+			}
 
 			FDemoMeshWrapper_Lf& Mesh = Meshes[MeshData];
 			//

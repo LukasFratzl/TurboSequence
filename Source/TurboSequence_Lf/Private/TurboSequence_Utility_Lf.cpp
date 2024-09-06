@@ -57,8 +57,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		EAttachLocation::KeepWorldPosition,
 		false
 	);
-
-	Component->SetVisibleInRayTracing(true);
+	if (IsValid(Component))
+	{
+		Component->SetVisibleInRayTracing(true);
+	}
 
 	TArray<FRenderingMaterialKeyValue_Lf> ConvertedMaterial;
 	for (const TObjectPtr<UMaterialInterface>& Material : Materials)
@@ -100,6 +102,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 					*Reference.RenderData[MaterialsHash].GetMeshName(),
 					{*FString::FormatAsNumber(LodElement.GPUMeshIndex)}));
 
+				if (!IsValid(RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer))
+				{
+					continue;
+				}
 				RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
 					WantedMeshName, LodElement.Mesh);
 			}
@@ -129,6 +135,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
 			FromAsset->MeshDataTexture->GetSizeY());
 
+		if (!IsValid(RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer))
+		{
+			continue;
+		}
 		RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableMaterial(
 			WantedMaterialName, MaterialInstance);
 
@@ -146,6 +156,12 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			// Basically 5000-Meter Radius
 			constexpr float BoundsExtend = GET1000_NUMBER * GET1000_NUMBER / GET2_NUMBER;
 			const FBox& Bounds = FBox(FVector::OneVector * -BoundsExtend, FVector::OneVector * BoundsExtend);
+
+			if (!IsValid(RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer))
+			{
+				continue;
+			}
+
 			RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetEmitterFixedBounds(
 				Reference.RenderData[MaterialsHash].GetEmitterName(), Bounds);
 			break;
@@ -155,45 +171,70 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 	return MaterialsHash;
 }
 
-void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld)
+void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld,
+                                              const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo)
 {
-	const bool bIsSinglePlayer = UGameplayStatics::GetNumPlayerControllers(InWorld) < GET2_NUMBER;
-	const int32 MaxNumberPlayerControllers = UGameplayStatics::GetNumPlayerControllers(InWorld);
+	const bool bHasCustomCameraData = CustomCameraInfo.Num();
+	const bool bIsSinglePlayer = UGameplayStatics::GetNumPlayerControllers(InWorld) < GET2_NUMBER &&
+		CustomCameraInfo.Num() < GET2_NUMBER;
+	int32 MaxNumberPlayerControllers = CustomCameraInfo.Num();
+	if (!bHasCustomCameraData)
+	{
+		MaxNumberPlayerControllers = UGameplayStatics::GetNumPlayerControllers(InWorld);
+	}
 	OutView.SetNum(MaxNumberPlayerControllers);
 	for (int32 ViewIdx = GET0_NUMBER; ViewIdx < MaxNumberPlayerControllers; ++ViewIdx)
 	{
-		const TObjectPtr<APlayerController> PlayerController = UGameplayStatics::GetPlayerController(
-			InWorld, ViewIdx);
-		if (!IsValid(PlayerController))
-		{
-			continue;
-		}
-		const TObjectPtr<ULocalPlayer> LocalPlayer = PlayerController->GetLocalPlayer();
-		if (!IsValid(LocalPlayer))
-		{
-			continue;
-		}
-
-		PlayerController->PlayerCameraManager->UpdateCamera(GET0_NUMBER);
-
-		const FMinimalViewInfo& PlayerMinimalViewInfo = PlayerController->PlayerCameraManager->ViewTarget.POV;
-
+		FMinimalViewInfo PlayerMinimalViewInfo;
+		FVector2D LocalPlayerSize;
 		FVector2D ViewportSize;
-		LocalPlayer->ViewportClient->GetViewportSize(ViewportSize);
-		const FVector2D SplitScreenPlayerViewSize(LocalPlayer->Size.X * ViewportSize.X,
-		                                          LocalPlayer->Size.Y * ViewportSize.Y);
+		float Fov;
+		TEnumAsByte<enum EAspectRatioAxisConstraint> ConstraintType;
+		if (!bHasCustomCameraData)
+		{
+			const TObjectPtr<APlayerController> PlayerController = UGameplayStatics::GetPlayerController(
+				InWorld, ViewIdx);
+			if (!IsValid(PlayerController))
+			{
+				continue;
+			}
+			const TObjectPtr<ULocalPlayer> LocalPlayer = PlayerController->GetLocalPlayer();
+			if (!IsValid(LocalPlayer))
+			{
+				continue;
+			}
 
+			PlayerController->PlayerCameraManager->UpdateCamera(GET0_NUMBER);
+
+			PlayerMinimalViewInfo = PlayerController->PlayerCameraManager->ViewTarget.POV;
+
+			LocalPlayer->ViewportClient->GetViewportSize(ViewportSize);
+			LocalPlayerSize = FVector2D(LocalPlayer->Size.X, LocalPlayer->Size.Y);
+			Fov = PlayerController->PlayerCameraManager->GetFOVAngle();
+
+			ConstraintType = LocalPlayer->AspectRatioAxisConstraint;
+		}
+		else
+		{
+			PlayerMinimalViewInfo = CustomCameraInfo[ViewIdx].ViewInfo;
+			LocalPlayerSize = CustomCameraInfo[ViewIdx].LocalPlayerSize;
+			Fov = CustomCameraInfo[ViewIdx].Fov;
+
+			ConstraintType = CustomCameraInfo[ViewIdx].AspectRatioAxisConstraint;
+		}
+
+		FVector2f SplitScreenPlayerViewSize = FVector2f(LocalPlayerSize.X * ViewportSize.X,
+		                                                LocalPlayerSize.Y * ViewportSize.Y);
 		FVector2f ViewportDimensions = FVector2f(ViewportSize.X, ViewportSize.Y);
 
-		float Fov = PlayerController->PlayerCameraManager->GetFOVAngle();
 		if (!bIsSinglePlayer)
 		{
 			ViewportDimensions = FVector2f(SplitScreenPlayerViewSize.X / SplitScreenPlayerViewSize.Y);
 
 
 			float AspectRatio;
-			if (((ViewportSize.X > ViewportSize.Y) && (LocalPlayer->AspectRatioAxisConstraint ==
-				AspectRatio_MajorAxisFOV)) || (LocalPlayer->AspectRatioAxisConstraint == AspectRatio_MaintainXFOV))
+			if (((ViewportSize.X > ViewportSize.Y) && (ConstraintType ==
+				AspectRatio_MajorAxisFOV)) || (ConstraintType == AspectRatio_MaintainXFOV))
 			{
 				//if the viewport is wider than it is tall
 				AspectRatio = ViewportDimensions.X / ViewportDimensions.Y;
@@ -211,7 +252,7 @@ void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, c
 		FCameraView_Lf View;
 		View.Fov = Fov; // * 1.1f;
 		View.ViewportSize = ViewportDimensions;
-		View.AspectRatioAxisConstraint = LocalPlayer->AspectRatioAxisConstraint;
+		View.AspectRatioAxisConstraint = ConstraintType;
 		View.bIsPerspective = PlayerMinimalViewInfo.ProjectionMode == ECameraProjectionMode::Perspective;
 		View.OrthoWidth = PlayerMinimalViewInfo.OrthoWidth;
 		View.FarClipPlane = PlayerMinimalViewInfo.OrthoFarClipPlane;
@@ -227,9 +268,9 @@ void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, c
 
 void FTurboSequence_Utility_Lf::UpdateCameras_1(TArray<FCameraView_Lf>& OutViews,
                                                 const TMap<uint8, FTransform>& LastFrameCameraTransforms,
-                                                const UWorld* InWorld, float DeltaTime)
+                                                const UWorld* InWorld, float DeltaTime, const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo)
 {
-	UpdateCameras(OutViews, InWorld);
+	UpdateCameras(OutViews, InWorld, CustomCameraInfo);
 	float Interpolation = GET1_NUMBER; //GET2_NUMBER + DeltaTime * GET4_NUMBER;
 	uint8 NumCameraViews = OutViews.Num();
 	for (uint8 i = GET0_NUMBER; i < NumCameraViews; ++i)
@@ -1528,7 +1569,10 @@ void FTurboSequence_Utility_Lf::CleanNiagaraRenderer(
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>& NiagaraComponents,
 	FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime)
 {
-	NiagaraComponents[Runtime.DataAsset].NiagaraRenderer[Runtime.MaterialsHash].NiagaraRenderer->DestroyComponent();
+	if (IsValid(NiagaraComponents[Runtime.DataAsset].NiagaraRenderer[Runtime.MaterialsHash].NiagaraRenderer))
+	{
+		NiagaraComponents[Runtime.DataAsset].NiagaraRenderer[Runtime.MaterialsHash].NiagaraRenderer->DestroyComponent();
+	}
 	NiagaraComponents[Runtime.DataAsset].NiagaraRenderer.Remove(Runtime.MaterialsHash);
 	if (!NiagaraComponents[Runtime.DataAsset].NiagaraRenderer.Num())
 	{

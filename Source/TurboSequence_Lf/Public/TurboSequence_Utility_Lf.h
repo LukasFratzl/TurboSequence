@@ -163,8 +163,9 @@ public:
 	 *
 	 * @param OutView The array to store the updated camera views.
 	 * @param InWorld The world object to retrieve the camera views from.
+	 * @param CustomCameraInfo The custom camera info if needed
 	 */
-	static void UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld);
+	static void UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld, const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo);
 
 	/**
  * Updates the cameras in the scene.
@@ -173,12 +174,14 @@ public:
  * @param LastFrameCameraTransforms The map of the last frame's camera transforms.
  * @param InWorld The world in which the cameras are located.
  * @param DeltaTime The time elapsed since the last frame.
+ * @param CustomCameraInfo The custom camera info if needed
  *
  * @throws None
  */
 	static void UpdateCameras_1(TArray<FCameraView_Lf>& OutViews,
 								const TMap<uint8, FTransform>& LastFrameCameraTransforms,
-								const UWorld* InWorld, float DeltaTime);
+								const UWorld* InWorld, float DeltaTime,
+								const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo);
 
 	/**
  * Updates the last frame camera transforms based on the provided camera views.

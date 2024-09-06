@@ -78,6 +78,11 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			const TObjectPtr<UNiagaraComponent> NiagaraComponent = Instance->NiagaraComponents[Asset].
 				NiagaraRenderer[RenderData.Key].NiagaraRenderer;
 
+			if (!IsValid(NiagaraComponent))
+			{
+				continue;
+			}
+
 			if (RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
@@ -462,7 +467,7 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			GET0_NUMBER].CameraTransform.Equals(
 			FTransform::Identity)))
 		{
-			FTurboSequence_Utility_Lf::UpdateCameras(GlobalLibrary.CameraViews, InWorld);
+			FTurboSequence_Utility_Lf::UpdateCameras(GlobalLibrary.CameraViews, InWorld, TArray<FTurboSequence_CameraInfo_Lf>());
 			uint8 CameraIndex = GET0_NUMBER;
 			for (FCameraView_Lf& View : GlobalLibrary.CameraViews)
 			{
@@ -675,7 +680,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 		bMeshesSolvingAtTheMoment = true;
 
 		FTurboSequence_Utility_Lf::UpdateCameras_1(GlobalLibrary.CameraViews, LastFrameCameraTransforms, InWorld,
-		                                           DeltaTime);
+		                                           DeltaTime, UpdateContext.CustomCameraInfo);
 
 		if (!GlobalLibrary.CameraViews.Num() || !GlobalLibrary.UpdateGroups.IsValidIndex(UpdateContext.GroupIndex))
 		{
