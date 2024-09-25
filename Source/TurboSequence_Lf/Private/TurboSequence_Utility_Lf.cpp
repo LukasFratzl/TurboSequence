@@ -174,7 +174,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld,
                                               const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo)
 {
-	const bool bHasCustomCameraData = CustomCameraInfo.Num();
+	const bool bHasCustomCameraData = static_cast<bool>(CustomCameraInfo.Num());
 	const bool bIsSinglePlayer = UGameplayStatics::GetNumPlayerControllers(InWorld) < GET2_NUMBER &&
 		CustomCameraInfo.Num() < GET2_NUMBER;
 	int32 MaxNumberPlayerControllers = CustomCameraInfo.Num();
