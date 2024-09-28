@@ -510,7 +510,7 @@ public:
 	float Fov = GET0_NUMBER;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<enum EAspectRatioAxisConstraint> AspectRatioAxisConstraint;
+	TEnumAsByte<enum EAspectRatioAxisConstraint> AspectRatioAxisConstraint = EAspectRatioAxisConstraint::AspectRatio_MAX;
 };
 
 USTRUCT(BlueprintType)
