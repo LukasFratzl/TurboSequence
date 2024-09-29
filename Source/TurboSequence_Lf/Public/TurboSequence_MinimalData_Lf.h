@@ -135,6 +135,15 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimPlaySettings_Lf
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETurboSequence_ManagementMode_Lf AnimationManagementMode = ETurboSequence_ManagementMode_Lf::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OverrideWeight = -1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OverrideStartTime = -1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OverrideEndTime = -1.0f;
 };
 
 //

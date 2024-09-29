@@ -110,6 +110,12 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoCustomization_Lf : public FFeatureDemoBa
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
+	UPROPERTY(EditAnywhere)
+	FTurboSequence_AnimMinimalCollection_Lf TargetAnimations;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FAnimationMetaData_Lf> ExtractedAnimationsData;
+
 	float RandomTimer = 0;
 	int16 RandomIndex = 0;
 

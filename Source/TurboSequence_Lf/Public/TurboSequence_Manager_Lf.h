@@ -35,6 +35,8 @@ public:
 	< - - - - - - - - - - - - - - - - - - - - >
 */
 
+	friend class FTurboSequence_Utility_Lf;
+
 	// For the Frustum Culling we need Camera Transforms
 	inline static TMap<uint8, FTransform> LastFrameCameraTransforms;
 	// Indicates when the Mesh is Solving at the moment
@@ -139,7 +141,8 @@ protected:
 	                                               const TArray<TObjectPtr<UMaterialInterface>>& OverrideMaterials =
 		                                               TArray<TObjectPtr<UMaterialInterface>>(),
 	                                               const TObjectPtr<UTurboSequence_FootprintAsset_Lf>& FootprintAsset =
-		                                               nullptr);
+		                                               nullptr,
+		                                               const int32 OverrideMeshID = INDEX_NONE);
 
 	static bool RemoveSkinnedMeshInstance_GameThread(int32 MeshID, const TObjectPtr<UWorld> InWorld);
 
@@ -252,6 +255,17 @@ public:
 		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Contains"))
 	static bool ContainsMeshIDInUpdateGroup_Concurrent(const int32 MeshID,
 	                                                   const int32 GroupIndex);
+
+	/**
+ * Checks if the given Mesh ID is present in the specified Update Group concurrently and returns the index.
+ *
+ * @param MeshID The ID of the Mesh to check for in the Update Group
+ *
+ * @return the Update group index, otherwise on error -1
+ */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
+		meta=(Keywords="Turbo, Sequence, TS, Update, Mesh, Group, Get"))
+	static int32 GetUpdateGroupIndexFromMeshID_Concurrent(const int32 MeshID);
 
 	/**
  * Gets the Mesh Data from a Mesh ID
@@ -440,6 +454,18 @@ public:
 		UBlendSpace* BlendSpace,
 		const FTurboSequence_AnimPlaySettings_Lf& AnimSettings
 	);
+
+
+	// /**
+ // * Gets all Animations Playing right now on the character as an animation collection array
+ // * @param OutAnimations The animation collection array output
+ // * @param MeshData The Mesh ID
+ // */
+	// UFUNCTION(BlueprintPure, Category="Turbo Sequence",
+	// 	meta=(ReturnDisplayName="Animation Sequence", Keywords="Turbo, Sequence, TS, Get, Animation, Play, Priority"))
+	// static void GetAllAnimationsFromMeshData_Concurrent(
+	// TArray<FTurboSequence_AnimMinimalCollection_Lf> OutAnimations,
+	// 	const FTurboSequence_MinimalMeshData_Lf& MeshData);
 
 
 	/**
@@ -669,7 +695,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Customize, Change, Mesh, Material"))
-	static bool CustomizeMesh_RawID_GameThread(int32 MeshID,
+	static int32 CustomizeMesh_RawID_GameThread(int32 MeshID,
 	                                           UTurboSequence_MeshAsset_Lf* TargetMesh,
 	                                           const TArray<UMaterialInterface*>& TargetMaterials);
 

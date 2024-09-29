@@ -335,21 +335,26 @@ struct TURBOSEQUENCE_LF_API FAnimationMetaData_Lf
 
 	FORCEINLINE void SetAnimationID(const TMap<uint32, int32>& InputCollection, int32 BelongsToMeshID)
 	{
-		uint32 SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
+		uint32 SecurityNumber = FMath::RandRange(GET0_NUMBER, INT32_MAX);
 		// Set the hash
 		AnimationID = SetHash(SecurityNumber);
 		// We don't want a 0 Hash because it's the Instance Return type when the function cancel unexpected
 		// Here we check if the hash is unique, if not we run the loop again,
 		// usually on the 1st try it already pass the check fine
-		while (InputCollection.Contains(AnimationID) || (!InputCollection.Contains(AnimationID) && AnimationID ==
+		while (InputCollection.Contains(AnimationID) || (!InputCollection.Contains(AnimationID) && AnimationID <=
 			GET0_NUMBER))
 		{
-			SecurityNumber = FMath::RandRange(INT32_MIN, INT32_MAX);
+			SecurityNumber = FMath::RandRange(GET0_NUMBER, INT32_MAX);
 			SecurityNumber++;
 			AnimationID = SetHash(SecurityNumber);
 		}
 
 		AnimationID = HashCombine(AnimationID, BelongsToMeshID);
+	}
+
+	FORCEINLINE void SetAnimationID(const uint32 ID)
+	{
+		AnimationID = ID;
 	}
 };
 
@@ -533,6 +538,9 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 
 	// < Material Hash | Data >
 	TMap<uint32, FRenderData_Lf> RenderData;
+
+	UPROPERTY()
+	TObjectPtr<UWorld> FromWorld = nullptr;
 };
 
 /*	==============================================================================================================
@@ -597,14 +605,22 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	}
 
 	explicit FSkinnedMeshRuntime_Lf(const TMap<int32, FSkinnedMeshRuntime_Lf>& InputCollection,
-	                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset)
+	                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
+	                                const int32 OverrideMeshID = INDEX_NONE)
 	{
-		MeshID = FMath::RandRange(0, INT32_MAX - 1);
-		MeshID++;
-		while (InputCollection.Contains(MeshID) || (!InputCollection.Contains(MeshID) && MeshID < GET0_NUMBER))
+		if (OverrideMeshID > INDEX_NONE && !InputCollection.Contains(OverrideMeshID))
+		{
+			MeshID = OverrideMeshID;
+		}
+		else
 		{
 			MeshID = FMath::RandRange(0, INT32_MAX - 1);
 			MeshID++;
+			while (InputCollection.Contains(MeshID) || (!InputCollection.Contains(MeshID) && MeshID < GET0_NUMBER))
+			{
+				MeshID = FMath::RandRange(0, INT32_MAX - 1);
+				MeshID++;
+			}
 		}
 
 		DataAsset = Asset;
@@ -658,6 +674,8 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	TObjectPtr<AActor> HybridMeshInstance;
 
 	bool bSpawnedHybridActor = false;
+
+	int32 UpdateGroupIndex = INDEX_NONE;
 };
 
 

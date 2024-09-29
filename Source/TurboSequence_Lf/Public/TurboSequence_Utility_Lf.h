@@ -20,6 +20,8 @@ public:
 	FTurboSequence_Utility_Lf() = delete;
 	~FTurboSequence_Utility_Lf() = delete;
 
+	friend class ATurboSequence_Manager_Lf;
+
 	// Licence Start
 	// Copyright Epic Games, Inc. All Rights Reserved.
 	/**
@@ -270,18 +272,6 @@ public:
 	static int32 GetValidBoneData(int32 FromData, uint8 CurrentInfluenceIndex,
 	                              uint8 MaxInfluenceIndex);
 	/**
-	 * Caches TurboSequence assets in the given libraries and critical section.
-	 *
-	 * @param Library The global library to cache the assets in.
-	 * @param Library_RenderThread The render thread library to cache the assets in.
-	 * @param CriticalSection The critical section to use for thread safety.
-	 *
-	 * @throws None
-	 */
-	static void CacheTurboSequenceAssets(FSkinnedMeshGlobalLibrary_Lf& Library,
-	                                     FSkinnedMeshGlobalLibrary_RenderThread_Lf&
-	                                     Library_RenderThread, FCriticalSection& CriticalSection);
-	/**
 	 * Creates asynchronous chunked mesh data based on the provided mesh asset, global data, and libraries.
 	 *
 	 * @param FromAsset The mesh asset used to create the chunked mesh data.
@@ -289,6 +279,7 @@ public:
 	 * @param Library The global library used to create the chunked mesh data.
 	 * @param Library_RenderThread The render thread library used to create the chunked mesh data.
 	 * @param CriticalSection The critical section used for thread safety.
+	 * @param InWorld The world this data getting created.
 	 *
 	 * @throws None
 	 */
@@ -296,7 +287,8 @@ public:
 	                                       const TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData,
 	                                       FSkinnedMeshGlobalLibrary_Lf& Library,
 	                                       FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                                       FCriticalSection& CriticalSection);
+	                                       FCriticalSection& CriticalSection,
+	                                       const TObjectPtr<UWorld> InWorld);
 	/**
 	 * Refreshes asynchronous chunked mesh data based on the provided global data and libraries.
 	 *
@@ -318,6 +310,7 @@ public:
 	 * @param Library_RenderThread The render thread library to store the render thread reference data.
 	 * @param CriticalSection The critical section for thread safety.
 	 * @param FromAsset The TurboSequence asset from which to create the reference.
+	 * @param InWorld The world this reference belongs to.
 	 *
 	 * @return None
 	 *
@@ -326,7 +319,8 @@ public:
 	static void CreateTurboSequenceReference(FSkinnedMeshGlobalLibrary_Lf& Library,
 	                                         FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
 	                                         FCriticalSection& CriticalSection,
-	                                         const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset);
+	                                         const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
+	                                         const TObjectPtr<UWorld> InWorld);
 	/**
 	 * Creates level of details for a skinned mesh reference.
 	 *
@@ -459,14 +453,10 @@ public:
  *
  * @throws None
  */
-	static void CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime, const TObjectPtr<UTurboSequence_MeshAsset_Lf> TargetMesh,
-	                          const TArray<TObjectPtr<UMaterialInterface>>& TargetMaterials,
-	                          TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>&
-	                          NiagaraComponents, FSkinnedMeshGlobalLibrary_Lf
-	                          & Library,
-	                          FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
-	                          const TObjectPtr<USceneComponent> RootComponent,
-	                          const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
+	// static int32 CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime, const TObjectPtr<UTurboSequence_MeshAsset_Lf> TargetMesh,
+	//                           const TArray<TObjectPtr<UMaterialInterface>>& TargetMaterials,
+	//                           const TObjectPtr<USceneComponent> RootComponent,
+	//                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	/**
      * Updates the instance transform of a skinned mesh reference based on the provided player views.
@@ -952,6 +942,7 @@ public:
 	 * @param OverrideWeight The optional override weight for the animation.
 	 * @param OverrideStartTime The optional override start time for the animation.
 	 * @param OverrideEndTime The optional override end time for the animation.
+	 * @param OverrideAnimationID The optional override ID for the animation.
 	 *
 	 * @return The ID of the played animation.
 	 *
@@ -965,7 +956,8 @@ public:
 	                            UAnimSequence* Animation,
 	                            const FTurboSequence_AnimPlaySettings_Lf& AnimSettings, const bool bIsLoop,
 	                            float OverrideWeight = INDEX_NONE,
-	                            float OverrideStartTime = INDEX_NONE, float OverrideEndTime = INDEX_NONE);
+	                            float OverrideStartTime = INDEX_NONE, float OverrideEndTime = INDEX_NONE,
+	                            uint32 OverrideAnimationID = GET0_NUMBER);
 	/**
 	 * Returns the animation sequence with the highest priority from the given runtime.
 	 *

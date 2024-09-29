@@ -172,9 +172,7 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 			ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(0, MeshData);
 
 			FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
-			//AnimationPlaySettings.Animation = CustomizationDemo.DemoAnimation;
-			ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(MeshData, CustomizationDemo.DemoAnimation,
-			                                                    AnimationPlaySettings);
+			CustomizationDemo.TargetAnimations = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(MeshData, CustomizationDemo.DemoAnimation, AnimationPlaySettings);
 
 			CustomizationDemo.MeshData.Add(MeshData);
 		}
@@ -444,12 +442,28 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 			ATurboSequence_Demo_Lf::GetRandomMeshSpawnData(CustomizableData, CustomizationDemo.CategorizedRootData,
 			                                               CustomizationDemo.CategorizeCustomizableData, nullptr);
 
-			ATurboSequence_Manager_Lf::CustomizeMesh_GameThread(
-				CustomizationDemo.MeshData[CustomizationDemo.RandomIndex], CustomizableData);
+			FTurboSequence_MinimalMeshData_Lf& Mesh = CustomizationDemo.MeshData[CustomizationDemo.RandomIndex];
+
+			// FAnimationMetaData_Lf AnimationMetaData;
+			// ATurboSequence_Manager_Lf::GetAnimationMetaData_Concurrent(AnimationMetaData, CustomizationDemo.TargetAnimations.RootMotionMesh);
+			// FTurboSequence_AnimPlaySettings_Lf AnimPlaySettings = AnimationMetaData.Settings;
+			// // Sync the Animation Time
+			// AnimPlaySettings.AnimationPlayTimeInSeconds = AnimationMetaData.AnimationTime;
+			// // Force Override this animation Layer
+			// AnimPlaySettings.ForceMode = ETurboSequence_AnimationForceMode_Lf::PerLayer;
+			ATurboSequence_Manager_Lf::CustomizeMesh_GameThread(Mesh, CustomizableData);
+			// CustomizationDemo.TargetAnimations = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(Mesh, CustomizationDemo.DemoAnimation, AnimPlaySettings);
 
 			CustomizationDemo.RandomIndex++;
 			CustomizationDemo.RandomIndex = CustomizationDemo.RandomIndex % CustomizationDemo.MeshData.Num();
 		}
+
+		// ATurboSequence_Manager_Lf::GetAnimationCollectionMetaData_Concurrent(CustomizationDemo.ExtractedAnimationsData, CustomizationDemo.TargetAnimations);
+		// for (auto& Element : CustomizationDemo.ExtractedAnimationsData)
+		// {
+		// 	UE_LOG(LogTemp, Warning, TEXT("%d"), Element.AnimationID)
+		// }
+		// UE_LOG(LogTemp, Warning, TEXT("Done"))
 	}
 
 	if (BlendSpaceDemo.bEnable && BlendSpaceDemo.MeshData.Num() && BlendSpaceDemo.TweakingBlendSpace.
