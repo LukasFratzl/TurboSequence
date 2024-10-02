@@ -345,16 +345,15 @@ The whole Turbo Sequence API is inside 2 Files:
 - `TurboSequence_Manager_Lf.h` which contains all Functions and can be found [Here](https://github.com/LukasFratzl/TurboSequence/blob/main/Source/TurboSequence_Lf/Public/TurboSequence_Manager_Lf.h) in the Repo
 - `TurboSequence_MinimalData_Lf.h` which contains the top level structures of the API, which can be found [Here](https://github.com/LukasFratzl/TurboSequence/blob/main/Source/TurboSequence_Lf/Public/TurboSequence_MinimalData_Lf.h) in the Repo
 
+---
+
+# Optimization
 
 Graphics Card Memory is mostly limited across multiple Target Devices, so it makes sense using the CPU Memory, there are some engines out there which does work mostly on the GPU but for Unreal Engine this is not the case, a lot of it like Animations etc. are still using massively the CPU.
 
 It also makes no sense to cache most of the Data, because in the end on a complicated system the amount of memory can be a bottleneck, sometimes generating the data at runtime is much faster.
 
 Here some performance optimization guidelines:
-
----
-
-# Optimization
 
 ## CPU Time
 
