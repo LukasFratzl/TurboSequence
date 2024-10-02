@@ -77,7 +77,7 @@ Here is a little checklist from the import of the Mesh to the production-ready T
 ### 3) Write or Use an Animation Controller
 
 - Navigate to Plugins\TurboSequence\Resources and find BP_TurboSequence_MeshTester_Lf, drag and drop it into your map and assign the mesh
-- Most Projects need to write specific Animation Controllers, in this case, there is a C++ API -> [Here](https://github.com/LukasFratzl/Turbo-Sequence/wiki/Get-Started-with-the-Scripting-API)
+- Most Projects need to write specific Animation Controllers, in this case, there is a C++ API -> [Here](https://github.com/LukasFratzl/TurboSequence/blob/main/DOCS.md#get-started-with-the-scripting-api)
 
 ## Materials
 
@@ -145,7 +145,7 @@ Mesh Assets are Data Assets that store info about the Mesh, like all TS Mesh pro
 ![Mesh Asset](https://github.com/LukasFratzl/Turbo-Sequence/blob/main/TS_WikiResources/MeshAssetExample.png)
 
 When Tweaking the Mesh Asset, you can optimize a lot of CPU and GPU Times by simply iterating over, adjusting the settings and play testing.
-Some performance optimization best practices can be found [Here](https://github.com/LukasFratzl/Turbo-Sequence/wiki/Performance-Optimization-Guidelines).
+Some performance optimization best practices can be found [Here](https://github.com/LukasFratzl/TurboSequence/blob/main/DOCS.md#optimization).
 
 
 ---
