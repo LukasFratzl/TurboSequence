@@ -31,7 +31,13 @@ if (SwTextureOffset)
 {
 	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
 
-	float2 UVs = Parameters.TexCoords[NUM_MATERIAL_TEXCOORDS_VERTEX - 1];
+	int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
+	if (MeshDataUVChannelOverride > -0.5f)
+	{
+		UVChannelIndex = MeshDataUVChannelOverride;
+	}
+
+	float2 UVs = Parameters.TexCoords[UVChannelIndex];
 	int VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
 	// Setting0.z -> Custom States offset
 
