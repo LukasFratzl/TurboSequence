@@ -112,7 +112,6 @@ inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 //         creates -135 AS 2 Byte value
 #define GET135_NEGATIVE_NUMBER ( static_cast<int16>(-135) )
 
-
 // -> Licence Start
 // Copyright Epic Games, Inc. All Rights Reserved.
 UENUM(BlueprintType)
@@ -324,6 +323,14 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FAnimPose_Lf
 
 // -> Licence End
 
+
+UENUM(BlueprintType)
+enum class ETurboSequence_MeshDataMode_Lf : uint8
+{
+	UV,
+	VertexColor
+};
+
 /**
  * 
  */
@@ -385,6 +392,7 @@ public:
 	inline static const FName NameMaterialParameterMeshDataTexture = FName("SkinWeight_Texture2DArray");
 	inline static const FName NameMaterialParameterMeshDataTextureSizeX = FName("SkinWeight_TexX");
 	inline static const FName NameMaterialParameterMeshDataTextureSizeY = FName("SkinWeight_TexY");
+	inline static const FName NameMaterialParameterMeshDataMode = FName("MeshDataMode_TS");
 
 
 	// -> Licence Start
@@ -1007,6 +1015,7 @@ public:
 
 		return Color;
 	}
+
 
 	static FORCEINLINE_DEBUGGABLE uint16 EncodeUInt16ToUInt8Vector2(const FIntVector2& Int8Vector)
 	{

@@ -88,6 +88,7 @@ enum class EShow_ControlPanel_Properties_Lf : uint8
 	Skeletal_Mesh,
 	Skeletal_Mesh_Reference,
 	MaxInstancedLevelOfDetails,
+	MeshDataModeToGenerate,
 	TweakGlobalTextureSection
 };
 
@@ -149,6 +150,9 @@ public:
 	int32 MaxNumberOfLODs = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference;
 
 	UPROPERTY(EditAnywhere, Category="Lod")
@@ -192,7 +196,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh,
-	                     UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* TweakGlobalTextures);
+	                     UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* MeshDataModeToGenerate,
+	                     UPropertyViewBase* TweakGlobalTextures);
 
 	UFUNCTION(BlueprintCallable)
 	void CreateProperties();
@@ -376,7 +381,8 @@ public:
 	static TObjectPtr<UStaticMesh> GenerateStaticMeshFromSkeletalMesh(const TObjectPtr<USkeletalMesh> SkeletalMesh,
 	                                                                  int32 LodIndex, const FString& InPath,
 	                                                                  const FString& InAssetName,
-	                                                                  TArray<int32>& OutMeshIndicesOrder)
+	                                                                  TArray<int32>& OutMeshIndicesOrder,
+	                                                                  const ETurboSequence_MeshDataMode_Lf MeshDataMode)
 	{
 		if (FString PackageName; FPackageName::TryConvertFilenameToLongPackageName(InPath, PackageName))
 		{
@@ -411,27 +417,56 @@ public:
 			const FSkeletalMeshLODRenderData& LodResource = RenderData->LODRenderData[LodIndex];
 			uint32 MaxNumTextCoord = LodResource.StaticVertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
 
-			MaxNumTextureCoordinate = FMath::Max(MaxNumTextCoord + GET1_NUMBER, MaxNumTextureCoordinate);
-
 			FSkeletalMeshAttributes MeshAttributes(MeshDescription);
 
-			TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = MeshAttributes.GetVertexInstanceUVs();
-
-			VertexInstanceUVs.InsertChannel(MaxNumTextCoord);
-
-			int32 NumIndices = LodModel.IndexBuffer.Num();
-			for (int32 Idx = GET0_NUMBER; Idx < NumIndices; ++Idx)
+			if (MeshDataMode == ETurboSequence_MeshDataMode_Lf::UV)
 			{
-				const int32 VertexID = LodModel.IndexBuffer[Idx];
+				MaxNumTextureCoordinate = FMath::Max(MaxNumTextCoord + GET1_NUMBER, MaxNumTextureCoordinate);
 
-				if (!OutMeshIndicesOrder.Contains(VertexID))
+				TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = MeshAttributes.GetVertexInstanceUVs();
+
+				VertexInstanceUVs.InsertChannel(MaxNumTextCoord);
+
+				int32 NumIndices = LodModel.IndexBuffer.Num();
+				for (int32 Idx = GET0_NUMBER; Idx < NumIndices; ++Idx)
 				{
-					OutMeshIndicesOrder.Add(VertexID);
+					const int32 VertexID = LodModel.IndexBuffer[Idx];
+
+					if (!OutMeshIndicesOrder.Contains(VertexID))
+					{
+						OutMeshIndicesOrder.Add(VertexID);
+					}
+
+					const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(VertexID);
+
+					VertexInstanceUVs.Set(Idx, MaxNumTextCoord, FVector2f(BitValues.X, BitValues.Y));
 				}
+			}
+			else // Generate Vertex Color Instead
+			{
+				//const bool bHasVertexColors = EnumHasAllFlags(SkeletalMesh->GetVertexBufferFlags(), ESkeletalMeshVertexFlags::HasVertexColors);
 
-				const FIntVector2 BitValues = FTurboSequence_Helper_Lf::DecodeUInt32ToUInt16(VertexID);
+				TVertexInstanceAttributesRef<FVector4f> VertexInstanceColor = MeshAttributes.GetVertexInstanceColors();
 
-				VertexInstanceUVs.Set(Idx, MaxNumTextCoord, FVector2f(BitValues.X, BitValues.Y));
+				// if (!bHasVertexColors)
+				// {
+				//
+				// }
+
+				int32 NumIndices = LodModel.IndexBuffer.Num();
+				for (int32 Idx = GET0_NUMBER; Idx < NumIndices; ++Idx)
+				{
+					const int32 VertexID = LodModel.IndexBuffer[Idx];
+
+					if (!OutMeshIndicesOrder.Contains(VertexID))
+					{
+						OutMeshIndicesOrder.Add(VertexID);
+					}
+
+					const FVector4f BitValues = FVector4f(FTurboSequence_Helper_Lf::DecodeUInt32ToColor(VertexID));
+
+					VertexInstanceColor.Set(Idx, BitValues);
+				}
 			}
 
 

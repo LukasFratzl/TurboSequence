@@ -156,7 +156,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 								TurboSequence_Asset->ReferenceMeshEdited, MeshIdx, PackagePath,
 								FString(FString::Format(
 									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)})),
-								StaticMeshOrderIndices))
+								StaticMeshOrderIndices, TurboSequence_Asset->MeshDataMode))
 						{
 							//FMeshItem_Lf Item = FMeshItem_Lf();
 							if (MeshIdx > GET9_NUMBER)
