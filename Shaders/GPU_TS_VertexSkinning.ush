@@ -34,7 +34,7 @@ if (SwTextureOffset)
 	int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
 	if (MeshDataUVChannelOverride > -0.5f)
 	{
-		UVChannelIndex = MeshDataUVChannelOverride;
+		UVChannelIndex = (int)MeshDataUVChannelOverride;
 	}
 
 	float2 UVs = Parameters.TexCoords[UVChannelIndex];
