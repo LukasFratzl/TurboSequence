@@ -174,6 +174,9 @@ public:
 	TObjectPtr<UTurboSequence_AnimLibrary_Lf> AnimationLibrary;
 
 	UPROPERTY(VisibleAnywhere)
+	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
+
+	UPROPERTY(VisibleAnywhere)
 	TArray<FMeshData_Lf> MeshData;
 
 	int32 MeshDataCustomData = GET0_NUMBER;

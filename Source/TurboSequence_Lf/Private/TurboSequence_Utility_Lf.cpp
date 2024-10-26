@@ -135,6 +135,15 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
 			FromAsset->MeshDataTexture->GetSizeY());
 
+		float DataMode = 0.0f;
+		if (FromAsset->MeshDataMode == ETurboSequence_MeshDataMode_Lf::VertexColor)
+		{
+			DataMode = 1.0f;
+		}
+		MaterialInstance->SetScalarParameterValue(
+			FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
+			DataMode);
+
 		if (!IsValid(RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer))
 		{
 			continue;

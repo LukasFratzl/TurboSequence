@@ -31,15 +31,26 @@ if (SwTextureOffset)
 {
 	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
 
-	int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
-	if (MeshDataUVChannelOverride > -0.5f)
+	int VertexBaseIndex = 0;
+	if (MeshDataMode > 0.5f) // Vertex Color
 	{
-		UVChannelIndex = (int)MeshDataUVChannelOverride;
+		float4 VertexColorScaled = float4(VertexInstanceColorTS_Lf.x * 0xFF, VertexInstanceColorTS_Lf.y * 0xFF,
+		 									VertexInstanceColorTS_Lf.z * 0xFF, VertexInstanceColorTS_Lf.w * 0xFF);
+		VertexBaseIndex = EncodeFunction.EncodeUInt32ToColor_Float(VertexColorScaled) * 7 + (SwTextureOffset - Settings0.z);
+		// Setting0.z -> Custom States offset
 	}
+	else // UV
+	{
+		int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
+		if (MeshDataUVChannelOverride > -0.5f)
+		{
+			UVChannelIndex = MeshDataUVChannelOverride;
+		}
 
-	float2 UVs = Parameters.TexCoords[UVChannelIndex];
-	int VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
-	// Setting0.z -> Custom States offset
+		float2 UVs = Parameters.TexCoords[UVChannelIndex];
+		VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
+		// Setting0.z -> Custom States offset
+	}
 
 	int TTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.z, CustomData.w);
 	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];

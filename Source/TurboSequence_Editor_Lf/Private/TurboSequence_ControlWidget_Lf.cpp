@@ -59,6 +59,8 @@ void UTurboSequence_ControlWidget_Lf::OnAssignMainAsset()
 		LevelOfDetails = Main_Asset_To_Edit->InstancedMeshes;
 
 		MaxNumberOfLODs = Main_Asset_To_Edit->MaxLevelOfDetails;
+
+		MeshDataMode = Main_Asset_To_Edit->MeshDataMode;
 	}
 	else // Reset the values that way
 	{
@@ -137,12 +139,14 @@ void UTurboSequence_ControlWidget_Lf::CacheButtons(TArray<UButton*> WelcomeButto
 void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAsset,
                                                       UPropertyViewBase* LodZeroSkeletalMesh,
                                                       UPropertyViewBase* MaxLevelOfDetailsToGenerate,
+                                                      UPropertyViewBase* MeshDataModeToGenerate,
                                                       UPropertyViewBase* TweakGlobalTextures)
 {
 	AddPropertyToArray(MainAsset, EShow_ControlPanel_Properties_Lf::Main_Asset);
 	AddPropertyToArray(LodZeroSkeletalMesh, EShow_ControlPanel_Properties_Lf::Skeletal_Mesh);
 
 	AddPropertyToArray(MaxLevelOfDetailsToGenerate, EShow_ControlPanel_Properties_Lf::MaxInstancedLevelOfDetails);
+	AddPropertyToArray(MeshDataModeToGenerate, EShow_ControlPanel_Properties_Lf::MeshDataModeToGenerate);
 
 	AddPropertyToArray(TweakGlobalTextures, EShow_ControlPanel_Properties_Lf::TweakGlobalTextureSection);
 }
@@ -357,7 +361,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(
 					NewMesh, i, WantedMeshPath,
 					FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})),
-					StaticMeshIndices))
+					StaticMeshIndices, MeshDataMode))
 				{
 					FMeshItem_Lf Item = FMeshItem_Lf();
 					if (i > GET9_NUMBER)
@@ -382,6 +386,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 			{
 				Main_Asset_To_Edit->InstancedMeshes = LevelOfDetails;
 				Main_Asset_To_Edit->MeshDataOrderView = MeshDataOrderView;
+				Main_Asset_To_Edit->MeshDataMode = MeshDataMode;
 
 				if (GIsEditor)
 				{
