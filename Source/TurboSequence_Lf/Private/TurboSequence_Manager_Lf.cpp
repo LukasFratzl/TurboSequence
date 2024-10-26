@@ -83,61 +83,64 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				continue;
 			}
 
-			if (RenderData.Value.bChangedCollectionSizeThisFrame)
-			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
-				RenderData.Value.bChangedCollectionSizePreviousFrame = true;
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-					NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
-			}
+			// if (RenderData.Value.bChangedCollectionSizeThisFrame)
+			// {
+			// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+			// 		NiagaraComponent, RenderData.Value.GetParticleIDAddName(), RenderData.Value.ParticleIDs);
+			// 	RenderData.Value.bChangedCollectionSizePreviousFrame = true;
+			// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+			// 		NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
+			// }
 
 			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame",
 			                                  RenderData.Value.bChangedCollectionSizeThisFrame || RenderData.Value.
 			                                  bChangedCollectionSizePreviousFrame);
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+				NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+
+			// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+			// 	NiagaraComponent, RenderData.Value.GetParticleIDRemoveName(), RenderData.Value.ParticleRemoveIDs);
+
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+				NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			if (RenderData.Value.bChangedCollectionSizePreviousFrame && !RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
 				RenderData.Value.bChangedCollectionSizePreviousFrame = false;
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-					NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
-
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-					NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			}
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
+				NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
 			if (RenderData.Value.bChangedLodCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
-					NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
 			}
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
+				NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			if (RenderData.Value.bChangedCustomDataCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
-					NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			}
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
+				NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			if (RenderData.Value.bChangedPositionCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
-					NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			}
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
+				NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
 			if (RenderData.Value.bChangedRotationCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
-					NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
 			}
 
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
+				NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			if (RenderData.Value.bChangedScaleCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
-				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
-					NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			}
 
 			RenderData.Value.bChangedLodCollectionThisFrame = false;
@@ -150,9 +153,9 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			// ParticleIDs needs to have the last frame valid Indices
 			if (RenderData.Value.ParticlesToRemove.Num())
 			{
-				for (const int32 ParticleIndexToRemove : RenderData.Value.ParticlesToRemove)
+				for (const int32 ParticleIDToRemove : RenderData.Value.ParticlesToRemove)
 				{
-					RenderData.Value.ParticleIDs.RemoveAt(ParticleIndexToRemove);
+					RenderData.Value.ParticleIDs.Remove(ParticleIDToRemove);
 				}
 			}
 			RenderData.Value.ParticlesToRemove.Empty();

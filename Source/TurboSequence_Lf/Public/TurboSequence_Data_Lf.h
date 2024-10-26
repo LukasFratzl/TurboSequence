@@ -88,6 +88,7 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 	// ID
 	TMap<int32, int32> InstanceMap; // < MeshID | Renderer Instance Index >
 	TArray<int32> ParticleIDs; // < Unique ID > -> Used internally for Niagara finding the Index
+	TMap<int32, int32> ParticleIDMap; // < MeshID | UniqueID >
 
 	// Transform
 	TArray<FVector> ParticlePositions;

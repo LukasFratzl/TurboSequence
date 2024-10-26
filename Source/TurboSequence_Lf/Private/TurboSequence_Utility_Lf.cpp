@@ -1445,6 +1445,8 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 
 	const int32 InstanceIndex = RenderData.InstanceMap.Num();
 	RenderData.InstanceMap.Add(Runtime.GetMeshID(), InstanceIndex);
+	//RenderData.ParticleRemoveIDs.Add(RenderData.GetUniqueID());
+	RenderData.ParticleIDMap.Add(Runtime.GetMeshID(), RenderData.GetUniqueID());
 	RenderData.ParticleIDs.Add(RenderData.GetUniqueID());
 
 	RenderData.ParticlePositions.Add(WorldSpaceTransform.GetLocation());
@@ -1500,9 +1502,11 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
 	RenderData.ParticleRotations.RemoveAt(InstanceIndex);
 	RenderData.ParticleScales.RemoveAt(InstanceIndex);
 	RenderData.ParticleLevelOfDetails.RemoveAt(InstanceIndex);
+	//RenderData.ParticleIDs.RemoveAt(InstanceIndex);
 
 	// Removing IDs happens on the removal of this Array in Tick()
-	RenderData.ParticlesToRemove.Add(InstanceIndex);
+	RenderData.ParticlesToRemove.Add(RenderData.ParticleIDMap[Runtime.GetMeshID()]);
+	RenderData.ParticleIDMap.Remove(Runtime.GetMeshID());
 
 	for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
 	{
