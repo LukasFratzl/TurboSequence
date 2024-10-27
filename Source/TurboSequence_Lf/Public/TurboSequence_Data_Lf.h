@@ -87,8 +87,10 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 	// ID
 	TMap<int32, int32> InstanceMap; // < MeshID | Renderer Instance Index >
-	TArray<int32> ParticleIDs; // < Unique ID > -> Used internally for Niagara finding the Index
-	TMap<int32, int32> ParticleIDMap; // < MeshID | UniqueID >
+	//TMap<int32, int32> InstanceMapCopy; // < MeshID | Renderer Instance Index > Needed to Keep the Indices correct
+	//TArray<int32> MeshIDsToRemove;
+	//TArray<int32> ParticleIDs; // < Unique ID > -> Used internally for Niagara finding the Index
+	//TMap<int32, int32> ParticleIDMap; // < MeshID | UniqueID >
 
 	// Transform
 	TArray<FVector> ParticlePositions;
@@ -97,7 +99,8 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 	// Culling and Visibility
 	TArray<uint8> ParticleLevelOfDetails; // Index 32 -> Not Visible
-	TArray<int32> ParticlesToRemove;
+	//TArray<bool> ParticlesToRemove;
+	// TArray<int32> ParticlesToRemoveIndices;
 
 	// Custom Data
 	TArray<float> ParticleCustomData;
@@ -127,18 +130,18 @@ private:
 	FName CustomDataName;
 	FName ParticleRemoveName;
 
-	int32 UniqueID = 0;
+	// int32 UniqueID = 0;
 
 public:
-	FORCEINLINE int32 GetUniqueID() const
-	{
-		return UniqueID;
-	}
-
-	FORCEINLINE void IncrementUniqueID()
-	{
-		UniqueID++;
-	}
+	// FORCEINLINE int32 GetUniqueID() const
+	// {
+	// 	return UniqueID;
+	// }
+	//
+	// FORCEINLINE void IncrementUniqueID()
+	// {
+	// 	UniqueID++;
+	// }
 
 	FORCEINLINE FName& GetEmitterName()
 	{
@@ -606,10 +609,11 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	}
 
 	explicit FSkinnedMeshRuntime_Lf(const TMap<int32, FSkinnedMeshRuntime_Lf>& InputCollection,
+	                                const TMap<int32, bool>& BlacklistedMeshIDs,
 	                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
 	                                const int32 OverrideMeshID = INDEX_NONE)
 	{
-		if (OverrideMeshID > INDEX_NONE && !InputCollection.Contains(OverrideMeshID))
+		if (OverrideMeshID > INDEX_NONE && !InputCollection.Contains(OverrideMeshID) && !BlacklistedMeshIDs.Contains(OverrideMeshID))
 		{
 			MeshID = OverrideMeshID;
 		}
@@ -617,7 +621,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 		{
 			MeshID = FMath::RandRange(0, INT32_MAX - 1);
 			MeshID++;
-			while (InputCollection.Contains(MeshID) || (!InputCollection.Contains(MeshID) && MeshID < GET0_NUMBER))
+			while ((InputCollection.Contains(MeshID) || BlacklistedMeshIDs.Contains(MeshID)) || ((!InputCollection.Contains(MeshID) && !BlacklistedMeshIDs.Contains(MeshID)) && MeshID < GET0_NUMBER))
 			{
 				MeshID = FMath::RandRange(0, INT32_MAX - 1);
 				MeshID++;
@@ -786,6 +790,8 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 
 	TMap<int32, FSkinnedMeshRuntime_Lf> RuntimeSkinnedMeshes;
 	TArray<int32> RuntimeSkinnedMeshesHashMap;
+	TMap<int32, bool> BlackListedMeshIDs;
+
 	// < MeshID | Data >
 	TMap<int32, FTurboSequence_MinimalMeshData_Lf> MeshIDToMinimalData;
 

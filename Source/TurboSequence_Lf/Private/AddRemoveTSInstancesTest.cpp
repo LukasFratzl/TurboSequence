@@ -104,7 +104,7 @@ void AAddRemoveTSInstancesTest::Tick(float DeltaTime)
 
 			if (bIsVisibleOnAnyCamera)
 			{
-				if (!ATurboSequence_Manager_Lf::ContainsMeshDataInUpdateGroup_Concurrent(TestInstance.MeshData, 0))
+				if (!TestInstance.bSpawned)
 				{
 					TestInstance.MeshData = ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(TestInstance.UsedSpawnData, TestInstance.SpawnTransform, GetWorld());
 					if (TestInstance.MeshData.IsMeshDataValid())
@@ -119,7 +119,7 @@ void AAddRemoveTSInstancesTest::Tick(float DeltaTime)
 			}
 			else
 			{
-				if (ATurboSequence_Manager_Lf::ContainsMeshDataInUpdateGroup_Concurrent(TestInstance.MeshData, 0))
+				if (TestInstance.bSpawned)
 				{
 
 					if (ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(TestInstance.MeshData, GetWorld()))

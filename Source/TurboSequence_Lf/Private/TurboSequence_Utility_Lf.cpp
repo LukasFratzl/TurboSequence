@@ -1454,9 +1454,11 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 
 	const int32 InstanceIndex = RenderData.InstanceMap.Num();
 	RenderData.InstanceMap.Add(Runtime.GetMeshID(), InstanceIndex);
+	// const int32 InstanceCopyIndex = RenderData.InstanceMapCopy.Num();
+	// RenderData.InstanceMapCopy.Add(Runtime.GetMeshID(), InstanceCopyIndex);
 	//RenderData.ParticleRemoveIDs.Add(RenderData.GetUniqueID());
-	RenderData.ParticleIDMap.Add(Runtime.GetMeshID(), RenderData.GetUniqueID());
-	RenderData.ParticleIDs.Add(RenderData.GetUniqueID());
+	// RenderData.ParticleIDMap.Add(Runtime.GetMeshID(), RenderData.GetUniqueID());
+	// RenderData.ParticleIDs.Add(RenderData.GetUniqueID());
 
 	RenderData.ParticlePositions.Add(WorldSpaceTransform.GetLocation());
 	RenderData.ParticleRotations.Add(
@@ -1468,7 +1470,9 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 
 	RenderData.ParticleCustomData.AddDefaulted(FTurboSequence_Helper_Lf::NumInstanceCustomData);
 
-	RenderData.IncrementUniqueID(); // Use the same ID as Niagara
+	//RenderData.IncrementUniqueID(); // Use the same ID as Niagara
+	//RenderData.ParticlesToRemove.Add(false);
+
 
 	RenderData.bChangedCollectionSizeThisFrame = true;
 }
@@ -1491,22 +1495,30 @@ void FTurboSequence_Utility_Lf::CleanNiagaraRenderer(
 
 void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& Reference,
                                                      const FSkinnedMeshRuntime_Lf& Runtime,
-                                                     FCriticalSection& CriticalSection)
+                                                     FCriticalSection& CriticalSection,
+                                                     FSkinnedMeshGlobalLibrary_Lf& Library)
 {
 	FScopeLock Lock(&CriticalSection);
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
+	//RenderData.MeshIDsToRemove.Add(Runtime.GetMeshID());
+	Library.BlackListedMeshIDs.Add(Runtime.GetMeshID(), false);
+
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
+	//RenderData.ParticlesToRemove[InstanceIndex] = true;
+	//RenderData.ParticlePositions[InstanceIndex] = FVector(-100000, -100000, -100000); // Remove Point
+
 	RenderData.InstanceMap.Remove(Runtime.GetMeshID());
-	for (TTuple<int32, int32>& Instance : RenderData.InstanceMap)
+	for (TTuple<int32, int32>& Item : RenderData.InstanceMap)
 	{
-		if (Instance.Value > InstanceIndex)
+		if (Item.Value > InstanceIndex)
 		{
-			Instance.Value--;
+			Item.Value--;
 		}
 	}
-
+	//
+	//
 	RenderData.ParticlePositions.RemoveAt(InstanceIndex);
 	RenderData.ParticleRotations.RemoveAt(InstanceIndex);
 	RenderData.ParticleScales.RemoveAt(InstanceIndex);
@@ -1514,8 +1526,9 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
 	//RenderData.ParticleIDs.RemoveAt(InstanceIndex);
 
 	// Removing IDs happens on the removal of this Array in Tick()
-	RenderData.ParticlesToRemove.Add(RenderData.ParticleIDMap[Runtime.GetMeshID()]);
-	RenderData.ParticleIDMap.Remove(Runtime.GetMeshID());
+	//RenderData.ParticleIDMap.Remove(Runtime.GetMeshID());
+	// RenderData.ParticlesToRemove[InstanceIndex] = true;
+	// RenderData.ParticlesToRemoveIndices.Add(InstanceIndex);
 
 	for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
 	{

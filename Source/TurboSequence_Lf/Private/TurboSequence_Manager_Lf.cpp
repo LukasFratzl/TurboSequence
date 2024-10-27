@@ -83,64 +83,65 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				continue;
 			}
 
-			// if (RenderData.Value.bChangedCollectionSizeThisFrame)
-			// {
-			// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-			// 		NiagaraComponent, RenderData.Value.GetParticleIDAddName(), RenderData.Value.ParticleIDs);
-			// 	RenderData.Value.bChangedCollectionSizePreviousFrame = true;
-			// 	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-			// 		NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
-			// }
+			if (RenderData.Value.bChangedCollectionSizeThisFrame)
+			{
+				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+				// 	NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+				RenderData.Value.bChangedCollectionSizePreviousFrame = true;
+				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
+				// 	NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
+			}
 
 			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame",
 			                                  RenderData.Value.bChangedCollectionSizeThisFrame || RenderData.Value.
 			                                  bChangedCollectionSizePreviousFrame);
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-				NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
-
-			// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-			// 	NiagaraComponent, RenderData.Value.GetParticleIDRemoveName(), RenderData.Value.ParticleRemoveIDs);
-
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-				NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			if (RenderData.Value.bChangedCollectionSizePreviousFrame && !RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
 				RenderData.Value.bChangedCollectionSizePreviousFrame = false;
+				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
+				// 	NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
+
+				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
+				// 	NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			}
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
-				NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
+			// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
+			// 		NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
+
+
 			if (RenderData.Value.bChangedLodCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
+					NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
 			}
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
-				NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			if (RenderData.Value.bChangedCustomDataCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
+					NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			}
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
-				NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			if (RenderData.Value.bChangedPositionCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
+					NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			}
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
-				NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
 			if (RenderData.Value.bChangedRotationCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
+					NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
 			}
 
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
-				NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			if (RenderData.Value.bChangedScaleCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
+					NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			}
 
 			RenderData.Value.bChangedLodCollectionThisFrame = false;
@@ -151,14 +152,22 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 
 			RenderData.Value.bChangedCollectionSizeThisFrame = false;
 			// ParticleIDs needs to have the last frame valid Indices
-			if (RenderData.Value.ParticlesToRemove.Num())
-			{
-				for (const int32 ParticleIDToRemove : RenderData.Value.ParticlesToRemove)
-				{
-					RenderData.Value.ParticleIDs.Remove(ParticleIDToRemove);
-				}
-			}
-			RenderData.Value.ParticlesToRemove.Empty();
+			// if (RenderData.Value.ParticlesToRemoveIndices.Num())
+			// {
+			// 	for (const int32 ParticleIndexToRemove : RenderData.Value.ParticlesToRemoveIndices)
+			// 	{
+			// 		RenderData.Value.ParticlesToRemove.RemoveAt(ParticleIndexToRemove);
+			// 	}
+			// }
+			// const int32 NumRemove = RenderData.Value.ParticlesToRemove.Num();
+			// for (int32 i = NumRemove - GET1_NUMBER; i >= GET0_NUMBER; --i)
+			// {
+			// 	if (RenderData.Value.ParticlesToRemove[i])
+			// 	{
+			// 		RenderData.Value.ParticlesToRemove.RemoveAt(i);
+			// 	}
+			// }
+			// RenderData.Value.ParticlesToRemoveIndices.Empty();
 
 			const FBox RendererBounds = FBox(RenderData.Value.MinBounds, RenderData.Value.MaxBounds);
 			NiagaraComponent->SetEmitterFixedBounds(RenderData.Value.GetEmitterName(), RendererBounds);
@@ -167,6 +176,49 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			// so we add a default camera bounds extend to it for the next frame
 			FTurboSequence_Utility_Lf::UpdateCameraRendererBounds(RenderData.Value, GlobalLibrary.CameraViews,
 			                                                      GET100_NUMBER * GET10_NUMBER);
+
+			// for (const int32 MeshIDToRemove : RenderData.Value.MeshIDsToRemove)
+			// {
+			// 	const int32 InstanceIndex = RenderData.Value.InstanceMap[MeshIDToRemove];
+			// 	// RenderData.ParticlePositions[InstanceIndex] = FVector(-100000, -100000, -100000); // Remove Point
+			//
+			// 	RenderData.Value.InstanceMap.Remove(MeshIDToRemove);
+			// 	for (TTuple<int32, int32>& Item : RenderData.Value.InstanceMap)
+			// 	{
+			// 		if (Item.Value > InstanceIndex)
+			// 		{
+			// 			Item.Value--;
+			// 		}
+			// 	}
+			//
+			//
+			// 	RenderData.Value.ParticlePositions.RemoveAt(InstanceIndex);
+			// 	RenderData.Value.ParticleRotations.RemoveAt(InstanceIndex);
+			// 	RenderData.Value.ParticleScales.RemoveAt(InstanceIndex);
+			// 	RenderData.Value.ParticleLevelOfDetails.RemoveAt(InstanceIndex);
+			// 	//RenderData.ParticleIDs.RemoveAt(InstanceIndex);
+			// 	RenderData.Value.ParticlesToRemove.RemoveAt(InstanceIndex);
+			//
+			// 	// Removing IDs happens on the removal of this Array in Tick()
+			// 	//RenderData.ParticleIDMap.Remove(Runtime.GetMeshID());
+			// 	// RenderData.ParticlesToRemove[InstanceIndex] = true;
+			// 	// RenderData.ParticlesToRemoveIndices.Add(InstanceIndex);
+			//
+			// 	for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
+			// 	{
+			// 		int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
+			// 		RenderData.Value.ParticleCustomData.RemoveAt(CustomDataIndex);
+			// 	}
+			// }
+			//RenderData.Value.MeshIDsToRemove.Empty();
+
+			// for (TTuple<int32, int32>& Item : RenderData.Value.InstanceMap)
+			// {
+			// 	if (RenderData.Value.InstanceMapCopy.Contains(Item.Key))
+			// 	{
+			// 		Item.Value = RenderData.Value.InstanceMapCopy[Item.Key];
+			// 	}
+			// }
 		}
 	}
 
@@ -222,6 +274,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 		FootprintAsset.Key->OnPostManagerUpdated_GameThread(DeltaTime);
 	}
 
+	GlobalLibrary.BlackListedMeshIDs.Empty();
 	if (GlobalLibrary.RuntimeSkinnedMeshes.Num())
 	{
 		// Otherwise the Critical Section grow in size until we run out of memory when we don't refresh it...
@@ -442,7 +495,7 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 		}
 
 		// Now it's time to add the actual instance
-		FSkinnedMeshRuntime_Lf Runtime = FSkinnedMeshRuntime_Lf(GlobalLibrary.RuntimeSkinnedMeshes, FromAsset,
+		FSkinnedMeshRuntime_Lf Runtime = FSkinnedMeshRuntime_Lf(GlobalLibrary.RuntimeSkinnedMeshes, GlobalLibrary.BlackListedMeshIDs, FromAsset,
 		                                                        OverrideMeshID);
 		FSkinnedMeshRuntime_RenderThread_Lf Runtime_RenderThread = FSkinnedMeshRuntime_RenderThread_Lf(
 			Runtime.GetMeshID(), FromAsset);
@@ -585,7 +638,7 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 	                                                     Library_RenderThread);
 
 	FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection);
+	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection, GlobalLibrary);
 
 	if (const FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash]; !RenderData.InstanceMap.Num())
 	{

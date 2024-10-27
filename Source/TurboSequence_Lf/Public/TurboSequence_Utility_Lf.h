@@ -513,7 +513,8 @@ public:
 	 */
 	static void RemoveRenderInstance(FSkinnedMeshReference_Lf& Reference,
 	                                 const FSkinnedMeshRuntime_Lf& Runtime,
-	                                 FCriticalSection& CriticalSection);
+	                                 FCriticalSection& CriticalSection,
+	                                 FSkinnedMeshGlobalLibrary_Lf& Library);
 	/**
 	 * Updates the level of detail for a render instance concurrently.
 	 *
