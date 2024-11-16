@@ -1,6 +1,7 @@
 // Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
 #include "/Engine/Public/Platform.ush"
+#include "/Engine/Private/ComputeShaderUtils.ush"
 
 uint NumMeshesPerThread;
 uint NumFirstGPUBones;
@@ -547,37 +548,30 @@ float3x4 BendBoneFromAnimations_Full(in uint BoneIndexCPU, in int AnimStartIndex
 
 
 [numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
-void Main(
-	uint GroupIndex : SV_GroupIndex
-)
+void Main(uint3 GroupId : SV_GroupID, uint GroupIndex : SV_GroupIndex)
 {
 	RW_BoneTransform_OutputTexture[uint3(0, 0, 0)] = float4(0,
-	                                                        0,
-	                                                        NumCustomStates,
-	                                                        NumPixelBuffer);
+															0,
+															NumCustomStates,
+															NumPixelBuffer);
 	RW_BoneTransform_OutputTexture[uint3(1, 0, 0)] = float4(0,
-	                                                        0,
-	                                                        OutputTextureSizeX,
-	                                                        OutputTextureSizeY);
+															0,
+															OutputTextureSizeX,
+															OutputTextureSizeY);
 
 	RW_BoneTransformPrevious_OutputTexture[uint3(0, 0, 0)] = float4(0,
-	                                                                0,
-	                                                                NumCustomStates,
-	                                                                NumPixelBuffer);
+																	0,
+																	NumCustomStates,
+																	NumPixelBuffer);
 	RW_BoneTransformPrevious_OutputTexture[uint3(1, 0, 0)] = float4(0,
-	                                                                0,
-	                                                                OutputTextureSizeX,
-	                                                                OutputTextureSizeY);
+																	0,
+																	OutputTextureSizeX,
+																	OutputTextureSizeY);
 
-	uint ThreadIndex = GroupIndex * NumMeshesPerThread;
-	if (ThreadIndex >= NumMeshesPerFrame)
-	{
-		return;
-	}
-
+	const uint DispatchId = GetUnWrappedDispatchThreadId(GroupId, GroupIndex, THREADS_X * THREADS_Y * THREADS_Z);
 	for (uint MeshIndex = 0; MeshIndex < NumMeshesPerThread; ++MeshIndex)
 	{
-		uint LocalMeshIndex = ThreadIndex + MeshIndex;
+		uint LocalMeshIndex = DispatchId * NumMeshesPerThread + MeshIndex;
 
 		if (LocalMeshIndex >= NumMeshesPerFrame)
 		{

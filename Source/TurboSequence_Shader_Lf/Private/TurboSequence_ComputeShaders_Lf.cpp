@@ -73,13 +73,18 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 			RHICmdList,
 			FRDGEventName(
 				*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::GraphName,
-				                                           Params.ShaderID)), ERDGBuilderFlags::AllowParallelExecute);
+				                                           Params.ShaderID)), ERDGBuilderFlags::Parallel);
 
 
 		const FTurboSequence_BoneTransform_CS_Lf::FPermutationDomain PermutationVector;
 
-		FIntVector GroupCount = FComputeShaderUtils::GetGroupCount(FTurboSequence_BoneTransform_CS_Lf::NumThreads,
-		                                                           FComputeShaderUtils::kGolden2DGroupSize);
+		int32 NumMeshesPerThread = GET1_NUMBER;
+
+		int32 GroupCountX = FMath::CeilToInt32(
+					FMath::CeilToInt32(static_cast<float>(Params.NumMeshes / NumMeshesPerThread)) / static_cast<float>(FTurboSequence_BoneTransform_CS_Lf::NumThreads.X *
+						FTurboSequence_BoneTransform_CS_Lf::NumThreads.Y * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Z));
+
+		FIntVector GroupCount = FComputeShaderUtils::GetGroupCountWrapped(GroupCountX);
 
 		TShaderMapRef<FTurboSequence_BoneTransform_CS_Lf> MeshUnitComputeShader(
 			GetGlobalShaderMap(GMaxRHIFeatureLevel), PermutationVector);
@@ -172,9 +177,9 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->NumLevelOfDetails = Params.NumMaxLevelOfDetails;
 		MeshUnitPassParameters->NumCPUBones = Params.NumMaxCPUBones;
 		MeshUnitPassParameters->NumFirstGPUBones = Params.NumMaxGPUBones;
-		int32 NumMeshesPerThread = FMath::CeilToInt32(
-			static_cast<float>(Params.NumMeshes) / static_cast<float>(FTurboSequence_BoneTransform_CS_Lf::NumThreads.X *
-				FTurboSequence_BoneTransform_CS_Lf::NumThreads.Y * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Z));
+		// int32 NumMeshesPerThread = FMath::CeilToInt32(
+		// 	static_cast<float>(Params.NumMeshes) / static_cast<float>(FTurboSequence_BoneTransform_CS_Lf::NumThreads.X *
+		// 		FTurboSequence_BoneTransform_CS_Lf::NumThreads.Y * FTurboSequence_BoneTransform_CS_Lf::NumThreads.Z));
 		MeshUnitPassParameters->NumMeshesPerThread = NumMeshesPerThread;
 		MeshUnitPassParameters->NumMeshesPerFrame = Params.NumMeshes;
 		MeshUnitPassParameters->NumPixelBuffer = FTurboSequence_Helper_Lf::NumGPUTextureBoneBuffer;
@@ -370,9 +375,7 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	FTurboSequence_Settings_CS_Lf::FParameters* PassParameters = GraphBuilder.AllocParameters<
 		FTurboSequence_Settings_CS_Lf::FParameters>();
 
-	FIntVector GroupCount = FComputeShaderUtils::GetGroupCount(
-		FIntVector(FTurboSequence_Settings_CS_Lf::NumThreads.X, FTurboSequence_Settings_CS_Lf::NumThreads.Y,
-		           GET1_NUMBER), FComputeShaderUtils::kGolden2DGroupSize);
+	FIntVector GroupCount = FIntVector(GET1_NUMBER, GET1_NUMBER, GET1_NUMBER);
 
 	FRDGTextureRef SettingOutputTextureRef;
 	if (Params.bUse32BitTexture)
