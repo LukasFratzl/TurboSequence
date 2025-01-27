@@ -1,0 +1,144 @@
+// Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
+
+struct TurboSequenceEncodeFunctions_Lf
+{
+	// Might Change to Non Bit Shifting Version if compiler <= ES3.2
+	int EncodeUInt16ToUInt32_Int(in uint XValue, in uint YValue)
+	{
+		return YValue * 0xFFFF + XValue;
+	}
+
+	int EncodeUInt16ToUInt32_Float(in float XValue, in float YValue)
+	{
+		return int(YValue) * 0xFFFF + int(XValue);
+	}
+
+	int EncodeUInt32ToColor_Int(in int4 Color)
+	{
+		// return (float)(((int)(Color.x) << 24) | ((int)(Color.y) << 16) | ((int)(Color.z) <<8) | (int)Color.w);
+		return (Color.r << 24) | (Color.g << 16) | (Color.b << 8) | Color.a;
+	}
+
+	int EncodeUInt32ToColor_Float(in float4 Color)
+	{
+		// return (float)(((int)(Color.x) << 24) | ((int)(Color.y) << 16) | ((int)(Color.z) <<8) | (int)Color.w);
+		return (int(Color.r) << 24) | (int(Color.g) << 16) | (int(Color.b) << 8) | int(Color.a);
+	}
+};
+
+struct TurboSequenceVSFunctions_Lf
+{
+	int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
+	{
+		//int TexPow = TextureSizeX * TextureSizeY;
+		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
+		// 		int SliceBase = GetModulus(Index, TexPow);
+		// 		return int3(GetModulus(SliceBase, TextureSizeX), SliceBase / TextureSizeY, Index / TexPow);
+		// #else
+		int SliceBase = Index % TexPow;
+		return int3(SliceBase % TextureSizeX, SliceBase / TextureSizeY, Index / TexPow);
+		// #endif
+	}
+
+	void VertexSkin(inout float3 FinalCurrentBlendPosition, inout float3 FinalPreviousBlendPosition,
+	                in Texture2DArray<float4> TransformTexture_Current,
+	                in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture,
+	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
+	                in int2 MaterialSettings0, in float3 VertexPosition, in bool bEarlyOutInfluences)
+	{
+		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
+		int TransformTexPow = Settings1.z * Settings1.w;
+		//float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+
+		//min16int QualityLevel = (min16int)CustomData.x;
+		for (int i = 0; i < 3; ++i)
+		{
+			int VertexOffsetIndex = VertexBaseIndex + i * 2;
+			int4 Indices = (int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+			int4 Weights = (int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex + 1, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+
+			for (int W = 0; W < 4; ++W)
+			{
+				// Lets early out
+				if (bEarlyOutInfluences && !Weights[W])
+				{
+					return;
+				}
+
+				int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
+				int3x3 BoneMatrixIndices = int3x3(
+					GetDimensionsFromIndex3D(BoneIndex, Settings1.z, Settings1.w, TransformTexPow),
+					GetDimensionsFromIndex3D(BoneIndex + 1, Settings1.z, Settings1.w, TransformTexPow),
+					GetDimensionsFromIndex3D(BoneIndex + 2, Settings1.z, Settings1.w, TransformTexPow));
+
+				float3x4 BoneMatrix_Current = float3x4(
+					TransformTexture_Current[BoneMatrixIndices[0]],
+					TransformTexture_Current[BoneMatrixIndices[1]],
+					TransformTexture_Current[BoneMatrixIndices[2]]
+				);
+
+				float3x4 BoneMatrix_Previous = float3x4(
+					TransformTexture_Previous[BoneMatrixIndices[0]],
+					TransformTexture_Previous[BoneMatrixIndices[1]],
+					TransformTexture_Previous[BoneMatrixIndices[2]]
+				);
+
+				float Weight = (float)Weights[W] / (float)0xFF;
+				FinalCurrentBlendPosition += (mul(BoneMatrix_Current, float4(VertexPosition, 1.0f)).xyz -
+					VertexPosition) * Weight;
+				FinalPreviousBlendPosition += (mul(BoneMatrix_Previous, float4(VertexPosition, 1.0f)).xyz -
+					VertexPosition) * Weight;
+			}
+		}
+	}
+
+	void VertexSkinNormal( inout float3 Normal,
+	                in Texture2DArray<float4> TransformTexture_Current,
+	                in Texture2DArray<float4> SkinWeightTexture,
+	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
+	                in int2 MaterialSettings0, in float3 SourceNormal, in bool bEarlyOutInfluences)
+	{
+		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
+		int TransformTexPow = Settings1.z * Settings1.w;
+
+		//float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+
+		//min16int QualityLevel = (min16int)CustomData.x;
+		for (int i = 0; i < 3; ++i)
+		{
+			int VertexOffsetIndex = VertexBaseIndex + i * 2;
+			int4 Indices = (int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+			int4 Weights = (int4)SkinWeightTexture[GetDimensionsFromIndex3D(
+				VertexOffsetIndex + 1, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+
+			for (int W = 0; W < 4; ++W)
+			{
+				// Lets early out
+				if (bEarlyOutInfluences && !Weights[W])
+				{
+					return;
+				}
+
+				int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
+				int3x3 BoneMatrixIndices = int3x3(
+					GetDimensionsFromIndex3D(BoneIndex, Settings1.z, Settings1.w, TransformTexPow),
+					GetDimensionsFromIndex3D(BoneIndex + 1, Settings1.z, Settings1.w, TransformTexPow),
+					GetDimensionsFromIndex3D(BoneIndex + 2, Settings1.z, Settings1.w, TransformTexPow));
+
+				float3x4 BoneMatrix_Current = float3x4(
+					TransformTexture_Current[BoneMatrixIndices[0]],
+					TransformTexture_Current[BoneMatrixIndices[1]],
+					TransformTexture_Current[BoneMatrixIndices[2]]
+				);
+
+
+				float Weight = (float)Weights[W] / (float)0xFF;
+				Normal += mul(BoneMatrix_Current, float4(SourceNormal, 0.0f)).xyz * Weight;
+
+			}
+		}
+	}
+};

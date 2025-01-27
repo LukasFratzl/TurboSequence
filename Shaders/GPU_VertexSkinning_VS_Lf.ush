@@ -1,79 +1,47 @@
 // Copyright Lukas Fratzl, 2022-2024. All Rights Reserved.
 
-struct TurboSequenceVSFunctions_Lf
-{
-	int3 GetDimensionsFromIndex3D(in int Index, in int TextureSizeX, in int TextureSizeY, in int TexPow)
-	{
-		//int TexPow = TextureSizeX * TextureSizeY;
-		// #if FEATURE_LEVEL <= FEATURE_LEVEL_ES3_1
-		// 		int SliceBase = GetModulus(Index, TexPow);
-		// 		return int3(GetModulus(SliceBase, TextureSizeX), SliceBase / TextureSizeY, Index / TexPow);
-		// #else
-		int SliceBase = Index % TexPow;
-		return int3(SliceBase % TextureSizeX, SliceBase / TextureSizeY, Index / TexPow);
-		// #endif
-	}
-	
-	void VertexSkin(inout float3 FinalCurrentBlendPosition, inout float3 FinalPreviousBlendPosition,
-	                in Texture2DArray<float4> TransformTexture_Current,
-	                in Texture2DArray<float4> TransformTexture_Previous, in Texture2DArray<float4> SkinWeightTexture,
-	                in int TransformTextureOffset, in int VertexBaseIndex, in int Settings0_W, in int4 Settings1,
-	                in int2 MaterialSettings0, in float3 VertexPosition, in bool bEarlyOutInfluences)
-	{
-		int SkinTexPow = MaterialSettings0.x * MaterialSettings0.y; //Settings1.x * Settings1.y;
-		int TransformTexPow = Settings1.z * Settings1.w;
-		//float4 CustomData = SkinWeightTexture[GetDimensionsFromIndex3D(VertexBaseIndex + 6, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
+#pragma once
 
-		//min16int QualityLevel = (min16int)CustomData.x;
-		for (min16int i = 0; i < 3; ++i)
-		{
-			int VertexOffsetIndex = VertexBaseIndex + i * 2;
-			min16int4 Indices = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(
-				VertexOffsetIndex, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
-			min16int4 Weights = (min16int4)SkinWeightTexture[GetDimensionsFromIndex3D(
-				VertexOffsetIndex + 1, MaterialSettings0.x, MaterialSettings0.y, SkinTexPow)];
-
-			for (min16int W = 0; W < 4; ++W)
-			{
-				// Lets early out
-				if (bEarlyOutInfluences && !Weights[W])
-				{
-					return;
-				}
-
-				int BoneIndex = TransformTextureOffset + Indices[W] * Settings0_W;
-				int3x3 BoneMatrixIndices = int3x3(
-					GetDimensionsFromIndex3D(BoneIndex, Settings1.z, Settings1.w, TransformTexPow),
-					GetDimensionsFromIndex3D(BoneIndex + 1, Settings1.z, Settings1.w, TransformTexPow),
-					GetDimensionsFromIndex3D(BoneIndex + 2, Settings1.z, Settings1.w, TransformTexPow));
-
-				float3x4 BoneMatrix_Current = float3x4(
-					TransformTexture_Current[BoneMatrixIndices[0]],
-					TransformTexture_Current[BoneMatrixIndices[1]],
-					TransformTexture_Current[BoneMatrixIndices[2]]
-				);
-
-				float3x4 BoneMatrix_Previous = float3x4(
-					TransformTexture_Previous[BoneMatrixIndices[0]],
-					TransformTexture_Previous[BoneMatrixIndices[1]],
-					TransformTexture_Previous[BoneMatrixIndices[2]]
-				);
-
-				float Weight = (float)Weights[W] / (float)0xFF;
-				FinalCurrentBlendPosition += (mul(BoneMatrix_Current, float4(VertexPosition, 1.0f)).xyz -
-					VertexPosition) * Weight;
-				FinalPreviousBlendPosition += (mul(BoneMatrix_Previous, float4(VertexPosition, 1.0f)).xyz -
-					VertexPosition) * Weight;
-			}
-		}
-	}
-};
+#include "TS_MaterialFunctions.ush"
 
 float3 FinalCurrentFrameBlendPosition = float3(0, 0, 0);
 
 TurboSequenceVSFunctions_Lf f;
 
-	#include "/TurboSequence_Shaders/GPU_TS_VertexSkinning.ush"
+TurboSequenceEncodeFunctions_Lf EncodeFunction;
+
+int SwTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.x, CustomData.y);
+if (SwTextureOffset)
+{
+	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
+
+	int VertexBaseIndex = 0;
+	if (MeshDataMode > 0.5f) // Vertex Color
+	{
+		float4 VertexColorScaled = float4(VertexInstanceColorTS_Lf.x * 0xFF, VertexInstanceColorTS_Lf.y * 0xFF,
+											 VertexInstanceColorTS_Lf.z * 0xFF, VertexInstanceColorTS_Lf.w * 0xFF);
+		VertexBaseIndex = EncodeFunction.EncodeUInt32ToColor_Float(VertexColorScaled) * 7 + (SwTextureOffset - Settings0.z);
+		// Setting0.z -> Custom States offset
+	}
+	else // UV
+	{
+		int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
+		if (MeshDataUVChannelOverride > -0.5f)
+		{
+			UVChannelIndex = MeshDataUVChannelOverride;
+		}
+
+		float2 UVs = Parameters.TexCoords[UVChannelIndex];
+		VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
+		// Setting0.z -> Custom States offset
+	}
+
+	int TTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.z, CustomData.w);
+	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];
+	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
+								  (int)MeshDataTextureDimension.y);
+
+	bool bEarlyOutInfluences = EarlyOutInfluences > 0.1f;
 
 	f.VertexSkin(FinalCurrentFrameBlendPosition, FinalPreviousBlendPosition, TransformTexture_CurrentFrame,
 	             TransformTexture_PreviousFrame, SkinWeightTexture, TTextureOffset, VertexBaseIndex, Settings0.w,

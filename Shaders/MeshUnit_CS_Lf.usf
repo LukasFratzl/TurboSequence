@@ -551,22 +551,22 @@ float3x4 BendBoneFromAnimations_Full(in uint BoneIndexCPU, in int AnimStartIndex
 void Main(uint3 GroupId : SV_GroupID, uint GroupIndex : SV_GroupIndex)
 {
 	RW_BoneTransform_OutputTexture[uint3(0, 0, 0)] = float4(0,
-															0,
-															NumCustomStates,
-															NumPixelBuffer);
+	                                                        0,
+	                                                        NumCustomStates,
+	                                                        NumPixelBuffer);
 	RW_BoneTransform_OutputTexture[uint3(1, 0, 0)] = float4(0,
-															0,
-															OutputTextureSizeX,
-															OutputTextureSizeY);
+	                                                        0,
+	                                                        OutputTextureSizeX,
+	                                                        OutputTextureSizeY);
 
 	RW_BoneTransformPrevious_OutputTexture[uint3(0, 0, 0)] = float4(0,
-																	0,
-																	NumCustomStates,
-																	NumPixelBuffer);
+	                                                                0,
+	                                                                NumCustomStates,
+	                                                                NumPixelBuffer);
 	RW_BoneTransformPrevious_OutputTexture[uint3(1, 0, 0)] = float4(0,
-																	0,
-																	OutputTextureSizeX,
-																	OutputTextureSizeY);
+	                                                                0,
+	                                                                OutputTextureSizeX,
+	                                                                OutputTextureSizeY);
 
 	const uint DispatchId = GetUnWrappedDispatchThreadId(GroupId, GroupIndex, THREADS_X * THREADS_Y * THREADS_Z);
 	for (uint MeshIndex = 0; MeshIndex < NumMeshesPerThread; ++MeshIndex)
