@@ -34,6 +34,11 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 			return;
 		}
 
+		if (!Params.CPUInverseReferencePose.Num())
+		{
+			return;
+		}
+
 		if (!AnimationOutputTextureCurrent->SizeX || !AnimationOutputTextureCurrent->SizeY || !
 			AnimationOutputTextureCurrent
 			->Slices)
