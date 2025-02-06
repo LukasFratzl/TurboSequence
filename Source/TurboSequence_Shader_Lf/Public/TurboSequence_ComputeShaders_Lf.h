@@ -159,7 +159,7 @@ struct TURBOSEQUENCE_SHADER_LF_API FSettingsComputeShader_Params_Lf
 class TURBOSEQUENCE_SHADER_LF_API FTurboSequence_BoneTransform_CS_Lf : public FGlobalShader
 {
 public:
-	inline static FIntVector3 NumThreads = FIntVector3(GET8_NUMBER, GET8_NUMBER, GET1_NUMBER);
+	inline static FIntVector3 NumThreads = FIntVector3(GET32_NUMBER, GET32_NUMBER, GET1_NUMBER);
 
 	inline static const FString GraphName = TEXT("TurboSequence_MeshUnit_ComputeShaderExecute_{0}");
 	inline static const FString DebugName = TEXT("TurboSequence_MeshUnit_Debug_{0}");
