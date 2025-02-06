@@ -41,6 +41,10 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTurboSequence_Lf, Log, All);
 
 inline DEFINE_LOG_CATEGORY(LogTurboSequence_Lf);
 
+#ifndef TURBO_SEQUENCE_DEBUG_GPU_READBACK
+#define TURBO_SEQUENCE_DEBUG_GPU_READBACK 0
+#endif
+
 
 //         creates INFINITY AS 4 Byte value
 #define GET_INFINITY ( TNumericLimits<float>::Max() )

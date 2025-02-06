@@ -330,10 +330,12 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		AddCopyTexturePass(GraphBuilder, AnimationOutputTexturePeviousRef,
 		                   RenderTargetAnimationOutputPreviousFrameTexture, AnimationRenderTargetCopyInfo);
 
+#if TURBO_SEQUENCE_DEBUG_GPU_READBACK
 		if (Params.NumDebugData > GET0_NUMBER)
 		{
 			FTurboSequence_Helper_Lf::CallbackDebugValues(GraphBuilder, OutputDebugBufferRef, DebugData, AsyncCallback);
 		}
+#endif
 
 		// Execute the graph
 		GraphBuilder.Execute();

@@ -254,6 +254,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			Instance->GlobalData->TransformTexture_CurrentFrame, /*Instance->GlobalData->CustomDataTexture,*/
 			[&](TArray<float>& DebugValue)
 			{
+#if TURBO_SEQUENCE_DEBUG_GPU_READBACK
 				if (DebugValue.Num() && !FMath::IsNaN(DebugValue[GET0_NUMBER]) && FMath::IsNearlyEqual(
 					DebugValue[GET0_NUMBER], 777.0f, 0.1f))
 				{
@@ -264,6 +265,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 					}
 					UE_LOG(LogTurboSequence_Lf, Warning, TEXT(" ----- > End Stack < -----"))
 				}
+#endif
 			});
 	}
 
