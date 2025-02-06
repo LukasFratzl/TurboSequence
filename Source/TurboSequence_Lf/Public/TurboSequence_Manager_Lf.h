@@ -49,14 +49,14 @@ public:
 	// The Instance
 	inline static TObjectPtr<ATurboSequence_Manager_Lf> Instance;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<USceneComponent> Root;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	// The Rendering Part needs Niagara to draw the meshes: 1 Draw Call per Mesh | 1 Draw Call per Material
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf> NiagaraComponents;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	// The Global Data which keeps track of internal Texture Data
 	TObjectPtr<UTurboSequence_GlobalData_Lf> GlobalData;
 
@@ -65,7 +65,7 @@ public:
 	inline static TMap<TObjectPtr<UTurboSequence_FootprintAsset_Lf>, int32> FootprintAssetsInUse;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	// The Current Thread Context, Please Call GetThreadContext()
 	TObjectPtr<UTurboSequence_ThreadContext_Lf> CurrentThreadContext_Runtime;
 

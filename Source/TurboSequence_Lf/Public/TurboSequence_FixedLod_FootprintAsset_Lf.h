@@ -28,12 +28,12 @@ public:
 	                                     const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext) override;
 
 
-	UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="31"))
+	UPROPERTY(EditAnywhere, meta=(ClampMin="0", ClampMax="31"), Category="TurboSequence")
 	int32 LodIndex = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	ETurboSequence_IsVisibleOverride_Lf IsVisible = ETurboSequence_IsVisibleOverride_Lf::Default;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	ETurboSequence_IsAnimatedOverride_Lf IsAnimated = ETurboSequence_IsAnimatedOverride_Lf::Default;
 };

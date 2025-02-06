@@ -194,10 +194,10 @@ void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, c
 	OutView.SetNum(MaxNumberPlayerControllers);
 	for (int32 ViewIdx = GET0_NUMBER; ViewIdx < MaxNumberPlayerControllers; ++ViewIdx)
 	{
-		FMinimalViewInfo PlayerMinimalViewInfo;
-		FVector2D LocalPlayerSize;
-		FVector2D ViewportSize;
-		float Fov;
+		FMinimalViewInfo PlayerMinimalViewInfo = FMinimalViewInfo();
+		FVector2D LocalPlayerSize = FVector2D(0,0);
+		FVector2D ViewportSize = FVector2D(0,0);
+		float Fov = 90;
 		TEnumAsByte<enum EAspectRatioAxisConstraint> ConstraintType;
 		if (!bHasCustomCameraData)
 		{

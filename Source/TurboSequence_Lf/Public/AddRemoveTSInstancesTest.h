@@ -40,16 +40,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	int32 NumSpawnInstances = 10000;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	int32 DistanceBetweenMeshes = 700;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTurboSequence_MeshSpawnData_Lf> SpawnData;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> AnimSequence;
 
 	TArray<FTestInstance> TestInstances;

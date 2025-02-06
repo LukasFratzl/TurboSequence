@@ -15,16 +15,16 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bEnable = true;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTransform> ActionTransforms;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTurboSequence_MeshSpawnData_Lf> Spawns;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTurboSequence_MinimalMeshData_Lf> MeshData;
 };
 
@@ -33,7 +33,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoBlending_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTurboSequence_BoneLayer_Lf> BlendLayers;
 
 	float RandomTimer = 0;
@@ -44,13 +44,13 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoTweaking_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FTurboSequence_AnimMinimalCollection_Lf TweakingAnimation;
 
 	float RandomTimer = 0;
 	float RandomAnimationData = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
@@ -59,7 +59,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoRootMotion_Lf : public FFeatureDemoBase_
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
@@ -68,16 +68,16 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoIK_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TMap<FName, float> IKWeights;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	float MasterIKWeight = GET0_NUMBER;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FTransform SpawnOffset = FTransform::Identity;
 };
 
@@ -86,7 +86,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoLod_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
@@ -95,10 +95,10 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoSockets_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName SocketName = FName("Socket");
 };
 
@@ -107,28 +107,28 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoCustomization_Lf : public FFeatureDemoBa
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FTurboSequence_AnimMinimalCollection_Lf TargetAnimations;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FAnimationMetaData_Lf> ExtractedAnimationsData;
 
 	float RandomTimer = 0;
 	int16 RandomIndex = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FDemoMeshSpawnData_Lf> RootAssets;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FDemoMeshSpawnData_Lf> CustomizableAssets;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	FDemoCustomizationContainer_Lf CategorizedRootData;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TMap<FName, FDemoCustomizationContainer_Lf> CategorizeCustomizableData;
 };
 
@@ -137,10 +137,10 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoBlendSpace_Lf : public FFeatureDemoBase_
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UBlendSpace> DemoBlendSpace;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FTurboSequence_AnimMinimalBlendSpaceCollection_Lf TweakingBlendSpace;
 
 	float RandomTimer = 0;
@@ -151,22 +151,22 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoCurves_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FTurboSequence_AnimMinimalCollection_Lf DemoAnimationData;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName CurveName = FName("Curve");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName MaterialParameterName = FName("bIsCurveValue");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UMaterialInstanceDynamic> RfMaterialInstance;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UMaterialInstanceDynamic> LfMaterialInstance;
 };
 
@@ -175,7 +175,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoNormals_Lf : public FFeatureDemoBase_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
@@ -184,7 +184,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoUpdateGroups_Lf : public FFeatureDemoBas
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 
 	TArray<float> DeltaTime;
@@ -196,7 +196,7 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoHybridMode_Lf : public FFeatureDemoBase_
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
@@ -238,11 +238,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bUpdateManager = false;
 
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<EFeatureDemoEnableFeature_Lf> EnableFlags;
 
 	FORCEINLINE bool ShouldEnableFeature(const EFeatureDemoEnableFeature_Lf& Feature)
@@ -263,61 +263,61 @@ public:
 		return false;
 	}
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<USceneComponent> Root = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoBlending_Lf SimpleBlendingDemo = FFeatureDemoBlending_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoBlending_Lf LayerBlendingDemo = FFeatureDemoBlending_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoTweaking_Lf AnimationTweaksDemo = FFeatureDemoTweaking_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoRootMotion_Lf RootMotionDemo = FFeatureDemoRootMotion_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoIK_Lf IKDemo = FFeatureDemoIK_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoLod_Lf LodDemo = FFeatureDemoLod_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoSockets_Lf SocketsDemo = FFeatureDemoSockets_Lf();
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UStaticMeshComponent> SocketsDemoMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoCustomization_Lf CustomizationDemo = FFeatureDemoCustomization_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoBlendSpace_Lf BlendSpaceDemo = FFeatureDemoBlendSpace_Lf();
 
 	inline static FVector3f LastDemoBlendSpacePosition = FVector3f::ZeroVector;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static FVector3f GetFeatureDemoBlendSpacePosition_TurboSequence_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoCurves_Lf CurveDemo = FFeatureDemoCurves_Lf();
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UStaticMeshComponent> RfCurveDemoMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UStaticMeshComponent> LfCurveDemoMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoNormals_Lf NormalsDemo = FFeatureDemoNormals_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoUpdateGroups_Lf UpdateGroupsDemo = FFeatureDemoUpdateGroups_Lf();
 
 	int32 CurrentUpdateGroupIndex = 1;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoHybridMode_Lf HybridMode = FFeatureDemoHybridMode_Lf();
 };

@@ -38,7 +38,7 @@ struct TURBOSEQUENCE_LF_API FDemoMaterialData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<TObjectPtr<UMaterialInterface>> Materials;
 };
 
@@ -47,16 +47,16 @@ struct TURBOSEQUENCE_LF_API FDemoMeshSpawnData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName CategoryName;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bExclude = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TMap<FName, FDemoMaterialData_Lf> Materials;
 };
 
@@ -65,7 +65,7 @@ struct TURBOSEQUENCE_LF_API FDemoCustomizationContainer_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TArray<FDemoMeshSpawnData_Lf> CategorizedData;
 };
 
@@ -244,7 +244,7 @@ public:
 	                              float Weight, float OffsetWeight, float AnimationDeltaTime,
 	                              const FTransform& StartOffsetTransform);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static void SolveBlueprintDemoMeshesInCpp(const TArray<FTurboSequence_MinimalMeshData_Lf>& MeshData,
 	                                          UPARAM(ref) TArray<FVector4>& AnimData, UAnimSequence* AnimA,
 	                                          UAnimSequence* AnimB,

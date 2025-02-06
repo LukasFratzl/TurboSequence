@@ -370,7 +370,7 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 		RHICmdList,
 		FRDGEventName(
 			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::GraphName, Params.ShaderID)),
-		ERDGBuilderFlags::AllowParallelExecute);
+		ERDGBuilderFlags::Parallel);
 
 	const FTurboSequence_Settings_CS_Lf::FPermutationDomain PermutationVector;
 

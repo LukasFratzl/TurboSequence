@@ -13,13 +13,13 @@ struct TURBOSEQUENCE_LF_API FDemoMeshData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<USkinnedMeshComponent> Mesh;
 
 	int8 FrameDelay = 0;
 	bool bIsUEVisible = false;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshActorConnection_Lf> ActorConnection;
 };
 
@@ -34,10 +34,10 @@ public:
 
 	TMap<int32, FDemoMeshData_Lf> MeshDataCollection;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TSubclassOf<AActor> UEMeshClass;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	float UEMeshShowDistance = 1000.0f;
 
 

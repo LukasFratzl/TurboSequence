@@ -20,10 +20,10 @@ struct TURBOSEQUENCE_LF_API FMeshData_Lf
 	{
 	}
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	int32 NumVertices = GET0_NUMBER;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TMap<int32, int32> CPUBoneToGPUBoneIndicesMap;
 };
 
@@ -36,7 +36,7 @@ struct TURBOSEQUENCE_LF_API FMeshDataOrderView_Lf
 	{
 	}
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TArray<int32> StaticMeshIndices;
 };
 

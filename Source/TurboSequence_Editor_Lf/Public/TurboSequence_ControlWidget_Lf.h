@@ -136,32 +136,32 @@ public:
 		FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, Object, Category);
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnTick(float DeltaTime);
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> Main_Asset_To_Edit;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference_NoEdit;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = "1", ClampMax = "32"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = "1", ClampMax = "32"), Category="TurboSequence")
 	int32 MaxNumberOfLODs = 8;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference;
 
-	UPROPERTY(EditAnywhere, Category="Lod")
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FMeshItem_Lf> LevelOfDetails;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnAssignMainAsset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnAssignLodZeroMeshAsset();
 
 	static FORCEINLINE_DEBUGGABLE void PrintMainAssetMissingWarning(const FName& ItemName, const FName& ItemType)
@@ -184,37 +184,37 @@ public:
 
 	EShow_ControlPanel_Section_Lf CurrentSectionWhichIsShowing = EShow_ControlPanel_Section_Lf::Reference;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CacheSections(UScrollBox* WelcomeScrollBox, UScrollBox* ReferenceScrollBox, UScrollBox* GenerateScrollBox,
 	                   UScrollBox* TweaksScrollBox);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CacheButtons(TArray<UButton*> WelcomeButton, UButton* ReferenceButton, UButton* GenerateButton,
 	                  UButton* TweaksButton, UButton* DocsButton, UButton* DiscordButton,
 	                  TArray<UButton*> PreviousSectionButtons, TArray<UButton*> NextSectionButtons,
 	                  UButton* CreateLodButton, UButton* CreateGlobalTextureButton);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh,
 	                     UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* MeshDataModeToGenerate,
 	                     UPropertyViewBase* TweakGlobalTextures);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CreateProperties();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void ShowSection(EShow_ControlPanel_Section_Lf SectionToShow);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void ShowHomeSection();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void ShowNextSection();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void ShowPreviousSection();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnGenerateButtonPressed();
 
 
@@ -341,7 +341,7 @@ public:
 	bool bManuallyAdjustTextureSize = false;
 
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnTweakingGlobalTextures();
 
 

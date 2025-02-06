@@ -355,7 +355,7 @@ public:
 	                                           const TObjectPtr<UTextureRenderTarget2DArray> Texture,
 	                                           const EPixelFormat& TextureFormat)
 	{
-		FRDGBuilder GraphBuilder(RHICmdList, FRDGEventName(*GraphName), ERDGBuilderFlags::AllowParallelExecute);
+		FRDGBuilder GraphBuilder(RHICmdList, FRDGEventName(*GraphName), ERDGBuilderFlags::Parallel);
 
 		FParameters* Parameters = GraphBuilder.AllocParameters<FParameters>();
 

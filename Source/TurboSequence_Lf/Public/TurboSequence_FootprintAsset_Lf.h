@@ -12,16 +12,16 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSyncData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> SyncsTo = nullptr;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bIsBoneTransformSync = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bIsWorldTransformSync = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bHideMeshOnFade = false;
 };
 
@@ -36,7 +36,7 @@ class TURBOSEQUENCE_LF_API UTurboSequence_FootprintAsset_Lf : public UDataAsset
 public:
 	UTurboSequence_FootprintAsset_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TMap<TObjectPtr<USkinnedAsset>, FTurboSequence_MeshSyncData_Lf> SyncData;
 
 	/**

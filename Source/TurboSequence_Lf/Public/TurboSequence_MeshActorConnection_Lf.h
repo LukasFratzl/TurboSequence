@@ -21,13 +21,13 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	FTurboSequence_MinimalMeshData_Lf ActorTSMeshDataID;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<USkinnedMeshComponent*> SkinnedMeshComponents;
 
 public:

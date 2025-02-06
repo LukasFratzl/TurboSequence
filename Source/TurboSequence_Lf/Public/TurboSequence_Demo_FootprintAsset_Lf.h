@@ -21,13 +21,13 @@ struct TURBOSEQUENCE_LF_API FDemoMeshInstance_Lf
 
 	float MinFadeExitTime = 0;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<AActor> Mesh;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<USkinnedMeshComponent*> SkinnedComponents;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshActorConnection_Lf> ActorConnection;
 };
 
@@ -67,16 +67,16 @@ public:
 
 	virtual void OnPostManagerUpdated_GameThread(const float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	float FadeTime = 0.5f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	float FadeDistance = 1000;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FRotator ActorSpawnRotationOffset = FRotator(0, 0, 0);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	float MinTimeBeforeFadingAgain = 0;
 
 	float LastDeltaTime = 0;
@@ -84,7 +84,7 @@ public:
 	TMap<int32, FDemoMeshInstance_Lf> MeshesOpen;
 	TMap<int32, FDemoMeshInstance_Lf> MeshesClosed;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TSubclassOf<AActor> MeshActor = nullptr;
 
 	virtual bool CanShowUEMesh(const int32 MeshID, const float MeshDistanceToCamera, const int32 MeshClosedID,

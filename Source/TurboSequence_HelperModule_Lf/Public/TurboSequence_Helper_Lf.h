@@ -136,7 +136,7 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FAnimPoseEvaluationOptions_Lf
 
 	bool bExtractRootMotion = false;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<USkeletalMesh> OptionalSkeletalMesh = nullptr;
 
 	bool bRetrieveAdditiveAsFullPose = true;
@@ -293,31 +293,31 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FAnimPose_Lf
 	/** Whether or local space pose data has been populated */
 	bool IsPopulated() const { return LocalSpacePoses.Num() != 0; }
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FName> BoneNames;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<int32> BoneIndices;
 
-	//UPROPERTY()
+	//UPROPERTY(EditAnywhere, Category="TurboSequence")
 	//TArray<int32> ParentBoneIndices;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FTurboSequence_TransposeMatrix_Lf> LocalSpacePoses;
 
-	//UPROPERTY()
+	//UPROPERTY(EditAnywhere, Category="TurboSequence")
 	//TArray<FTransform> WorldSpacePoses;
 
-	//UPROPERTY()
+	//UPROPERTY(EditAnywhere, Category="TurboSequence")
 	//TArray<FTransform> RefLocalSpacePoses;
 
-	//UPROPERTY()
+	//UUPROPERTY(EditAnywhere, Category="TurboSequence")
 	//TArray<FTransform> RefWorldSpacePoses;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FName> CurveNames;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<float> CurveValues;
 };
 
@@ -1403,7 +1403,7 @@ public:
 		// Get the render target resource
 		const FRenderTarget* RenderTargetResource = Texture.GetRenderTargetResource();
 		// Get the RHI texture from the resource
-		const FTexture2DRHIRef RenderTargetRHI = RenderTargetResource->GetRenderTargetTexture();
+		const FTextureRHIRef RenderTargetRHI = RenderTargetResource->GetRenderTargetTexture();
 		// Create the description of the upload,
 		// here it's important to use TexCreate_RenderTargetable and TexCreate_ShaderResource
 
@@ -1449,7 +1449,7 @@ public:
 		// Get the render target resource
 		const FRenderTarget* RenderTargetResource = Texture.GetRenderTargetResource();
 		// Get the RHI texture from the resource
-		const FTexture2DRHIRef RenderTargetRHI = RenderTargetResource->GetRenderTargetTexture();
+		const FTextureRHIRef RenderTargetRHI = RenderTargetResource->GetRenderTargetTexture();
 		// Create the description of the upload,
 		// here it's important to use TexCreate_RenderTargetable and TexCreate_ShaderResource
 
@@ -2016,7 +2016,7 @@ class TURBOSEQUENCE_HELPERMODULE_LF_API UTurboSequence_Helper_BlueprintFunctions
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static bool TurboSequence_NeverCalledFunction_Lf()
 	{
 		static bool bCalled = false;
@@ -2028,31 +2028,31 @@ public:
 		return false;
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static int32 TurboSequence_GetNumCPUThreads_Lf()
 	{
 		return FTurboSequence_Helper_Lf::NumCPUThreads();
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static int64 TurboSequence_GetThreadID_Lf()
 	{
 		return FPlatformTLS::GetCurrentThreadId();
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static bool TurboSequence_IsGameThread_Lf()
 	{
 		return IsInGameThread();
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	static void TurboSequence_LogToConsole_Lf(const FString Message)
 	{
 		UE_LOG(LogTurboSequence_Lf, Warning, TEXT("%s"), *Message);
 	}
 
-	UFUNCTION(BlueprintCallable, meta=(Keywords="World, World Context, Static World, Get World, Turbo Sequence, TS"))
+	UFUNCTION(BlueprintCallable, meta=(Keywords="World, World Context, Static World, Get World, Turbo Sequence, TS"), Category="TurboSequence")
 	static UWorld* TurboSequence_GetWorldFromStaticFunction()
 	{
 		return GEngine->GetCurrentPlayWorld();

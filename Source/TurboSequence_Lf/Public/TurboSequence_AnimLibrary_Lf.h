@@ -19,10 +19,10 @@ struct TURBOSEQUENCE_LF_API FAnimationLibraryItem_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> Animation;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FVector AnimationSeed_CM_Per_Second = FVector(600, 0, 0);
 };
 
@@ -38,9 +38,9 @@ class TURBOSEQUENCE_LF_API UTurboSequence_AnimLibrary_Lf : public UObject
 public:
 	UTurboSequence_AnimLibrary_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FAnimationLibraryItem_Lf> Animations;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<TObjectPtr<UBlendSpace>> BlendSpaces;
 };

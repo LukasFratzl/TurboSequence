@@ -21,49 +21,49 @@ public:
 
 	UTurboSequence_GlobalData_Lf();
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraEmitter = FName("FXE_TurboSequence_Mesh_Unit_Lf");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FString NameNiagaraMeshObject = FString("User.Mesh_{0}");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FString NameNiagaraMaterialObject = FString("User.Material_{0}");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraParticleLocations = FName("User.Particle_Position");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraParticleIDMap = FName("User.Particle_ID_To_Index");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraParticleRotations = FName("User.Particle_Rotation");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraParticleScales = FName("User.Particle_Scale");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraLevelOfDetailIndex = FName("User.LevelOfDetail_Index");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraParticleRemove = FName("User.Particle_Remove");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraCustomData = FName("User.CustomData");
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_CurrentFrame;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_PreviousFrame;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> SkinWeightTexture;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> AnimationLibraryTexture;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bUseHighPrecisionAnimationMode = true;
 
 	FSettingsComputeShader_Params_Lf CachedMeshDataCreationSettingsParams;

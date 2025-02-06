@@ -60,13 +60,13 @@ class TURBOSEQUENCE_LF_API UTurboSequence_ThreadContext_Lf : public UObject
 public:
 	FCriticalSection CriticalSection;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void LockThread()
 	{
 		CriticalSection.Lock();
 	}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void UnlockThread()
 	{
 		CriticalSection.Unlock();
@@ -86,10 +86,10 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_BoneLayer_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	FName BoneLayerName = FName();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	uint8 BoneDepth = GET2_NUMBER;
 };
 
@@ -106,43 +106,43 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimPlaySettings_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TArray<FTurboSequence_BoneLayer_Lf> BoneLayerMasks;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	bool bAnimationTimeSelfManaged = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float AnimationWeight = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float AnimationPlayTimeInSeconds = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float AnimationSpeed = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	ETurboSequence_AnimationForceMode_Lf ForceMode = ETurboSequence_AnimationForceMode_Lf::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float StartTransitionTimeInSeconds = GET1_NUMBER;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float EndTransitionTimeInSeconds = 0.25f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	ETurboSequence_RootMotionMode_Lf RootMotionMode = ETurboSequence_RootMotionMode_Lf::OnRootBoneAnimated;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	ETurboSequence_ManagementMode_Lf AnimationManagementMode = ETurboSequence_ManagementMode_Lf::Auto;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float OverrideWeight = -1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float OverrideStartTime = -1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float OverrideEndTime = -1.0f;
 };
 
