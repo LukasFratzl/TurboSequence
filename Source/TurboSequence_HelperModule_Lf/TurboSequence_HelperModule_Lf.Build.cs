@@ -23,6 +23,8 @@ public class TurboSequence_HelperModule_Lf : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new[]
 			{
+				"Core",
+				"Engine",
 				"CoreUObject",
 				"RenderCore",
 				"Renderer",

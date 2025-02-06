@@ -42,6 +42,7 @@ public class TurboSequence_Lf : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new[]
 			{
+				"Core",
 				"CoreUObject",
 				"Engine",
 				"Projects",

@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/BlendSpace.h"
 #include "UObject/Object.h"
 #include "TurboSequence_AnimLibrary_Lf.generated.h"
 

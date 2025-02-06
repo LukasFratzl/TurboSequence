@@ -11,6 +11,7 @@
 #include "TurboSequence_MeshAsset_Lf.h"
 #include "TurboSequence_MinimalData_Lf.h"
 #include "Animation/AnimationPoseData.h"
+#include "Engine/StaticMesh.h"
 #include "GameFramework/PlayerController.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
