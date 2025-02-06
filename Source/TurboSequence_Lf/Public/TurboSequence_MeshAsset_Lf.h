@@ -173,15 +173,15 @@ public:
 	UPROPERTY(EditAnywhere, Category="Animation")
 	TObjectPtr<UTurboSequence_AnimLibrary_Lf> AnimationLibrary;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TArray<FMeshData_Lf> MeshData;
 
 	int32 MeshDataCustomData = GET0_NUMBER;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
 
 	const FReferenceSkeleton& GetReferenceSkeleton() const
@@ -247,6 +247,6 @@ public:
 												COMPATIBILITY
 	==============================================================================================================	*/
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	bool bNeedGeneratedNextEngineStart = false;
 };

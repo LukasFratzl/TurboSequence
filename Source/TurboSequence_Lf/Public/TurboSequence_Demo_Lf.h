@@ -142,16 +142,16 @@ struct TURBOSEQUENCE_LF_API FDemoAssetData_Lf
 	UPROPERTY(EditAnywhere, Category="Demo")
 	FTransform SpawnOffsetTransform = FTransform::Identity;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	TArray<FDemoMeshSpawnData_Lf> RootAssets;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	TArray<FDemoMeshSpawnData_Lf> CustomizableAssets;
 
 	FDemoCustomizationContainer_Lf CategorizedRootData;
 	TMap<FName, FDemoCustomizationContainer_Lf> CategorizeCustomizableData;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset;
 };
 
@@ -189,17 +189,17 @@ public:
                     DEMO LOGIC
     < - - - - - - - - - - - - - - - - - - - - >
 */
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	bool bUpdateManager = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	bool bKeepHeightOnSpawnLevel = false;
 	float DemoComponentHeight = 0;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	int32 NumInstancesPerUpdateGroup = 21000;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Demo")
 	int32 RadiusOfHighQualitySolving = 25000;
 
 	int32 UpdateGroupIndex = 0;

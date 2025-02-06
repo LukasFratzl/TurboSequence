@@ -79,10 +79,10 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 	{
 	}
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UNiagaraSystem> RenderReference = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<TObjectPtr<UMaterialInterface>> Materials;
 
 	// ID
@@ -387,10 +387,10 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialKeyValue_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UMaterialInterface> MaterialKey;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UMaterialInterface> MaterialValue;
 };
 
@@ -399,10 +399,10 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialItem_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UNiagaraComponent> NiagaraRenderer;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FRenderingMaterialKeyValue_Lf> Materials;
 };
 
@@ -411,7 +411,7 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialMap_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TMap<uint32, FRenderingMaterialItem_Lf> NiagaraRenderer;
 };
 
@@ -420,11 +420,11 @@ struct TURBOSEQUENCE_LF_API FAnimationBlendSpaceData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	// < Animation ID | Sampler Index >
 	TMap<uint32, int32> Points;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FVector3f CurrentPosition = FVector3f::ZeroVector;
 
 	TArray<FBlendSampleData> CachedBlendSampleData;
@@ -456,7 +456,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReferenceLodElement_Lf
 	{
 	}
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UStaticMesh> Mesh;
 
 	uint32 SkinWeightOffset = GET0_NUMBER;
@@ -480,7 +480,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_RenderThread_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 	// CPU Indices, GPU Indices > -> Only contains bones with skin weight and Lod with mesh
@@ -528,7 +528,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 
 	TMap<uint8, FSkinnedMeshReferenceLodElement_Lf> LevelOfDetails;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UStaticMesh> FirstValidMeshLevelOfDetail;
 
 	uint16 NumCPUBones = GET0_NUMBER;
@@ -543,7 +543,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshReference_Lf : public FSkinnedMeshRefere
 	// < Material Hash | Data >
 	TMap<uint32, FRenderData_Lf> RenderData;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UWorld> FromWorld = nullptr;
 };
 
@@ -571,7 +571,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_RenderThread_Lf
 		DataAsset = Asset;
 	}
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 	bool bIsVisible = true;
@@ -672,10 +672,10 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 
 	int64 LastFrameAnimationSolved = GET0_NUMBER;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_FootprintAsset_Lf> FootprintAsset;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<AActor> HybridMeshInstance;
 
 	bool bSpawnedHybridActor = false;
@@ -717,7 +717,7 @@ struct TURBOSEQUENCE_LF_API FAsyncTextureGenerationChunk_Lf
 
 	TMap<int32, bool> TestValue;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> DataAsset;
 
 
@@ -770,7 +770,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_RenderThread_Lf
 	TMap<int32, int32> MeshIDToGlobalIndex;
 
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_RenderThread_Lf> PerReferenceData;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<TObjectPtr<UTurboSequence_MeshAsset_Lf>> PerReferenceDataKeys;
 };
 
@@ -797,7 +797,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshGlobalLibrary_Lf
 
 	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FSkinnedMeshReference_Lf> PerReferenceData;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<TObjectPtr<UTurboSequence_MeshAsset_Lf>> PerReferenceDataKeys;
 
 	// -> Key -> < USkeleton | UTurboSequence_MeshAsset_Lf | UAnimSequence >

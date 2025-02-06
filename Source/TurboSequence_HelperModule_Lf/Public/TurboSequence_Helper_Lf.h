@@ -1970,13 +1970,13 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FBool3_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bX = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bY = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bZ = false;
 
 	FORCEINLINE_DEBUGGABLE bool IsAnyAxisChecked() const
@@ -1998,10 +1998,10 @@ struct TURBOSEQUENCE_HELPERMODULE_LF_API FBool2_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bX = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	bool bY = false;
 
 	FORCEINLINE_DEBUGGABLE bool IsAnyAxisChecked() const

@@ -197,14 +197,14 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalCollection_Lf
 		bIsValid = bValid;
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	FTurboSequence_AnimMinimalData_Lf RootMotionMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	TArray<FTurboSequence_AnimMinimalData_Lf> CustomizableMeshes;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	bool bIsValid = false;
 
 public:
@@ -233,17 +233,17 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalBlendSpace_Lf
 		bIsValid = bValid;
 	}
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<uint32> Samples;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UBlendSpace> BlendSpace;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	int32 BelongsToMeshID = GET0_NUMBER;
 
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	bool bIsValid = false;
 
 public:
@@ -271,14 +271,14 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_AnimMinimalBlendSpaceCollection_Lf
 		bIsValid = bValid;
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	FTurboSequence_AnimMinimalBlendSpace_Lf RootMotionMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	TArray<FTurboSequence_AnimMinimalBlendSpace_Lf> CustomizableMeshes;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	bool bIsValid = false;
 
 public:
@@ -294,13 +294,13 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshMetaData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<UTurboSequence_MeshAsset_Lf> Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TArray<TObjectPtr<UMaterialInterface>> OverrideMaterials;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<class UTurboSequence_FootprintAsset_Lf> FootprintAsset;
 };
 
@@ -309,10 +309,10 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MeshSpawnData_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	FTurboSequence_MeshMetaData_Lf RootMotionMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TArray<FTurboSequence_MeshMetaData_Lf> CustomizableMeshes;
 
 	uint32 GetHash() const // TODO: Make GET and SET to assign the the hash only when values are changing
@@ -386,14 +386,14 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_MinimalMeshData_Lf
 		bIsValid = bValid;
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	int32 RootMotionMeshID = GET0_NUMBER;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	TArray<int32> CustomizableMeshIDs;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	bool bIsValid = false;
 
 public:
@@ -460,13 +460,13 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_PoseCurveData_Lf
 	{
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	TObjectPtr<UAnimSequence> CurveAnimation = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	FName CurveName = FName("");
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	float CurveFrame_0 = GET0_NUMBER;
 
 	FORCEINLINE bool IsCurveValid() const
@@ -489,16 +489,16 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateGroup_Lf
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TArray<int32> RawIDs;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TMap<int32, int32> RawIDData;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TMap<FTurboSequence_MinimalMeshData_Lf, FIntVector2> MeshIDToMinimal;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="TurboSequence")
 	TArray<FTurboSequence_MinimalMeshData_Lf> RawMinimalData;
 };
 
@@ -508,17 +508,17 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_CameraInfo_Lf
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	FMinimalViewInfo ViewInfo = FMinimalViewInfo();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	// The size of the primary viewport subregion allocated to this player. 0-1
 	FVector2D LocalPlayerSize = FVector2D::ZeroVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	float Fov = GET0_NUMBER;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TEnumAsByte<enum EAspectRatioAxisConstraint> AspectRatioAxisConstraint = EAspectRatioAxisConstraint::AspectRatio_MAX;
 };
 
@@ -540,9 +540,9 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_UpdateContext_Lf
 	{
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	int32 GroupIndex = GET0_NUMBER;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TArray<FTurboSequence_CameraInfo_Lf> CustomCameraInfo;
 };
