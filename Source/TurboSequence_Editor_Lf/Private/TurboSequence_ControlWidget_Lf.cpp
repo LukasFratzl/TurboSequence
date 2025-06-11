@@ -330,6 +330,7 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 			                                                          FName(FString::Format(
 				                                                          TEXT("{0}_Reference"), {*WantedMeshName})),
 			                                                          true);
+			NewMesh->NeverStream = true;
 			uint8 NumIterations = MaxNumberOfLODs / GET5_NUMBER + GET1_NUMBER;
 			for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
 			{
