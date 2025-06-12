@@ -158,7 +158,8 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 									TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(MeshIdx)})),
 								StaticMeshOrderIndices, TurboSequence_Asset->MeshDataMode))
 						{
-							StaticMesh->NeverStream = true;
+							// pr #9
+							// StaticMesh->NeverStream = true;
 							
 							//FMeshItem_Lf Item = FMeshItem_Lf();
 							if (MeshIdx > GET9_NUMBER)

@@ -359,7 +359,7 @@ public:
 		{
 			GenerateSkeletalMeshLevelOfDetails(DuplicatedMesh, GET1_NUMBER);
 		}
-
+		DuplicatedMesh->NeverStream = true;
 		return DuplicatedMesh;
 	}
 
@@ -372,7 +372,7 @@ public:
 
 		FLODUtilities::RegenerateLOD(FromMesh, GetTargetPlatformManagerRef().GetRunningTargetPlatform(), NewLODCount,
 		                             true, false);
-
+		FromMesh->NeverStream = true;
 		return FromMesh;
 	}
 
@@ -537,6 +537,7 @@ public:
 
 			StaticMesh->GetRenderData()->Bounds = Bounds;
 			StaticMesh->SetExtendedBounds(Bounds);
+			StaticMesh->NeverStream = true;
 
 			if (SkinnedMeshVertices != StaticMesh->GetNumVertices(GET0_NUMBER))
 			{
