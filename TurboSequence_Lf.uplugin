@@ -40,6 +40,10 @@
 		{
 			"Name": "Niagara",
 			"Enabled": true
+		},
+		{
+			"Name": "NiagaraNanite",
+			"Enabled": true
 		}
 	]
 }
