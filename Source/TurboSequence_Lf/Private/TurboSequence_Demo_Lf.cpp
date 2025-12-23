@@ -311,288 +311,275 @@ void ATurboSequence_Demo_Lf::SolveGroup(int32 GroupIndex,
 	}
 	FCriticalSection CriticalSection;
 
-	int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-	int32 NumMeshesPerThread = FMath::CeilToInt(
-		static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-	ParallelFor(NumThreads, [&](int32 ThreadsIndex)
+	ParallelFor(NumMeshes, [&](int32 Index)
 	{
-		const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread;
-		const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread;
+		const FTurboSequence_MinimalMeshData_Lf& MeshData =
+			ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(GroupIndex, Index);
 
-		for (int32 Index = MeshBaseIndex; Index < MeshBaseNum; ++Index)
+		if (!MeshData.IsMeshDataValid() || (MeshData.IsMeshDataValid() && !Meshes.Contains(MeshData)))
 		{
-			if (Index >= NumMeshes)
+			return;
+		}
+
+		FDemoMeshWrapper_Lf& Mesh = Meshes[MeshData];
+		//
+		// SolveMesh(Mesh, CriticalSection, CameraRotation, CameraLocation, SwitchingGroups, DeltaTime);
+
+		const FDemoAssetData_Lf* AssetCustomData = AssetDataRuntime[Mesh.AssetDataIndex];
+		const TObjectPtr<UTurboSequence_MeshAsset_Lf> MeshAsset =
+			ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(
+				Mesh.MeshData.RootMotionMeshID);
+
+		// Here we make a simple Distance Updating in seconds, if DeltaTimeAccumulator is accumulated
+		// higher than DistanceRatioSeconds we update the Mesh
+		// this is truly optional and only here for optimization
+		float CameraDistance = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_Concurrent(
+			Mesh.MeshData);
+		float DistanceRatioSeconds = MeshAsset->bUseDistanceUpdating
+			                             ? CameraDistance / 250000 * MeshAsset->DistanceUpdatingRatio
+			                             : 0;
+
+		Mesh.DeltaTimeAccumulator += DeltaTime;
+		if (Mesh.DeltaTimeAccumulator > DistanceRatioSeconds)
+		{
+			if (AssetCustomData->bUseRootMotion)
 			{
-				break;
+				ATurboSequence_Manager_Lf::MoveMeshWithRootMotion_Concurrent(
+					Mesh.MeshData, Mesh.DeltaTimeAccumulator, true, false);
 			}
-
-			const FTurboSequence_MinimalMeshData_Lf& MeshData =
-				ATurboSequence_Manager_Lf::GetMeshDataInUpdateGroupFromIndex_Concurrent(GroupIndex, Index);
-
-			if (!MeshData.IsMeshDataValid() || (MeshData.IsMeshDataValid() && !Meshes.Contains(MeshData)))
+			else if (AssetCustomData->bUseProgrammableSpeed)
 			{
-				continue;
-			}
+				const TObjectPtr<UAnimSequence> AnimSequence =
+					ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(Mesh.MeshData);
 
-			FDemoMeshWrapper_Lf& Mesh = Meshes[MeshData];
-			//
-			// SolveMesh(Mesh, CriticalSection, CameraRotation, CameraLocation, SwitchingGroups, DeltaTime);
-
-			const FDemoAssetData_Lf* AssetCustomData = AssetDataRuntime[Mesh.AssetDataIndex];
-			const TObjectPtr<UTurboSequence_MeshAsset_Lf> MeshAsset =
-				ATurboSequence_Manager_Lf::GetMeshAsset_RawID_Concurrent(
-					Mesh.MeshData.RootMotionMeshID);
-
-			// Here we make a simple Distance Updating in seconds, if DeltaTimeAccumulator is accumulated
-			// higher than DistanceRatioSeconds we update the Mesh
-			// this is truly optional and only here for optimization
-			float CameraDistance = ATurboSequence_Manager_Lf::GetMeshClosestCameraDistance_Concurrent(
-				Mesh.MeshData);
-			float DistanceRatioSeconds = MeshAsset->bUseDistanceUpdating
-				                             ? CameraDistance / 250000 * MeshAsset->DistanceUpdatingRatio
-				                             : 0;
-
-			Mesh.DeltaTimeAccumulator += DeltaTime;
-			if (Mesh.DeltaTimeAccumulator > DistanceRatioSeconds)
-			{
-				if (AssetCustomData->bUseRootMotion)
+				if (IsValid(MeshAsset->AnimationLibrary))
 				{
-					ATurboSequence_Manager_Lf::MoveMeshWithRootMotion_Concurrent(
-						Mesh.MeshData, Mesh.DeltaTimeAccumulator, true, false);
-				}
-				else if (AssetCustomData->bUseProgrammableSpeed)
-				{
-					const TObjectPtr<UAnimSequence> AnimSequence =
-						ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(Mesh.MeshData);
-
-					if (IsValid(MeshAsset->AnimationLibrary))
+					FVector Speed = FVector::ZeroVector;
+					for (FAnimationLibraryItem_Lf& AnimationLibraryItem : MeshAsset->AnimationLibrary->Animations)
 					{
-						FVector Speed = FVector::ZeroVector;
-						for (FAnimationLibraryItem_Lf& AnimationLibraryItem : MeshAsset->AnimationLibrary->Animations)
+						if (AnimationLibraryItem.Animation == AnimSequence)
 						{
-							if (AnimationLibraryItem.Animation == AnimSequence)
-							{
-								Speed = AnimationLibraryItem.AnimationSeed_CM_Per_Second;
-								break;
-							}
+							Speed = AnimationLibraryItem.AnimationSeed_CM_Per_Second;
+							break;
 						}
-
-						FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
-							Mesh.MeshData);
-
-						MeshTransform.SetLocation(
-							MeshTransform.GetLocation() + MeshTransform.GetRotation().RotateVector(Speed * DeltaTime));
-
-						ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
 					}
-				}
-				if (bKeepHeightOnSpawnLevel)
-				{
+
 					FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
 						Mesh.MeshData);
 
-					FVector Location = MeshTransform.GetLocation();
-					Location.Z = DemoComponentHeight;
-					MeshTransform.SetLocation(Location);
+					MeshTransform.SetLocation(
+						MeshTransform.GetLocation() + MeshTransform.GetRotation().RotateVector(Speed * DeltaTime));
 
 					ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
 				}
+			}
+			if (bKeepHeightOnSpawnLevel)
+			{
+				FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
+					Mesh.MeshData);
 
-				if (AssetCustomData->bUseRandomRotation)
+				FVector Location = MeshTransform.GetLocation();
+				Location.Z = DemoComponentHeight;
+				MeshTransform.SetLocation(Location);
+
+				ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData, MeshTransform);
+			}
+
+			if (AssetCustomData->bUseRandomRotation)
+			{
+				Mesh.RandomRotationTimer -= Mesh.DeltaTimeAccumulator;
+				if (Mesh.RandomRotationTimer < 0)
 				{
-					Mesh.RandomRotationTimer -= Mesh.DeltaTimeAccumulator;
-					if (Mesh.RandomRotationTimer < 0)
-					{
-						Mesh.RandomRotationTimer = FMath::RandRange(2.0f, 7.0f);
-						const float RandomYaw = FMath::RandRange(-180.0f, 180.0f);
+					Mesh.RandomRotationTimer = FMath::RandRange(2.0f, 7.0f);
+					const float RandomYaw = FMath::RandRange(-180.0f, 180.0f);
 
-						Mesh.RandomRotationYaw = RandomYaw;
-					}
-
-					FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
-						Mesh.MeshData);
-					FRotator Rotation = MeshTransform.Rotator();
-
-					Rotation.Yaw = FRotator::NormalizeAxis(
-						FMath::Lerp(Rotation.Yaw, static_cast<double>(Mesh.RandomRotationYaw),
-						            static_cast<double>(Mesh.DeltaTimeAccumulator)));
-
-					//MeshTransform.SetRotation(Rotation.Quaternion());
-					ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_Concurrent(
-						Mesh.MeshData, MeshTransform.GetLocation(), Rotation.Quaternion(), FVector::OneVector);
+					Mesh.RandomRotationYaw = RandomYaw;
 				}
 
-				if (AssetCustomData->bUseRandomAnimation)
+				FTransform MeshTransform = ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(
+					Mesh.MeshData);
+				FRotator Rotation = MeshTransform.Rotator();
+
+				Rotation.Yaw = FRotator::NormalizeAxis(
+					FMath::Lerp(Rotation.Yaw, static_cast<double>(Mesh.RandomRotationYaw),
+					            static_cast<double>(Mesh.DeltaTimeAccumulator)));
+
+				//MeshTransform.SetRotation(Rotation.Quaternion());
+				ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_Concurrent(
+					Mesh.MeshData, MeshTransform.GetLocation(), Rotation.Quaternion(), FVector::OneVector);
+			}
+
+			if (AssetCustomData->bUseRandomAnimation)
+			{
+				Mesh.RandomAnimationTimer -= Mesh.DeltaTimeAccumulator;
+				if (Mesh.RandomAnimationTimer < 0)
 				{
-					Mesh.RandomAnimationTimer -= Mesh.DeltaTimeAccumulator;
-					if (Mesh.RandomAnimationTimer < 0)
+					if (IsValid(MeshAsset->AnimationLibrary)) // TODO: Remove
 					{
-						if (IsValid(MeshAsset->AnimationLibrary)) // TODO: Remove
+						if (AssetCustomData->bUseBlendSpaces && CameraDistance < 15000)
 						{
-							if (AssetCustomData->bUseBlendSpaces && CameraDistance < 15000)
+							if (int32 NumBlendSpaces = MeshAsset->AnimationLibrary->BlendSpaces.Num())
 							{
-								if (int32 NumBlendSpaces = MeshAsset->AnimationLibrary->BlendSpaces.Num())
+								int32 RandomBlendSpace = FMath::RandRange(0, NumBlendSpaces - 1);
+								FTurboSequence_AnimPlaySettings_Lf PlaySettings =
+									FTurboSequence_AnimPlaySettings_Lf();
+
+								if (!Mesh.CurrentBlendSpace.IsAnimCollectionValid() || Mesh.CurrentBlendSpace.
+									RootMotionMesh.BlendSpace != MeshAsset->AnimationLibrary->BlendSpaces[
+										RandomBlendSpace])
 								{
-									int32 RandomBlendSpace = FMath::RandRange(0, NumBlendSpaces - 1);
-									FTurboSequence_AnimPlaySettings_Lf PlaySettings =
-										FTurboSequence_AnimPlaySettings_Lf();
-
-									if (!Mesh.CurrentBlendSpace.IsAnimCollectionValid() || Mesh.CurrentBlendSpace.
-										RootMotionMesh.BlendSpace != MeshAsset->AnimationLibrary->BlendSpaces[
-											RandomBlendSpace])
-									{
-										Mesh.CurrentBlendSpace = ATurboSequence_Manager_Lf::PlayBlendSpace_Concurrent(
-											Mesh.MeshData, MeshAsset->AnimationLibrary->BlendSpaces[RandomBlendSpace],
-											PlaySettings);
-									}
-
-									Mesh.RandomBlendSpacePosition = FVector3f(
-										FMath::RandRange(-200.0, 200.0), FMath::RandRange(-200.0, 200.0), 0);
-									if (FVector3f::Distance(Mesh.RandomBlendSpacePosition, FVector3f::ZeroVector) < 100)
-									{
-										Mesh.RandomBlendSpacePosition = FVector3f::ZeroVector;
-									}
-									else
-									{
-										Mesh.RandomBlendSpacePosition = Mesh.RandomBlendSpacePosition.GetUnsafeNormal() * 200;
-									}
-
-									ATurboSequence_Manager_Lf::TweakBlendSpace_Concurrent(
-										Mesh.CurrentBlendSpace, Mesh.RandomBlendSpacePosition);
+									Mesh.CurrentBlendSpace = ATurboSequence_Manager_Lf::PlayBlendSpace_Concurrent(
+										Mesh.MeshData, MeshAsset->AnimationLibrary->BlendSpaces[RandomBlendSpace],
+										PlaySettings);
 								}
-							}
-							else
-							{
-								if (int32 NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
+
+								Mesh.RandomBlendSpacePosition = FVector3f(
+									FMath::RandRange(-200.0, 200.0), FMath::RandRange(-200.0, 200.0), 0);
+								if (FVector3f::Distance(Mesh.RandomBlendSpacePosition, FVector3f::ZeroVector) < 100)
 								{
-									int32 RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
+									Mesh.RandomBlendSpacePosition = FVector3f::ZeroVector;
+								}
+								else
+								{
+									Mesh.RandomBlendSpacePosition = Mesh.RandomBlendSpacePosition.GetUnsafeNormal() *
+										200;
+								}
+
+								ATurboSequence_Manager_Lf::TweakBlendSpace_Concurrent(
+									Mesh.CurrentBlendSpace, Mesh.RandomBlendSpacePosition);
+							}
+						}
+						else
+						{
+							if (int32 NumAnimations = MeshAsset->AnimationLibrary->Animations.Num())
+							{
+								int32 RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
+								if (NumAnimations > 1)
+								{
+									while (ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
+											Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[
+											RandomAnimation].
+										Animation)
+									{
+										RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
+									}
+								}
+								FTurboSequence_AnimPlaySettings_Lf PlaySettings =
+									FTurboSequence_AnimPlaySettings_Lf();
+								Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
+									Mesh.MeshData,
+									MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
+									PlaySettings);
+
+								if (AssetCustomData->bUseLayer)
+								{
+									int32 RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
 									if (NumAnimations > 1)
 									{
-										while (ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
+										while (
+											ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
 												Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[
-												RandomAnimation].
-											Animation)
+												RandomAnimation2].Animation)
 										{
-											RandomAnimation = FMath::RandRange(0, NumAnimations - 1);
+											RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
 										}
 									}
-									FTurboSequence_AnimPlaySettings_Lf PlaySettings =
-										FTurboSequence_AnimPlaySettings_Lf();
-									Mesh.CurrentAnimation_0 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
+									PlaySettings.AnimationPlayTimeInSeconds = FMath::RandRange(0.0f, 0.5f);
+									PlaySettings.BoneLayerMasks = AssetCustomData->BoneLayers;
+									//PlaySettings.Animation = MeshAsset->AnimationLibrary->Animations[RandomAnimation2];
+									Mesh.CurrentAnimation_1 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
 										Mesh.MeshData,
-										MeshAsset->AnimationLibrary->Animations[RandomAnimation].Animation,
+										MeshAsset->AnimationLibrary->Animations[RandomAnimation2].Animation,
 										PlaySettings);
-
-									if (AssetCustomData->bUseLayer)
-									{
-										int32 RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
-										if (NumAnimations > 1)
-										{
-											while (
-												ATurboSequence_Manager_Lf::GetHighestPriorityPlayingAnimation_Concurrent(
-													Mesh.MeshData) == MeshAsset->AnimationLibrary->Animations[
-													RandomAnimation2].Animation)
-											{
-												RandomAnimation2 = FMath::RandRange(0, NumAnimations - 1);
-											}
-										}
-										PlaySettings.AnimationPlayTimeInSeconds = FMath::RandRange(0.0f, 0.5f);
-										PlaySettings.BoneLayerMasks = AssetCustomData->BoneLayers;
-										//PlaySettings.Animation = MeshAsset->AnimationLibrary->Animations[RandomAnimation2];
-										Mesh.CurrentAnimation_1 = ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(
-											Mesh.MeshData,
-											MeshAsset->AnimationLibrary->Animations[RandomAnimation2].Animation,
-											PlaySettings);
-									}
 								}
 							}
 						}
-
-						Mesh.RandomAnimationTimer = FMath::RandRange(2.0f, 7.0f);
-						Mesh.RandomAnimationData_0 = FMath::RandRange(0.9f, 1.75f);
-						Mesh.RandomAnimationData_1 = FMath::RandRange(0.9f, 1.75f);
 					}
 
-					if (AssetCustomData->bUseCustomData)
-					{
-						Mesh.CustomDataTimer -= Mesh.DeltaTimeAccumulator;
-						if (Mesh.CustomDataTimer < 0)
-						{
-							Mesh.CustomDataTimer = FMath::RandRange(2.0f, 5.0f);
-
-							const FLinearColor& RandomColor = FLinearColor::MakeRandomColor();
-
-							ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
-								Mesh.MeshData, 4, RandomColor.R);
-							ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
-								Mesh.MeshData, 5, RandomColor.G);
-							ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
-								Mesh.MeshData, 6, RandomColor.B);
-						}
-					}
+					Mesh.RandomAnimationTimer = FMath::RandRange(2.0f, 7.0f);
+					Mesh.RandomAnimationData_0 = FMath::RandRange(0.9f, 1.75f);
+					Mesh.RandomAnimationData_1 = FMath::RandRange(0.9f, 1.75f);
 				}
 
-
-				// IK is expensive on the CPU, we only do IK for 100 Meters Radius around the camera
-				// and only if the mesh is visible by the Camera Frustum
-				if (AssetCustomData->bUseIK && CameraDistance < 10000 &&
-					ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(Mesh.MeshData, false))
+				if (AssetCustomData->bUseCustomData)
 				{
-					const FTransform& OffsetTransform = AssetCustomData->SpawnOffsetTransform;
-
-					const FTransform& MeshTransform =
-						ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData) *
-						OffsetTransform.Inverse();
-
-					float Dot = FVector::DotProduct(CameraRotation.Vector(),
-					                                MeshTransform.GetRotation().Vector());
-					bool bIsInView = Dot < 0;
-
-					Mesh.IKWeight = FTurboSequence_Helper_Lf::Clamp01(FMath::Lerp(
-						Mesh.IKWeight, static_cast<float>(bIsInView),
-						bIsInView ? 2.0f * Mesh.DeltaTimeAccumulator : 5.0f * Mesh.DeltaTimeAccumulator));
-
-
-					// This Look At IK need to be done backwards like so many IKs because,
-					// If I move first the head and add the movement from spine I end up with
-					// a location and rotation offset on head
-					// Another thing is we need to add DeltaTime into the IK Because GetIKTransform
-					// is sometimes updating the Animation to stay up to date
-					SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->Spine1Bone, CameraLocation, Mesh.IKWeight,
-					                  AssetCustomData->Spine1IKStiffness, DeltaTime,
-					                  OffsetTransform);
-					SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->Spine2Bone, CameraLocation, Mesh.IKWeight,
-					                  AssetCustomData->Spine2IKStiffness, DeltaTime,
-					                  OffsetTransform);
-					SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->NeckBone, CameraLocation, Mesh.IKWeight,
-					                  AssetCustomData->NeckIKStiffness, DeltaTime,
-					                  OffsetTransform);
-					SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->HeadBone, CameraLocation, Mesh.IKWeight,
-					                  AssetCustomData->HeadIKStiffness, DeltaTime,
-					                  OffsetTransform);
-				}
-
-				if (CameraDistance < RadiusOfHighQualitySolving)
-				{
-					if (Mesh.CurrentUpdateGroupIndex == Mesh.DefaultUpdateGroupIndex)
+					Mesh.CustomDataTimer -= Mesh.DeltaTimeAccumulator;
+					if (Mesh.CustomDataTimer < 0)
 					{
-						CriticalSection.Lock();
-						SwitchingGroups.Add(Mesh.MeshData, true);
-						CriticalSection.Unlock();
+						Mesh.CustomDataTimer = FMath::RandRange(2.0f, 5.0f);
+
+						const FLinearColor& RandomColor = FLinearColor::MakeRandomColor();
+
+						ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
+							Mesh.MeshData, 4, RandomColor.R);
+						ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
+							Mesh.MeshData, 5, RandomColor.G);
+						ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(
+							Mesh.MeshData, 6, RandomColor.B);
 					}
 				}
-				else
-				{
-					if (Mesh.CurrentUpdateGroupIndex == QualityGroupIndex)
-					{
-						CriticalSection.Lock();
-						SwitchingGroups.Add(Mesh.MeshData, false);
-						CriticalSection.Unlock();
-					}
-				}
-
-				Mesh.DeltaTimeAccumulator = 0;
 			}
+
+
+			// IK is expensive on the CPU, we only do IK for 100 Meters Radius around the camera
+			// and only if the mesh is visible by the Camera Frustum
+			if (AssetCustomData->bUseIK && CameraDistance < 10000 &&
+				ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(Mesh.MeshData, false))
+			{
+				const FTransform& OffsetTransform = AssetCustomData->SpawnOffsetTransform;
+
+				const FTransform& MeshTransform =
+					ATurboSequence_Manager_Lf::GetMeshWorldSpaceTransform_Concurrent(Mesh.MeshData) *
+					OffsetTransform.Inverse();
+
+				float Dot = FVector::DotProduct(CameraRotation.Vector(),
+				                                MeshTransform.GetRotation().Vector());
+				bool bIsInView = Dot < 0;
+
+				Mesh.IKWeight = FTurboSequence_Helper_Lf::Clamp01(FMath::Lerp(
+					Mesh.IKWeight, static_cast<float>(bIsInView),
+					bIsInView ? 2.0f * Mesh.DeltaTimeAccumulator : 5.0f * Mesh.DeltaTimeAccumulator));
+
+
+				// This Look At IK need to be done backwards like so many IKs because,
+				// If I move first the head and add the movement from spine I end up with
+				// a location and rotation offset on head
+				// Another thing is we need to add DeltaTime into the IK Because GetIKTransform
+				// is sometimes updating the Animation to stay up to date
+				SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->Spine1Bone, CameraLocation, Mesh.IKWeight,
+				                  AssetCustomData->Spine1IKStiffness, DeltaTime,
+				                  OffsetTransform);
+				SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->Spine2Bone, CameraLocation, Mesh.IKWeight,
+				                  AssetCustomData->Spine2IKStiffness, DeltaTime,
+				                  OffsetTransform);
+				SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->NeckBone, CameraLocation, Mesh.IKWeight,
+				                  AssetCustomData->NeckIKStiffness, DeltaTime,
+				                  OffsetTransform);
+				SolveLookAtIKBone(Mesh.MeshData, AssetCustomData->HeadBone, CameraLocation, Mesh.IKWeight,
+				                  AssetCustomData->HeadIKStiffness, DeltaTime,
+				                  OffsetTransform);
+			}
+
+			if (CameraDistance < RadiusOfHighQualitySolving)
+			{
+				if (Mesh.CurrentUpdateGroupIndex == Mesh.DefaultUpdateGroupIndex)
+				{
+					CriticalSection.Lock();
+					SwitchingGroups.Add(Mesh.MeshData, true);
+					CriticalSection.Unlock();
+				}
+			}
+			else
+			{
+				if (Mesh.CurrentUpdateGroupIndex == QualityGroupIndex)
+				{
+					CriticalSection.Lock();
+					SwitchingGroups.Add(Mesh.MeshData, false);
+					CriticalSection.Unlock();
+				}
+			}
+
+			Mesh.DeltaTimeAccumulator = 0;
 		}
 	}, EParallelForFlags::BackgroundPriority);
 }
@@ -723,24 +710,10 @@ void ATurboSequence_Demo_Lf::SolveBlueprintDemoMeshesInCpp(const TArray<FTurboSe
 
 	if (bMultiThreaded)
 	{
-		int16 NumThreads = FTurboSequence_Helper_Lf::NumCPUThreads() - GET1_NUMBER;
-		int32 NumMeshesPerThread_Background = FMath::CeilToInt(
-			static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-		ParallelFor(NumThreads, [&](int32 ThreadsIndex)
+		ParallelFor(NumMeshes, [&](int32 Index)
 		{
-			const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread_Background;
-			const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread_Background;
-
-			for (int32 Index = MeshBaseIndex; Index < MeshBaseNum; ++Index)
-			{
-				if (Index >= NumMeshes)
-				{
-					break;
-				}
-
-				RunnerFunction(MeshData[Index], Index);
-			}
-		}, EParallelForFlags::BackgroundPriority);
+			RunnerFunction(MeshData[Index], Index);
+		});
 	}
 	else
 	{
