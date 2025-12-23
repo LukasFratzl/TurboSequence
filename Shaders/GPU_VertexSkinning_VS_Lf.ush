@@ -10,20 +10,20 @@ TurboSequenceVSFunctions_Lf f;
 
 TurboSequenceEncodeFunctions_Lf EncodeFunction;
 
-int SwTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.x, CustomData.y);
+float4 CustomData_TS_Lf = CustomData;
+if (MeshDataMode > 0.5f && MeshDataMode < 1.5f) // UV Nanite
+{
+	CustomData_TS_Lf = CustomDataNanite;
+}
+int SwTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData_TS_Lf.x, CustomData_TS_Lf.y);
 if (SwTextureOffset)
 {
 	int4 Settings0 = (int4)TransformTexture_CurrentFrame[int3(0, 0, 0)];
 
 	int VertexBaseIndex = 0;
-	if (MeshDataMode > 0.5f) // Vertex Color
-	{
-		float4 VertexColorScaled = float4(VertexInstanceColorTS_Lf.x * 0xFF, VertexInstanceColorTS_Lf.y * 0xFF,
-											 VertexInstanceColorTS_Lf.z * 0xFF, VertexInstanceColorTS_Lf.w * 0xFF);
-		VertexBaseIndex = EncodeFunction.EncodeUInt32ToColor_Float(VertexColorScaled) * 7 + (SwTextureOffset - Settings0.z);
-		// Setting0.z -> Custom States offset
-	}
-	else // UV
+	// UV MeshDataMode = 0 -> Without Nanite
+	// UV MeshDataMode = 1 -> With Nanite
+	if (MeshDataMode < 1.5f)
 	{
 		int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
 		if (MeshDataUVChannelOverride > -0.5f)
@@ -35,8 +35,16 @@ if (SwTextureOffset)
 		VertexBaseIndex = EncodeFunction.EncodeUInt16ToUInt32_Float(UVs.x, UVs.y) * 7 + (SwTextureOffset - Settings0.z);
 		// Setting0.z -> Custom States offset
 	}
+	// Vertex Color = 2 -> Not Supported with Nanite
+	else // Vertex Color
+	{
+		float4 VertexColorScaled = float4(VertexInstanceColorTS_Lf.x * 0xFF, VertexInstanceColorTS_Lf.y * 0xFF,
+											 VertexInstanceColorTS_Lf.z * 0xFF, VertexInstanceColorTS_Lf.w * 0xFF);
+		VertexBaseIndex = EncodeFunction.EncodeUInt32ToColor_Float(VertexColorScaled) * 7 + (SwTextureOffset - Settings0.z);
+		// Setting0.z -> Custom States offset
+	}
 
-	int TTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData.z, CustomData.w);
+	int TTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData_TS_Lf.z, CustomData_TS_Lf.w);
 	int4 Settings1 = (int4)TransformTexture_CurrentFrame[int3(1, 0, 0)];
 	int2 MaterialSettings0 = int2((int)MeshDataTextureDimension.x,
 								  (int)MeshDataTextureDimension.y);

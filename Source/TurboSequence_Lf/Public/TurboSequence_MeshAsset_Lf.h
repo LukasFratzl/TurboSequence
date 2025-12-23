@@ -242,6 +242,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	int32 MaxLevelOfDetails = 10;
+	
+	UPROPERTY(EditAnywhere, Category="UI")
+	bool bUseNanite = true;
 
 	/*	==============================================================================================================
 												COMPATIBILITY

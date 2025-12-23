@@ -50,6 +50,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FName NameNiagaraCustomData = FName("User.CustomData");
+	
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
+	FName NameNiagaraUseNanite = FName("User.TS_UseNanite");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_CurrentFrame;

@@ -793,6 +793,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 
 				const int32 ID = GlobalLibrary.UpdateGroups[
 					UpdateContext.GroupIndex].RawIDs[Index];
+				
 
 				if (!GlobalLibrary.RuntimeSkinnedMeshes.Contains(ID))
 				{
@@ -800,6 +801,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 					continue;
 				}
 				FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[ID];
+				
 
 				FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
 				if (!IsValid(Instance) || !IsValid(Reference.FirstValidMeshLevelOfDetail))
@@ -900,6 +902,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						Reference, GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()], LodElement.SkinWeightOffset,
 						Runtime, GlobalLibrary);
 				}
+				
 
 				if (FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference) || Runtime.
 					bForceVisibilityUpdatingThisFrame)
@@ -908,6 +911,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 						Reference, Runtime, GlobalLibrary.CameraViews);
 
 					FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
+					
 
 					if ((FTurboSequence_Utility_Lf::GetIsMeshAnimated(Runtime, Reference) && Runtime.
 						bIsDistanceUpdatingThisFrame && LodElement.
@@ -949,6 +953,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 								Runtime_RenderThread.AnimationMetaData_RenderThread = Animations_RenderThread;
 								Runtime_RenderThread.bIKDataInUse = bUseIK;
 								Runtime_RenderThread.IKData = IK_RenderThread;
+								
 							});
 					}
 				}

@@ -64,4 +64,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Niagara Particle Remove Name"), Category="TurboSequence")
 	FString NameNiagaraParticleRemove = FString("User.Particle_Remove");
+	
+	UPROPERTY(EditAnywhere, Config, meta = (DisplayName = "Niagara Use Nanite Name"), Category="TurboSequence")
+	FString NameUseNanite = FString("User.TS_UseNanite");
 };

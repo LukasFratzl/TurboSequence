@@ -31,6 +31,7 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/HashBuilder.h"
 #include "Misc/PackageName.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Runtime/Launch/Resources/Version.h"
 #include "UObject/SavePackage.h"
 
@@ -389,6 +390,8 @@ public:
 	inline static const FString NameNiagaraParticleRemove = FString("User.Particle_Remove");
 	inline static const FString NameNiagaraLevelOfDetailIndex = FString("User.LevelOfDetail_Index");
 	inline static const FString NameNiagaraCustomData = FString("User.CustomData");
+	inline static const FString NameUseNanite = FString("User.TS_UseNanite");
+	inline static const FName NameNotUseNanite = FName("User.TS_NotUseNanite");
 
 
 	inline static const FString ReferenceTurboSequenceTransformTextureCurrentFrame = FString(
@@ -1712,6 +1715,44 @@ public:
 		}
 
 		return AssetRegistryModule.Get().GetAssetsByTagValues(TagsValues, FoundAssets);
+	}
+	
+	static FORCEINLINE_DEBUGGABLE void OptimizeStaticMeshForManyMeshInstances(UStaticMesh* StaticMesh, const bool bBuild)
+	{
+		check(StaticMesh)
+
+		// Nanite
+		FMeshNaniteSettings NaniteSettings = StaticMesh->GetNaniteSettings();
+		NaniteSettings.bEnabled = true;
+		NaniteSettings.bLerpUVs = false;
+		StaticMesh->SetNaniteSettings(NaniteSettings);
+
+		// Collision
+		UBodySetup* BodySetup = StaticMesh->GetBodySetup();
+		BodySetup->DefaultInstance.SetObjectType(ECC_WorldDynamic);
+		BodySetup->DefaultInstance.SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		BodySetup->DefaultInstance.SetCollisionProfileName(UCollisionProfile::CustomCollisionProfileName);
+		BodySetup->DefaultInstance.SetResponseToAllChannels(ECR_Ignore);
+		for (int32 LODIndex = 0; LODIndex < StaticMesh->GetNumLODs(); ++LODIndex)
+		{
+			for (int32 SectionIndex = 0; SectionIndex < StaticMesh->GetNumSections(LODIndex); ++SectionIndex)
+			{
+				FMeshSectionInfo MeshSectionInfo = StaticMesh->GetSectionInfoMap().Get(LODIndex, SectionIndex);
+				MeshSectionInfo.bEnableCollision = false;
+				StaticMesh->GetSectionInfoMap().Set(LODIndex, SectionIndex, MeshSectionInfo);
+			}
+		}
+
+		// Navigation
+		StaticMesh->bHasNavigationData = false;
+
+		// Done
+		if (bBuild)
+		{
+			TArray<FText> OutErrors;
+			StaticMesh->Build(true, &OutErrors);
+			StaticMesh->MarkPackageDirty();
+		}
 	}
 
 
