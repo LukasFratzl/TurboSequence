@@ -634,6 +634,10 @@ public:
 			switch (Runtime.EIsAnimatedOverride)
 			{
 			case ETurboSequence_IsAnimatedOverride_Lf::Default:
+				if (Runtime.DataAsset->bUseNanite)
+				{
+					return Runtime.ClosestCameraDistance < Runtime.DataAsset->NaniteMaxAnimationDistance;
+				}
 				return LodElement.bIsAnimated;
 			case ETurboSequence_IsAnimatedOverride_Lf::IsAnimated:
 				return true;

@@ -630,9 +630,6 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 				{
 					NumVertices = FromAsset->MeshData[LodIdx].NumVertices;
 				}
-				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("NumLODs %d"), MaxNumLevelOfDetails));
-				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("Num VERTS 1 %d"), NumVerticesInstancedMesh));
-				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("Num VERTS 2 %d"), NumVertices));
 				if (NumVerticesInstancedMesh == NumVertices)
 				{
 					LodElement.MeshIndex = LodIdx;

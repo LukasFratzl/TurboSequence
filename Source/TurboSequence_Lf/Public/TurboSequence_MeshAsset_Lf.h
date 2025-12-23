@@ -127,6 +127,13 @@ public:
 	UPROPERTY(EditAnywhere, Category="Reference")
 	TObjectPtr<UTexture2DArray> MeshDataTexture;
 
+	UPROPERTY(EditAnywhere, Category="Nanite",
+		meta=(ClampMin = "0", ClampMax = "100000", ToolTip="Max Animation Distance from the camera when using the Nanite Renderer"
+			, ShortTooltip=
+			"Max Animation Distance in Meter from the camera when using the Nanite Renderer"
+		))
+	// Max Animation Distance in Meter from the camera when using the Nanite Renderer
+	float NaniteMaxAnimationDistance = 17000.0f;
 
 	UPROPERTY(EditAnywhere, Category="Optimization",
 		meta=(ClampMin = "0.001", ClampMax = "0.2", ToolTip=
