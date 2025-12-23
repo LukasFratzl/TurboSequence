@@ -183,6 +183,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, const UWorld* InWorld,
                                               const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateCameras);
 	const bool bHasCustomCameraData = static_cast<bool>(CustomCameraInfo.Num());
 	const bool bIsSinglePlayer = UGameplayStatics::GetNumPlayerControllers(InWorld) < GET2_NUMBER &&
 		CustomCameraInfo.Num() < GET2_NUMBER;
@@ -195,8 +196,8 @@ void FTurboSequence_Utility_Lf::UpdateCameras(TArray<FCameraView_Lf>& OutView, c
 	for (int32 ViewIdx = GET0_NUMBER; ViewIdx < MaxNumberPlayerControllers; ++ViewIdx)
 	{
 		FMinimalViewInfo PlayerMinimalViewInfo = FMinimalViewInfo();
-		FVector2D LocalPlayerSize = FVector2D(0,0);
-		FVector2D ViewportSize = FVector2D(0,0);
+		FVector2D LocalPlayerSize = FVector2D(0, 0);
+		FVector2D ViewportSize = FVector2D(0, 0);
 		float Fov = 90;
 		TEnumAsByte<enum EAspectRatioAxisConstraint> ConstraintType;
 		if (!bHasCustomCameraData)
@@ -280,6 +281,7 @@ void FTurboSequence_Utility_Lf::UpdateCameras_1(TArray<FCameraView_Lf>& OutViews
                                                 const UWorld* InWorld, float DeltaTime,
                                                 const TArray<FTurboSequence_CameraInfo_Lf>& CustomCameraInfo)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateCameras_1);
 	UpdateCameras(OutViews, InWorld, CustomCameraInfo);
 	float Interpolation = GET1_NUMBER; //GET2_NUMBER + DeltaTime * GET4_NUMBER;
 	uint8 NumCameraViews = OutViews.Num();
@@ -312,6 +314,7 @@ void FTurboSequence_Utility_Lf::UpdateCameras_1(TArray<FCameraView_Lf>& OutViews
 void FTurboSequence_Utility_Lf::UpdateCameras_2(TMap<uint8, FTransform>& OutLastFrameCameraTransforms,
                                                 const TArray<FCameraView_Lf>& CameraViews)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateCameras_2);
 	uint8 MaxNumberLastFrameCameras = FMath::Max(OutLastFrameCameraTransforms.Num(), CameraViews.Num());
 	for (uint8 i = GET0_NUMBER; i < MaxNumberLastFrameCameras; ++i)
 	{
@@ -419,6 +422,7 @@ void FTurboSequence_Utility_Lf::CreateTurboSequenceReference(FSkinnedMeshGlobalL
                                                              const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
                                                              const TObjectPtr<UWorld> InWorld)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateTurboSequenceReference);
 	if (!IsValid(FromAsset))
 	{
 		return;
@@ -495,6 +499,7 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
                                                      const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
                                                      bool bIsMeshDataEvaluationFunction)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateLevelOfDetails);
 	if (bIsMeshDataEvaluationFunction)
 	{
 		FromAsset->MeshData.Empty();
@@ -645,6 +650,7 @@ void FTurboSequence_Utility_Lf::CreateGPUBones(FSkinnedMeshReferenceLodElement_L
                                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
                                                bool bIsMeshDataEvaluation)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateGPUBones);
 	if (!LodElement.CPUBoneToGPUBoneIndicesMap.Num())
 	{
 		if (bIsMeshDataEvaluation)
@@ -717,6 +723,7 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
                                                FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
                                                FCriticalSection& CriticalSection)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateBoneMaps);
 	if (Library.PerReferenceData.Num())
 	{
 		const int16 PreviousNumCPUBones = Library.MaxNumCPUBones;
@@ -811,7 +818,7 @@ void FTurboSequence_Utility_Lf::CreateBoneMaps(FSkinnedMeshGlobalLibrary_Lf& Lib
 					}
 					CachedIndices[BaseIndex + i] = Data;
 				}
-			}, EParallelForFlags::BackgroundPriority);
+			});
 
 
 			if (!Reference.FirstLodGPUBonesCollection.Num() && bHasRenderState)
@@ -850,6 +857,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 	const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset, const TFunction<void(bool bSuccess)>& PostCall,
 	const TObjectPtr<UWorld> World)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer);
 #if WITH_EDITOR
 	if (!IsValid(FromAsset->GlobalData))
 	{
@@ -1001,7 +1009,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 				RealVertexIndex * FTurboSequence_Helper_Lf::NumSkinWeightPixels +
 				FTurboSequence_Helper_Lf::NumSkinWeightPixels - GET1_NUMBER] = PerVertexCustomData_0;
 		}
-	}, EParallelForFlags::BackgroundPriority);
+	});
 
 	const int32 Slice = FMath::Min(
 		FMath::CeilToInt(
@@ -1089,6 +1097,7 @@ void FTurboSequence_Utility_Lf::CreateInverseReferencePose(FSkinnedMeshGlobalLib
                                                            FSkinnedMeshGlobalLibrary_RenderThread_Lf&
                                                            Library_RenderThread, FCriticalSection& CriticalSection)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::CreateInverseReferencePose);
 	int32 NumReferences = Library.PerReferenceData.Num();
 	TArray<FVector4f> InvRefPoseData;
 
@@ -1133,7 +1142,7 @@ void FTurboSequence_Utility_Lf::CreateInverseReferencePose(FSkinnedMeshGlobalLib
 					InvRefPoseData[InvRestPoseBaseIndex + BoneIdx * GET3_NUMBER + M] = Row;
 				}
 			}
-		}, EParallelForFlags::BackgroundPriority);
+		});
 	}
 
 	ENQUEUE_RENDER_COMMAND(TurboSequence_AddInverseReferencePoses_Lf)(
@@ -1171,6 +1180,7 @@ int32 FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked(FSkinnedMeshGlobal
                                                               const FSkinnedMeshRuntime_Lf& Runtime,
                                                               const FAnimationMetaData_Lf& Animation)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::AddAnimationToLibraryChunked);
 	// Slow...
 	FScopeLock Lock(&CriticalSection);
 
@@ -1412,6 +1422,7 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshR
                                                                    const FTransform& WorldSpaceTransform,
                                                                    const bool bForce)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent);
 	if (bForce || Runtime.EIsVisibleOverride !=
 		ETurboSequence_IsVisibleOverride_Lf::ScaleToZero)
 	{
@@ -1448,6 +1459,7 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
                                                   FCriticalSection& CriticalSection,
                                                   const FTransform& WorldSpaceTransform)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::AddRenderInstance);
 	FScopeLock Lock(&CriticalSection);
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
@@ -1498,6 +1510,7 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
                                                      FCriticalSection& CriticalSection,
                                                      FSkinnedMeshGlobalLibrary_Lf& Library)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::RemoveRenderInstance);
 	FScopeLock Lock(&CriticalSection);
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
@@ -1638,6 +1651,7 @@ void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntim
                                                               TObjectPtr<UTurboSequence_ThreadContext_Lf> ThreadContext,
                                                               FSkinnedMeshGlobalLibrary_Lf& Library)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail);
 	float ClosestCameraDistance = GET_INFINITY;
 	const FVector& ComponentLocation = Runtime.WorldSpaceTransform.GetLocation();
 	for (const FCameraView_Lf& CameraView : CameraViews)
@@ -1764,6 +1778,7 @@ void FTurboSequence_Utility_Lf::UpdateCameraRendererBounds(FRenderData_Lf& Rende
 
 uint32 FTurboSequence_Utility_Lf::GetAnimationLayerGroupHash(const TArray<FTurboSequence_BoneLayer_Lf>& Layers)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::GetAnimationLayerGroupHash);
 	uint32 Hash = GET0_NUMBER;
 	for (const FTurboSequence_BoneLayer_Lf& Layer : Layers)
 	{
@@ -1814,6 +1829,7 @@ uint32 FTurboSequence_Utility_Lf::GenerateAnimationLayerMask(FAnimationMetaData_
                                                              const FSkinnedMeshReference_Lf& Reference,
                                                              bool bGenerateLayers)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::GenerateAnimationLayerMask);
 	int16 NumCPUBones = Reference.NumCPUBones;
 
 	if (bGenerateLayers)
@@ -1949,6 +1965,7 @@ bool FTurboSequence_Utility_Lf::MergeAnimationLayerMask(const TArray<uint16>& An
                                                         uint32 AnimationLayerHash, FCriticalSection& CriticalSection,
                                                         FSkinnedMeshGlobalLibrary_Lf& Library, bool bIsAdd)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::MergeAnimationLayerMask);
 	FScopeLock Lock(&CriticalSection);
 
 	bool bEditedLayer = false;
@@ -2056,6 +2073,7 @@ void FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(FCriticalSection& Crit
                                                           FSkinnedMeshGlobalLibrary_RenderThread_Lf&
                                                           Library_RenderThread)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks);
 	bool bEditedLayers = false;
 	if (Library.AnimationBlendLayerMasksRuntimeDirty.Num())
 	{
@@ -2147,34 +2165,21 @@ void FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(FCriticalSection& Crit
 									GET0_NUMBER;
 							}
 						}
-					}, EParallelForFlags::BackgroundPriority);
+					});
 				});
 
 			const int32 NumMeshes = Library.RuntimeSkinnedMeshesHashMap.Num();
-			int32 NumMeshesPerThread = FMath::CeilToInt(
-				static_cast<float>(NumMeshes) / static_cast<float>(NumThreads));
-			ParallelFor(NumThreads, [&](int32 ThreadsIndex)
+			ParallelFor(NumMeshes, [&](int32 Index)
 			{
-				const int32 MeshBaseIndex = ThreadsIndex * NumMeshesPerThread;
-				const int32 MeshBaseNum = MeshBaseIndex + NumMeshesPerThread;
+				FSkinnedMeshRuntime_Lf& Runtime = Library.RuntimeSkinnedMeshes[Library.
+					RuntimeSkinnedMeshesHashMap[Index]];
 
-				for (int32 Index = MeshBaseIndex; Index < MeshBaseNum; ++Index)
+				for (FAnimationMetaData_Lf& Animation : Runtime.AnimationMetaData)
 				{
-					if (Index >= NumMeshes)
-					{
-						break;
-					}
-
-					FSkinnedMeshRuntime_Lf& Runtime = Library.RuntimeSkinnedMeshes[Library.
-						RuntimeSkinnedMeshesHashMap[Index]];
-
-					for (FAnimationMetaData_Lf& Animation : Runtime.AnimationMetaData)
-					{
-						UpdatedAnimationLayerMaskIndex(Animation, Runtime,
-						                               Library, Library_RenderThread);
-					}
+					UpdatedAnimationLayerMaskIndex(Animation, Runtime,
+					                               Library, Library_RenderThread);
 				}
-			}, EParallelForFlags::BackgroundPriority);
+			});
 		}
 		else
 		{
@@ -2231,7 +2236,7 @@ void FTurboSequence_Utility_Lf::UpdateAnimationLayerMasks(FCriticalSection& Crit
 							Library_RenderThread.BoneTransformParams.AnimationLayers_RenderThread[i] = GET0_NUMBER;
 						}
 					}
-				}, EParallelForFlags::BackgroundPriority);
+				});
 			});
 	}
 }
@@ -2242,6 +2247,7 @@ void FTurboSequence_Utility_Lf::AddAnimation(FSkinnedMeshRuntime_Lf& Runtime, co
                                              const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext,
                                              FSkinnedMeshGlobalLibrary_Lf& Library)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::AddAnimation);
 	FScopeLock Lock(&ThreadContext->CriticalSection);
 	{
 		TArray<uint16> Layers;
@@ -2302,6 +2308,7 @@ void FTurboSequence_Utility_Lf::RemoveAnimation(FSkinnedMeshRuntime_Lf& Runtime,
                                                 FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
                                                 int32 Index)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::RemoveAnimation);
 	ThreadContext->CriticalSection.Lock();
 	const uint32 AnimationID = Runtime.AnimationMetaData[Index].AnimationID;
 	ThreadContext->CriticalSection.Unlock();
@@ -2349,6 +2356,7 @@ bool FTurboSequence_Utility_Lf::RefreshBlendSpaceState(const TObjectPtr<UBlendSp
                                                        FAnimationBlendSpaceData_Lf& Data, float DeltaTime,
                                                        FCriticalSection& CriticalSection)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::RefreshBlendSpaceState);
 	Data.Tick = FAnimTickRecord(BlendSpace, FVector(Data.CurrentPosition), Data.CachedBlendSampleData,
 	                            Data.BlendFilter, true, 1.0f, true, true, 1.0f, Data.CurrentTime, Data.Record);
 	const TArray<FName> MarkerNames;
@@ -2380,6 +2388,7 @@ FTurboSequence_AnimMinimalBlendSpace_Lf FTurboSequence_Utility_Lf::PlayBlendSpac
 	const FTurboSequence_AnimPlaySettings_Lf& AnimSettings, float OverrideWeight, float OverrideStartTime,
 	float OverrideEndTime)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::PlayBlendSpace);
 	FAnimationBlendSpaceData_Lf Data = FAnimationBlendSpaceData_Lf();
 	FTurboSequence_AnimMinimalBlendSpace_Lf BlendSpaceData = FTurboSequence_AnimMinimalBlendSpace_Lf(true);
 	BlendSpaceData.BlendSpace = BlendSpace;
@@ -2487,6 +2496,7 @@ uint32 FTurboSequence_Utility_Lf::PlayAnimation(const FSkinnedMeshReference_Lf& 
                                                 float OverrideStartTime, float OverrideEndTime,
                                                 uint32 OverrideAnimationID)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::PlayAnimation);
 	// TObjectPtr<USkeleton> Skeleton = Reference.DataAsset->GetSkeleton();
 	//
 	// ThreadContext->CriticalSection.Lock();
@@ -2633,6 +2643,7 @@ void FTurboSequence_Utility_Lf::UpdateBlendSpaces(FSkinnedMeshRuntime_Lf& Runtim
                                                   FSkinnedMeshGlobalLibrary_RenderThread_Lf& Library_RenderThread,
                                                   const FSkinnedMeshReference_Lf& Reference)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateBlendSpaces);
 	for (TTuple<TObjectPtr<UBlendSpace>, FAnimationBlendSpaceData_Lf>& BlendSpace : Runtime.
 	     AnimationBlendSpaceMetaData)
 	{
@@ -2692,6 +2703,7 @@ bool FTurboSequence_Utility_Lf::TweakAnimation(FSkinnedMeshRuntime_Lf& Runtime,
                                                const FTurboSequence_AnimPlaySettings_Lf& Settings, uint32 AnimationID,
                                                const FSkinnedMeshReference_Lf& Reference)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::TweakAnimation);
 	if (!Runtime.AnimationIDs.Contains(AnimationID))
 	{
 		return false;
@@ -2725,6 +2737,7 @@ void FTurboSequence_Utility_Lf::SolveAnimations(FSkinnedMeshRuntime_Lf& Runtime,
                                                 float DeltaTime, int32 CurrentFrameCount,
                                                 const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::SolveAnimations);
 	if (CurrentFrameCount == Runtime.LastFrameAnimationSolved)
 	{
 		return;
@@ -2997,6 +3010,7 @@ FTransform FTurboSequence_Utility_Lf::BendBoneFromAnimations(uint16 BoneIndex, c
                                                              const FSkinnedMeshReference_Lf& Reference,
                                                              const FSkinnedMeshGlobalLibrary_Lf& Library)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::BendBoneFromAnimations);
 	const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Runtime.DataAsset);
 
 	FTransform OutAtom = FTransform::Identity;
