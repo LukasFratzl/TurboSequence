@@ -1720,6 +1720,8 @@ public:
 	static FORCEINLINE_DEBUGGABLE void OptimizeStaticMeshForManyMeshInstances(UStaticMesh* StaticMesh, const bool bBuild)
 	{
 		check(StaticMesh)
+		
+#if WITH_EDITOR
 
 		// Nanite
 		FMeshNaniteSettings NaniteSettings = StaticMesh->GetNaniteSettings();
@@ -1753,6 +1755,8 @@ public:
 			StaticMesh->Build(true, &OutErrors);
 			StaticMesh->MarkPackageDirty();
 		}
+		
+#endif
 	}
 
 

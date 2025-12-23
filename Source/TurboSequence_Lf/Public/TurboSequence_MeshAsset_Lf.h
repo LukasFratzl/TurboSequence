@@ -20,10 +20,13 @@ struct TURBOSEQUENCE_LF_API FMeshData_Lf
 	{
 	}
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	int32 NumVertices = GET0_NUMBER;
+	
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
+	int32 NumNaniteVertices = GET0_NUMBER;
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TMap<int32, int32> CPUBoneToGPUBoneIndicesMap;
 };
 
@@ -176,7 +179,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TArray<FMeshData_Lf> MeshData;
 
 	int32 MeshDataCustomData = GET0_NUMBER;

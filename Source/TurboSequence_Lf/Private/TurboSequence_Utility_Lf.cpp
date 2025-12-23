@@ -97,7 +97,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 
 
 	// Add the mesh to the component we just created
-	bool bNaniteMeshSet = false;
+	//bool bNaniteMeshSet = false;
 	for (const TTuple<uint8, FSkinnedMeshReferenceLodElement_Lf>& Lod : LevelOfDetails)
 	{
 		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Lod.Value;
@@ -117,14 +117,14 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
 					WantedMeshName, LodElement.Mesh);
 				
-				if (!bNaniteMeshSet)
-				{
-					RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
-						FName("User.TS_NaniteMesh"), LodElement.Mesh);
-					
-					//UE_LOG(LogTemp, Warning, TEXT("%s"), *LodElement.Mesh->GetFName().ToString());
-				}
-				bNaniteMeshSet = true;
+				// if (!bNaniteMeshSet)
+				// {
+				// 	RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
+				// 		FName("User.TS_NaniteMesh"), LodElement.Mesh);
+				// 	
+				// 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *LodElement.Mesh->GetFName().ToString());
+				// }
+				// bNaniteMeshSet = true;
 			}
 		}
 	}
@@ -585,11 +585,26 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 			{
 				NumLevelOfDetails = FromAsset->ReferenceMeshEdited->GetLODNum();
 			}
-			uint32 NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(
-				GET0_NUMBER);
-			if (FromAsset->bUseNanite)
+			uint32 NumVerticesInstancedMesh = GET0_NUMBER;
+			if (bIsMeshDataEvaluationFunction)
 			{
-				NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumNaniteVertices();
+				if (FromAsset->bUseNanite)
+				{
+					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumNaniteVertices();
+					
+					MeshData.NumNaniteVertices = NumVerticesInstancedMesh;
+				}
+			}
+			else
+			{
+				if (FromAsset->bUseNanite)
+				{
+					NumVerticesInstancedMesh = FromAsset->MeshData[i].NumNaniteVertices;
+				}
+				else
+				{
+					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(GET0_NUMBER);
+				}
 			}
 			bool bLodValid = false;
 			//uint32 GPUSkinWeightOffset = GET0_NUMBER;
@@ -615,7 +630,10 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 				{
 					NumVertices = FromAsset->MeshData[LodIdx].NumVertices;
 				}
-				if ((NumVerticesInstancedMesh == NumVertices))
+				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("NumLODs %d"), MaxNumLevelOfDetails));
+				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("Num VERTS 1 %d"), NumVerticesInstancedMesh));
+				GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Yellow, FString::Printf(TEXT("Num VERTS 2 %d"), NumVertices));
+				if (NumVerticesInstancedMesh == NumVertices)
 				{
 					LodElement.MeshIndex = LodIdx;
 					LodElement.SkinWeightOffset = SkinWightOffsetIndex;
