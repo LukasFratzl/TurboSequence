@@ -332,14 +332,12 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 			                                                          true);
 			// pr #9
 			// NewMesh->NeverStream = true;
-			uint8 NumIterations = MaxNumberOfLODs / GET5_NUMBER + GET1_NUMBER;
+			uint8 NumIterations = MaxNumberOfLODs;
 			for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
 			{
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Running Mesh Reduction Iteration %d"), i);
 
-				int32 MaxIterationNum = i * GET5_NUMBER;
-
-				int32 ReductionLOD = FMath::Min(MaxIterationNum, MaxNumberOfLODs);
+				int32 ReductionLOD = FMath::Min(i, NumIterations);
 				GenerateSkeletalMeshLevelOfDetails(NewMesh, ReductionLOD);
 			}
 
