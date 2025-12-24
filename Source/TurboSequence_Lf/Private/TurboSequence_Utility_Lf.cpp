@@ -2825,6 +2825,9 @@ void FTurboSequence_Utility_Lf::SolveAnimations(FSkinnedMeshRuntime_Lf& Runtime,
 			}
 		}
 
+		if (Animation.FinalAnimationWeight <= 0.f)
+			continue;
+
 		int32 CPUPoses;
 		int32 GPUPoses = AddAnimationToLibraryChunked(Library, ThreadContext->CriticalSection, CPUPoses,
 		                                              Runtime, Animation);
