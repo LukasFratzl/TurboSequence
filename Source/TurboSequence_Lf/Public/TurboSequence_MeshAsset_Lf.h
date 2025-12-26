@@ -20,10 +20,13 @@ struct TURBOSEQUENCE_LF_API FMeshData_Lf
 	{
 	}
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	int32 NumVertices = GET0_NUMBER;
+	
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
+	int32 NumNaniteVertices = GET0_NUMBER;
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TMap<int32, int32> CPUBoneToGPUBoneIndicesMap;
 };
 
@@ -124,6 +127,13 @@ public:
 	UPROPERTY(EditAnywhere, Category="Reference")
 	TObjectPtr<UTexture2DArray> MeshDataTexture;
 
+	UPROPERTY(EditAnywhere, Category="Nanite",
+		meta=(ClampMin = "0", ClampMax = "100000", ToolTip="Max Animation Distance from the camera when using the Nanite Renderer"
+			, ShortTooltip=
+			"Max Animation Distance in Meter from the camera when using the Nanite Renderer"
+		))
+	// Max Animation Distance in Meter from the camera when using the Nanite Renderer
+	float NaniteMaxAnimationDistance = 17000.0f;
 
 	UPROPERTY(EditAnywhere, Category="Optimization",
 		meta=(ClampMin = "0.001", ClampMax = "0.2", ToolTip=
@@ -176,7 +186,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	ETurboSequence_MeshDataMode_Lf MeshDataMode = ETurboSequence_MeshDataMode_Lf::UV;
 
-	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	UPROPERTY(VisibleAnywhere, SaveGame, Category="TurboSequence")
 	TArray<FMeshData_Lf> MeshData;
 
 	int32 MeshDataCustomData = GET0_NUMBER;
@@ -242,6 +252,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	int32 MaxLevelOfDetails = 10;
+	
+	UPROPERTY(EditAnywhere, Category="UI")
+	bool bUseNanite = true;
 
 	/*	==============================================================================================================
 												COMPATIBILITY

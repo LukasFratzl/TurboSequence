@@ -426,6 +426,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		FString LodName = FString("");
 		FString CustomDataName = FString("");
 		FString ParticleRemoveName = FString("");
+		FString UseNaniteName = FString("");
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(EmitterName,
 		                                                 TEXT(
 			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
@@ -466,6 +467,10 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		                                                 TEXT(
 			                                                 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
 		                                                 TEXT("NameNiagaraParticleRemove"));
+		FTurboSequence_Helper_Lf::GetStringConfigSetting(UseNaniteName,
+												 TEXT(
+													 "/Script/TurboSequence_Editor_Lf.TurboSequence_NiagaraSettings_Lf"),
+												 TEXT("NameUseNanite_TS"));
 		if (EmitterName.IsEmpty())
 		{
 			EmitterName = FTurboSequence_Helper_Lf::NameNiagaraEmitter;
@@ -505,6 +510,10 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		if (ParticleRemoveName.IsEmpty())
 		{
 			ParticleRemoveName = FTurboSequence_Helper_Lf::NameNiagaraParticleRemove;
+		}
+		if (UseNaniteName.IsEmpty())
+		{
+			UseNaniteName = FTurboSequence_Helper_Lf::NameUseNanite;
 		}
 
 		if (GlobalData->NameNiagaraEmitter.ToString() != EmitterName)
@@ -547,6 +556,10 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		{
 			bAssetEdited = true;
 		}
+		if (GlobalData->NameNiagaraUseNanite.ToString() != UseNaniteName)
+		{
+			bAssetEdited = true;
+		}
 
 		// Makes no sense at all
 		if (GlobalData->bUseHighPrecisionAnimationMode != false)
@@ -565,6 +578,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		GlobalData->NameNiagaraLevelOfDetailIndex = FName(LodName);
 		GlobalData->NameNiagaraCustomData = FName(CustomDataName);
 		GlobalData->NameNiagaraParticleRemove = FName(ParticleRemoveName);
+		GlobalData->NameNiagaraUseNanite = FName(UseNaniteName);
 
 		FString DefaultTransformTextureReferencePathCurrentFrame;
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePathCurrentFrame,

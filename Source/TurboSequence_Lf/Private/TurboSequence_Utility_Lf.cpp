@@ -40,7 +40,8 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 	                                           GlobalData->NameNiagaraMaterialObject,
 	                                           GlobalData->NameNiagaraLevelOfDetailIndex,
 	                                           GlobalData->NameNiagaraCustomData,
-	                                           GlobalData->NameNiagaraParticleRemove);
+	                                           GlobalData->NameNiagaraParticleRemove,
+	                                           GlobalData->NameNiagaraUseNanite);
 
 	RenderData.Materials = Materials;
 	Reference.RenderData.Add(MaterialsHash, RenderData);
@@ -87,9 +88,16 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		Item.Materials = ConvertedMaterial;
 		RenderComponents[FromAsset].NiagaraRenderer.Add(MaterialsHash, Item);
 	}
+	
+	// Set Nanite State
+	RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
+					RenderData.GetUseNaniteName(), FromAsset->bUseNanite);
+	RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
+					FTurboSequence_Helper_Lf::NameNotUseNanite, !FromAsset->bUseNanite);
 
 
 	// Add the mesh to the component we just created
+	//bool bNaniteMeshSet = false;
 	for (const TTuple<uint8, FSkinnedMeshReferenceLodElement_Lf>& Lod : LevelOfDetails)
 	{
 		const FSkinnedMeshReferenceLodElement_Lf& LodElement = Lod.Value;
@@ -108,6 +116,15 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				}
 				RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
 					WantedMeshName, LodElement.Mesh);
+				
+				// if (!bNaniteMeshSet)
+				// {
+				// 	RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
+				// 		FName("User.TS_NaniteMesh"), LodElement.Mesh);
+				// 	
+				// 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *LodElement.Mesh->GetFName().ToString());
+				// }
+				// bNaniteMeshSet = true;
 			}
 		}
 	}
@@ -136,9 +153,23 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			FromAsset->MeshDataTexture->GetSizeY());
 
 		float DataMode = 0.0f;
-		if (FromAsset->MeshDataMode == ETurboSequence_MeshDataMode_Lf::VertexColor)
+		if (FromAsset->MeshDataMode != ETurboSequence_MeshDataMode_Lf::VertexColor) // Is UV
 		{
-			DataMode = 1.0f;
+			DataMode = 0.0f;
+			if (FromAsset->bUseNanite)
+			{
+				DataMode = 1.0f;
+			}
+		}
+		else
+		{
+			DataMode = 2.0f;
+			if (FromAsset->bUseNanite)
+			{
+				// Color Nanite
+				//DataMode = 3.0f;
+				UE_LOG(LogTurboSequence_Lf, Error, TEXT("Vertex Color mode is not supported with Nanite Rendering ... please use the UV Mode, Effected Asset is ->  %s"), *FromAsset->GetPathName())
+			}
 		}
 		MaterialInstance->SetScalarParameterValue(
 			FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
@@ -554,8 +585,27 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 			{
 				NumLevelOfDetails = FromAsset->ReferenceMeshEdited->GetLODNum();
 			}
-			uint32 NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(
-				GET0_NUMBER);
+			uint32 NumVerticesInstancedMesh = GET0_NUMBER;
+			if (bIsMeshDataEvaluationFunction)
+			{
+				if (FromAsset->bUseNanite)
+				{
+					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumNaniteVertices();
+					
+					MeshData.NumNaniteVertices = NumVerticesInstancedMesh;
+				}
+			}
+			else
+			{
+				if (FromAsset->bUseNanite)
+				{
+					NumVerticesInstancedMesh = FromAsset->MeshData[i].NumNaniteVertices;
+				}
+				else
+				{
+					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(GET0_NUMBER);
+				}
+			}
 			bool bLodValid = false;
 			//uint32 GPUSkinWeightOffset = GET0_NUMBER;
 			for (int16 LodIdx = GET0_NUMBER; LodIdx < NumLevelOfDetails; ++LodIdx)
@@ -1011,10 +1061,10 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 		}
 	});
 
-	const int32 Slice = FMath::Min(
+	const int32 Slice = FMath::Max(FMath::Min(
 		FMath::CeilToInt(
 			static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Num()) /
-			static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023);
+			static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023), 1);
 
 	FromAsset->GlobalData->SkinWeightTexture->Init(GET128_NUMBER, GET128_NUMBER, Slice, PF_FloatRGBA);
 	FromAsset->GlobalData->SkinWeightTexture->UpdateResourceImmediate(true);

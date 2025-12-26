@@ -57,7 +57,8 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 	explicit FRenderData_Lf(const FName& EmitterName, const FName& ParticleIDName, const FName& PositionName, const FName& RotationName,
 	                        const FName& ScaleName, const FString& MeshName, const FString& MaterialsName,
-	                        const FName& LodName, const FName& CustomDataName, const FName& ParticleRemoveName)
+	                        const FName& LodName, const FName& CustomDataName, const FName& ParticleRemoveName,
+	                        const FName& UseNaniteName)
 		: EmitterName(EmitterName),
 		  IDName(ParticleIDName),
 		  PositionName(PositionName),
@@ -67,7 +68,8 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 		  MaterialsName(MaterialsName),
 		  LodName(LodName),
 		  CustomDataName(CustomDataName),
-		  ParticleRemoveName(ParticleRemoveName)
+		  ParticleRemoveName(ParticleRemoveName),
+		  UseNaniteName(UseNaniteName)
 	{
 	}
 
@@ -129,6 +131,7 @@ private:
 	FName LodName;
 	FName CustomDataName;
 	FName ParticleRemoveName;
+	FName UseNaniteName;
 
 	// int32 UniqueID = 0;
 
@@ -191,6 +194,10 @@ public:
 	FORCEINLINE FName& GetParticleRemoveName()
 	{
 		return ParticleRemoveName;
+	}
+	FORCEINLINE FName& GetUseNaniteName()
+	{
+		return UseNaniteName;
 	}
 };
 

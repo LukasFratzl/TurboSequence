@@ -89,7 +89,8 @@ enum class EShow_ControlPanel_Properties_Lf : uint8
 	Skeletal_Mesh_Reference,
 	MaxInstancedLevelOfDetails,
 	MeshDataModeToGenerate,
-	TweakGlobalTextureSection
+	TweakGlobalTextureSection,
+	UseNaniteProperty
 };
 
 /**
@@ -145,6 +146,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	TObjectPtr<USkeletalMesh> Current_SkeletalMesh_Reference_NoEdit;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
+	bool bUseNanite = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin = "1", ClampMax = "32"), Category="TurboSequence")
 	int32 MaxNumberOfLODs = 8;
@@ -197,7 +201,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CacheProperties(UPropertyViewBase* MainAsset, UPropertyViewBase* LodZeroSkeletalMesh,
 	                     UPropertyViewBase* MaxLevelOfDetailsToGenerate, UPropertyViewBase* MeshDataModeToGenerate,
-	                     UPropertyViewBase* TweakGlobalTextures);
+	                     UPropertyViewBase* TweakGlobalTextures,  UPropertyViewBase* UseNaniteProperty);
 
 	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void CreateProperties();

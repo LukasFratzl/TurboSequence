@@ -59,6 +59,11 @@ void UTurboSequence_ControlWidget_Lf::OnAssignMainAsset()
 		LevelOfDetails = Main_Asset_To_Edit->InstancedMeshes;
 
 		MaxNumberOfLODs = Main_Asset_To_Edit->MaxLevelOfDetails;
+		bUseNanite = Main_Asset_To_Edit->bUseNanite;
+		if (bUseNanite)
+		{
+			MaxNumberOfLODs = GET1_NUMBER;
+		}
 
 		MeshDataMode = Main_Asset_To_Edit->MeshDataMode;
 	}
@@ -140,7 +145,8 @@ void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAss
                                                       UPropertyViewBase* LodZeroSkeletalMesh,
                                                       UPropertyViewBase* MaxLevelOfDetailsToGenerate,
                                                       UPropertyViewBase* MeshDataModeToGenerate,
-                                                      UPropertyViewBase* TweakGlobalTextures)
+                                                      UPropertyViewBase* TweakGlobalTextures,
+                                                      UPropertyViewBase* UseNaniteProperty)
 {
 	AddPropertyToArray(MainAsset, EShow_ControlPanel_Properties_Lf::Main_Asset);
 	AddPropertyToArray(LodZeroSkeletalMesh, EShow_ControlPanel_Properties_Lf::Skeletal_Mesh);
@@ -149,6 +155,8 @@ void UTurboSequence_ControlWidget_Lf::CacheProperties(UPropertyViewBase* MainAss
 	AddPropertyToArray(MeshDataModeToGenerate, EShow_ControlPanel_Properties_Lf::MeshDataModeToGenerate);
 
 	AddPropertyToArray(TweakGlobalTextures, EShow_ControlPanel_Properties_Lf::TweakGlobalTextureSection);
+	
+	AddPropertyToArray(UseNaniteProperty, EShow_ControlPanel_Properties_Lf::UseNaniteProperty);
 }
 
 void UTurboSequence_ControlWidget_Lf::CreateProperties()
@@ -324,12 +332,16 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 
 	if (!WantedMeshPath.IsEmpty() && Main_Asset_To_Edit && Main_Asset_To_Edit->ReferenceMeshNative)
 	{
-		if (MaxNumberOfLODs > 0)
+		if ((MaxNumberOfLODs > 0) || bUseNanite)
 		{
 			TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(Main_Asset_To_Edit->ReferenceMeshNative,
 			                                                          FName(FString::Format(
 				                                                          TEXT("{0}_Reference"), {*WantedMeshName})),
 			                                                          true);
+			if (bUseNanite)
+			{
+				MaxNumberOfLODs = GET1_NUMBER;
+			}
 			// pr #9
 			// NewMesh->NeverStream = true;
 			uint8 NumIterations = MaxNumberOfLODs;
@@ -348,7 +360,9 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 
 			FTurboSequence_Helper_Lf::SaveNewAsset(NewMesh);
 
+			Main_Asset_To_Edit->bUseNanite = bUseNanite;
 			Main_Asset_To_Edit->MaxLevelOfDetails = MaxNumberOfLODs;
+			
 			Current_SkeletalMesh_Reference = Main_Asset_To_Edit->ReferenceMeshEdited = Cast<USkeletalMesh>(
 				FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, NewMesh,
 				                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
@@ -363,6 +377,11 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 					FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})),
 					StaticMeshIndices, MeshDataMode))
 				{
+					if (bUseNanite)
+					{
+						FTurboSequence_Helper_Lf::OptimizeStaticMeshForManyMeshInstances(StaticMesh, true);
+					}
+					
 					FMeshItem_Lf Item = FMeshItem_Lf();
 					if (i > GET9_NUMBER)
 					{

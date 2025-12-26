@@ -48,6 +48,9 @@ TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, T
 
 In UE 5.5 Nanite Skeletal Meshes are here, before using Turbo Sequence, UEs Skeletal Mesh system for crowds can be a good option when using Nanite.
 
+**Since UE 5.7,** there is a `Niagara Nanite Renderer`, since Turbo Seuqnece 5.7 it is part of the plugin, Nanite can turn on in the Control Panel when building a Mesh.
+
+
 
 ## Features
 
@@ -78,12 +81,14 @@ In UE 5.5 Nanite Skeletal Meshes are here, before using Turbo Sequence, UEs Skel
 * Add Instances
 * Remove instances
 * Per Instance Custom Data
+* Nanite Rendering
 
 ## Limits
- * Blueprint-only projects are not supported.
- * A Blueprint API Exists, but I highly recommend using the C++ API because it's so much faster.
- * Only Windows and Linux are supported, Not IOS and Android or Mac.
- + Turbo Sequence is not built to handle metahumans, please use UE Nanite Skeletal Meshes instead.
+
+* Blueprint-only projects are not supported.
+* A Blueprint API Exists, but I highly recommend using the C++ API because it's so much faster.
+* Only Windows and Linux are supported, Not IOS and Android or Mac.
++ Turbo Sequence is not built to handle metahumans, please use UE Nanite Skeletal Meshes instead.
 
 ## Quick Start Guide
 
