@@ -46,7 +46,6 @@ TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, T
 
 ## Limits
 
- - TS not using Nanite
  - Metahumans are not supported, please use UE Nanite Skeletal Meshes instead
  - Windows and Linux exclusive
  - Blueprint-Only projects are not supported
