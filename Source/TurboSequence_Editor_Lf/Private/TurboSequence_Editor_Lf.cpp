@@ -226,7 +226,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
 
 	// Swap back and to the next iteration
 	//UE_LOG(LogTurboSequence_Lf, Display, TEXT("Swap Back Mesh Data Asset from ID=0"))
-	if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.IsValidIndex(GET0_NUMBER))
+	if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.Num())
 	{
 		//UE_LOG(LogTurboSequence_Lf, Display, TEXT("Swap Back Mesh Data Asset from ID=0"))
 		TurboSequence_MeshAssetData_AsyncComputeSwapBack.RemoveAt(GET0_NUMBER);
@@ -271,8 +271,11 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync2(const TObjectPtr<UTur
 				       ), *Asset->GetPathName());
 
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Swap Back Mesh Data Asset from ID=2"))
-				TurboSequence_MeshAssetData_AsyncComputeSwapBack.RemoveAt(GET0_NUMBER);
-				RepairMeshAssetAsync();
+				if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.Num())
+				{
+					TurboSequence_MeshAssetData_AsyncComputeSwapBack.RemoveAt(GET0_NUMBER);
+					RepairMeshAssetAsync();	
+				}
 
 				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Returning with ID=2"))
 				return;
@@ -313,7 +316,7 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync2(const TObjectPtr<UTur
 
 			if (bIsCollection)
 			{
-				if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.IsValidIndex(GET0_NUMBER))
+				if (TurboSequence_MeshAssetData_AsyncComputeSwapBack.Num())
 				{
 					FTimerDelegate SwapBackCallback;
 					SwapBackCallback.BindLambda([&]
