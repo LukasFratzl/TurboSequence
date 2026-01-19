@@ -200,6 +200,15 @@ struct TURBOSEQUENCE_LF_API FFeatureDemoHybridMode_Lf : public FFeatureDemoBase_
 	TObjectPtr<UAnimSequence> DemoAnimation;
 };
 
+USTRUCT()
+struct TURBOSEQUENCE_LF_API FFeatureDemoNanite_Lf : public FFeatureDemoBase_Lf
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
+	TObjectPtr<UAnimSequence> DemoAnimation;
+};
+
 UENUM(BlueprintType)
 enum class EFeatureDemoEnableFeature_Lf : uint8
 {
@@ -217,7 +226,8 @@ enum class EFeatureDemoEnableFeature_Lf : uint8
 	Curves,
 	Normals,
 	UpdateGroups,
-	HybridMode
+	HybridMode,
+	Nanite
 };
 
 
@@ -320,4 +330,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FFeatureDemoHybridMode_Lf HybridMode = FFeatureDemoHybridMode_Lf();
+	
+	UPROPERTY(EditAnywhere, Category="TurboSequence")
+	FFeatureDemoNanite_Lf NaniteDemo = FFeatureDemoNanite_Lf();
 };

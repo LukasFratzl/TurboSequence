@@ -273,6 +273,19 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 		ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(HybridMode.MeshData[0], HybridMode.DemoAnimation,
 		                                                    AnimationPlaySettings);
 	}
+	
+	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::Nanite) && NaniteDemo.bEnable &&
+	NaniteDemo.Spawns.Num())
+	{
+		NaniteDemo.MeshData.Add(
+			ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+				NaniteDemo.Spawns[0], NaniteDemo.ActionTransforms[0], GetWorld()));
+		ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(0, NaniteDemo.MeshData[0]);
+		
+		FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
+		ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(NaniteDemo.MeshData[0], NaniteDemo.DemoAnimation,
+															AnimationPlaySettings);
+	}
 }
 
 // Called every frame
@@ -436,6 +449,7 @@ void ATurboSequence_FeaturesDemo_Lf::Tick(float DeltaTime)
 		CustomizationDemo.RandomTimer -= DeltaTime;
 		if (CustomizationDemo.RandomTimer < 0)
 		{
+			
 			CustomizationDemo.RandomTimer = 0.5f; //FMath::RandRange(0.25f, 1.0f);
 
 			FTurboSequence_MeshSpawnData_Lf CustomizableData;
