@@ -594,6 +594,10 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 					
 					MeshData.NumNaniteVertices = NumVerticesInstancedMesh;
 				}
+				else
+				{
+					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumVertices(GET0_NUMBER);
+				}
 			}
 			else
 			{
