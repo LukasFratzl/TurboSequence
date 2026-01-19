@@ -18,6 +18,7 @@ The advantage of using Turbo Sequence over VATs is that Turbo Sequence uses bone
 Turbo Sequence is trying to use Draw-Calls per archetype efficiently and not per instance, which has an advantage compared to traditional rendering methods.
 
 _*Traditional Rendering:*_
+
 ```
 CPU       GPU
          |
@@ -32,6 +33,7 @@ Instance N (Mesh data N) -> Draw call
 ```
 
 _*GPU Instancing*_
+
 ```
 CPU       GPU
          |
@@ -42,15 +44,13 @@ Base mesh data -> Draw call
                   Rendered instances
 ```
 
-TS is optimized for crowds around 10k - 50k, if you need more units, use VATs, Turbo Sequence is built to combine Animation Quality with Modern Rendering which means it is just as fast as the Quality of Bone joint bending allows it.
+TS is CPU bound and optimized for crowds around 10k - 50k, if you need more units, use VATs and/or pure GPU systems.
 
 ## Nanite
 
 In UE 5.5 Nanite Skeletal Meshes are here, before using Turbo Sequence, UEs Skeletal Mesh system for crowds can be a good option when using Nanite.
 
 **Since UE 5.7,** there is a `Niagara Nanite Renderer`, since Turbo Seuqnece 5.7 it is part of the plugin, Nanite can turn on in the Control Panel when building a Mesh.
-
-
 
 ## Features
 
@@ -114,6 +114,7 @@ Inside Unreal Engine, navigate to `..\Plugins\TurboSequence\Content\Demo` and pl
 ## Docs
 
 The official documentation and API can be found here:
+
 <div align="center">
 
 [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://github.com/LukasFratzl/Turbo-Sequence/blob/main/DOCS.md)
