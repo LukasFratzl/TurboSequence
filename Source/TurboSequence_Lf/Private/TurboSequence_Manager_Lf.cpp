@@ -7,6 +7,7 @@
 #include "TurboSequence_ComputeShaders_Lf.h"
 #include "TurboSequence_Lf.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Components/InstancedStaticMeshComponent.h"
 //#include "Kismet/KismetRenderingLibrary.h"
 
 
@@ -75,21 +76,66 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 
 		for (TTuple<uint32, FRenderData_Lf>& RenderData : Reference.RenderData)
 		{
-			const TObjectPtr<UNiagaraComponent> NiagaraComponent = Instance->NiagaraComponents[Asset].
-				NiagaraRenderer[RenderData.Key].NiagaraRenderer;
+			const TObjectPtr<UNiagaraComponent> NiagaraComponent = Instance->RenderComponents[Asset].
+				Renderer[RenderData.Key].NiagaraRenderer;
+			const TObjectPtr<UInstancedStaticMeshComponent> IsmComponent = Instance->RenderComponents[Asset].
+				Renderer[RenderData.Key].IsmRenderer;
 
-			if (!IsValid(NiagaraComponent))
+			if (!IsValid(NiagaraComponent) && !IsValid(IsmComponent))
 			{
+				continue;
+			}
+			
+			if (IsValid(IsmComponent))
+			{
+				for (TTuple<int32, int32>& InstanceID : RenderData.Value.InstanceMap)
+				{
+					// Real Index
+					const uint32 InstanceIndex = InstanceID.Value;
+					
+					// Locations
+					const FQuat Quat = FQuat(RenderData.Value.ParticleRotations[InstanceIndex].X, 
+						RenderData.Value.ParticleRotations[InstanceIndex].Y, 
+						RenderData.Value.ParticleRotations[InstanceIndex].Z, 
+						RenderData.Value.ParticleRotations[InstanceIndex].W);
+					const FTransform& Transform = FTransform(Quat, 
+						FVector(RenderData.Value.ParticlePositions[InstanceIndex]),
+						FVector(RenderData.Value.ParticleScales[InstanceIndex]));
+					IsmComponent->UpdateInstanceTransform(InstanceIndex, Transform, true, true, false);
+					
+					// Custom Data
+					if (RenderData.Value.ParticleCustomDataIsm.IsValidIndex(InstanceIndex))
+					{
+						if (RenderData.Value.bChangedCustomDataCollectionThisFrame)
+						{
+							for (int32 i = GET0_NUMBER; i < FTurboSequence_Helper_Lf::NumInstanceCustomData; i++)
+							{
+								const int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
+							
+								RenderData.Value.ParticleCustomDataIsm[InstanceIndex][i] = RenderData.Value.ParticleCustomData[CustomDataIndex];
+							}
+							IsmComponent->SetCustomData(InstanceIndex, RenderData.Value.ParticleCustomDataIsm[InstanceIndex], true);
+						}
+					}
+				}
+				IsmComponent->MarkRenderInstancesDirty();
+				IsmComponent->MarkRenderStateDirty();
+				IsmComponent->MarkRenderDynamicDataDirty();
+				
+				RenderData.Value.bChangedLodCollectionThisFrame = false;
+				RenderData.Value.bChangedCustomDataCollectionThisFrame = false;
+				RenderData.Value.bChangedPositionCollectionThisFrame = false;
+				RenderData.Value.bChangedRotationCollectionThisFrame = false;
+				RenderData.Value.bChangedScaleCollectionThisFrame = false;
+
+				RenderData.Value.bChangedCollectionSizeThisFrame = false;
+				
 				continue;
 			}
 
 			if (RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
-				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-				// 	NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
 				RenderData.Value.bChangedCollectionSizePreviousFrame = true;
-				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
-				// 	NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			}
 
 			NiagaraComponent->SetVariableBool("User.CollectionChangedThisFrame",
@@ -100,15 +146,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				bChangedCollectionSizeThisFrame)
 			{
 				RenderData.Value.bChangedCollectionSizePreviousFrame = false;
-				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayInt32(
-				// 	NiagaraComponent, RenderData.Value.GetParticleIDName(), RenderData.Value.ParticleIDs);
-
-				// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
-				// 	NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 			}
-
-			// UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayBool(
-			// 		NiagaraComponent, RenderData.Value.GetParticleRemoveName(), RenderData.Value.ParticlesToRemove);
 
 
 			if (RenderData.Value.bChangedLodCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
@@ -151,23 +189,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			RenderData.Value.bChangedScaleCollectionThisFrame = false;
 
 			RenderData.Value.bChangedCollectionSizeThisFrame = false;
-			// ParticleIDs needs to have the last frame valid Indices
-			// if (RenderData.Value.ParticlesToRemoveIndices.Num())
-			// {
-			// 	for (const int32 ParticleIndexToRemove : RenderData.Value.ParticlesToRemoveIndices)
-			// 	{
-			// 		RenderData.Value.ParticlesToRemove.RemoveAt(ParticleIndexToRemove);
-			// 	}
-			// }
-			// const int32 NumRemove = RenderData.Value.ParticlesToRemove.Num();
-			// for (int32 i = NumRemove - GET1_NUMBER; i >= GET0_NUMBER; --i)
-			// {
-			// 	if (RenderData.Value.ParticlesToRemove[i])
-			// 	{
-			// 		RenderData.Value.ParticlesToRemove.RemoveAt(i);
-			// 	}
-			// }
-			// RenderData.Value.ParticlesToRemoveIndices.Empty();
 
 			const FBox RendererBounds = FBox(RenderData.Value.MinBounds, RenderData.Value.MaxBounds);
 			NiagaraComponent->SetEmitterFixedBounds(RenderData.Value.GetEmitterName(), RendererBounds);
@@ -176,49 +197,6 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			// so we add a default camera bounds extend to it for the next frame
 			FTurboSequence_Utility_Lf::UpdateCameraRendererBounds(RenderData.Value, GlobalLibrary.CameraViews,
 			                                                      GET100_NUMBER * GET10_NUMBER);
-
-			// for (const int32 MeshIDToRemove : RenderData.Value.MeshIDsToRemove)
-			// {
-			// 	const int32 InstanceIndex = RenderData.Value.InstanceMap[MeshIDToRemove];
-			// 	// RenderData.ParticlePositions[InstanceIndex] = FVector(-100000, -100000, -100000); // Remove Point
-			//
-			// 	RenderData.Value.InstanceMap.Remove(MeshIDToRemove);
-			// 	for (TTuple<int32, int32>& Item : RenderData.Value.InstanceMap)
-			// 	{
-			// 		if (Item.Value > InstanceIndex)
-			// 		{
-			// 			Item.Value--;
-			// 		}
-			// 	}
-			//
-			//
-			// 	RenderData.Value.ParticlePositions.RemoveAt(InstanceIndex);
-			// 	RenderData.Value.ParticleRotations.RemoveAt(InstanceIndex);
-			// 	RenderData.Value.ParticleScales.RemoveAt(InstanceIndex);
-			// 	RenderData.Value.ParticleLevelOfDetails.RemoveAt(InstanceIndex);
-			// 	//RenderData.ParticleIDs.RemoveAt(InstanceIndex);
-			// 	RenderData.Value.ParticlesToRemove.RemoveAt(InstanceIndex);
-			//
-			// 	// Removing IDs happens on the removal of this Array in Tick()
-			// 	//RenderData.ParticleIDMap.Remove(Runtime.GetMeshID());
-			// 	// RenderData.ParticlesToRemove[InstanceIndex] = true;
-			// 	// RenderData.ParticlesToRemoveIndices.Add(InstanceIndex);
-			//
-			// 	for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
-			// 	{
-			// 		int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
-			// 		RenderData.Value.ParticleCustomData.RemoveAt(CustomDataIndex);
-			// 	}
-			// }
-			//RenderData.Value.MeshIDsToRemove.Empty();
-
-			// for (TTuple<int32, int32>& Item : RenderData.Value.InstanceMap)
-			// {
-			// 	if (RenderData.Value.InstanceMapCopy.Contains(Item.Key))
-			// 	{
-			// 		Item.Value = RenderData.Value.InstanceMapCopy[Item.Key];
-			// 	}
-			// }
 		}
 	}
 
@@ -491,12 +469,12 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 		}
 
 		uint32 MaterialsHash = FTurboSequence_Helper_Lf::GetArrayHash(Materials);
-		if (!Instance->NiagaraComponents.Contains(FromAsset) || (Instance->NiagaraComponents.Contains(FromAsset) && !
-			Instance->NiagaraComponents[FromAsset].NiagaraRenderer.Contains(MaterialsHash)))
+		if (!Instance->RenderComponents.Contains(FromAsset) || (Instance->RenderComponents.Contains(FromAsset) && !
+			Instance->RenderComponents[FromAsset].Renderer.Contains(MaterialsHash)))
 		{
 			FTurboSequence_Utility_Lf::CreateRenderer(Reference, FromAsset->GlobalData, FromAsset->RendererSystem,
-			                                          Reference.LevelOfDetails, Instance->GetRootComponent(),
-			                                          Instance->NiagaraComponents, FromAsset, Materials, MaterialsHash);
+			                                          Reference.LevelOfDetails, Instance->GetRootComponent(), Instance,
+			                                          Instance->RenderComponents, FromAsset, Materials, MaterialsHash);
 		}
 
 		// Now it's time to add the actual instance
@@ -549,9 +527,9 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			}
 		}
 		const FTransform& InstanceTransform = Runtime.WorldSpaceTransform;
-
+		
 		FTurboSequence_Utility_Lf::AddRenderInstance(Reference, Runtime, ThreadContext->CriticalSection,
-		                                             InstanceTransform);
+		                                              Instance->RenderComponents, InstanceTransform);
 
 
 		Runtime.LodIndex = INDEX_NONE;
@@ -645,11 +623,11 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 	                                                     Library_RenderThread);
 
 	FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection, GlobalLibrary);
+	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection, GlobalLibrary, Instance->RenderComponents);
 
 	if (const FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash]; !RenderData.InstanceMap.Num())
 	{
-		FTurboSequence_Utility_Lf::CleanNiagaraRenderer(Instance->NiagaraComponents, Reference, Runtime);
+		FTurboSequence_Utility_Lf::CleanVisualRenderer(Instance->RenderComponents, Reference, Runtime);
 	}
 	GlobalLibrary.RuntimeSkinnedMeshes.Remove(Runtime.GetMeshID());
 	GlobalLibrary.RuntimeSkinnedMeshesHashMap.Remove(Runtime.GetMeshID());
@@ -898,7 +876,8 @@ void ATurboSequence_Manager_Lf::SolveMeshes_GameThread(float DeltaTime, UWorld* 
 				bForceVisibilityUpdatingThisFrame)
 			{
 				FTurboSequence_Utility_Lf::UpdateInstanceTransform_Internal(
-					Reference, Runtime, GlobalLibrary.CameraViews);
+					Reference, Runtime, GlobalLibrary.CameraViews,
+					Instance->RenderComponents);
 
 				FTurboSequence_Utility_Lf::UpdateRendererBounds(ThreadContext->CriticalSection, Reference, Runtime);
 
@@ -1752,7 +1731,8 @@ void ATurboSequence_Manager_Lf::SetMeshWorldSpaceLocationRotationScale_RawID_Con
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform, bForce);
+				Runtime.WorldSpaceTransform, bForce,
+				Instance->RenderComponents);
 		}
 	}
 }
@@ -1782,7 +1762,8 @@ void ATurboSequence_Manager_Lf::SetMeshWorldSpaceTransform_RawID_Concurrent(
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform, bForce);
+				Runtime.WorldSpaceTransform, bForce,
+				Instance->RenderComponents);
 		}
 	}
 }
@@ -1862,7 +1843,8 @@ void ATurboSequence_Manager_Lf::MoveMeshWithRootMotion_RawID_Concurrent(int32 Me
 		{
 			FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(
 				Reference, Runtime,
-				Runtime.WorldSpaceTransform, false);
+				Runtime.WorldSpaceTransform, false,
+				Instance->RenderComponents);
 		}
 	}
 }

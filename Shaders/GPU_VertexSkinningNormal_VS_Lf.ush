@@ -11,6 +11,10 @@ if (MeshDataMode > 0.5f && MeshDataMode < 1.5f) // UV Nanite
 {
 	CustomData_TS_Lf = CustomDataNanite;
 }
+if (MeshDataMode > 2.5f && MeshDataMode < 3.5f) // UV Nanite ISM Mode
+{
+	CustomData_TS_Lf = CustomDataNanite;
+}
 int SwTextureOffset = EncodeFunction.EncodeUInt16ToUInt32_Float(CustomData_TS_Lf.x, CustomData_TS_Lf.y);
 if (SwTextureOffset)
 {
@@ -19,7 +23,7 @@ if (SwTextureOffset)
 	int VertexBaseIndex = 0;
 	// UV MeshDataMode = 0 -> Without Nanite
 	// UV MeshDataMode = 1 -> With Nanite
-	if (MeshDataMode < 1.5f)
+	if (MeshDataMode < 1.5f || MeshDataMode > 2.5f && MeshDataMode < 3.5f)
 	{
 		int UVChannelIndex = NUM_MATERIAL_TEXCOORDS_VERTEX - 1;
 		if (MeshDataUVChannelOverride > -0.5f)

@@ -54,7 +54,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	// The Rendering Part needs Niagara to draw the meshes: 1 Draw Call per Mesh | 1 Draw Call per Material
-	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf> NiagaraComponents;
+	TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf> RenderComponents;
 
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	// The Global Data which keeps track of internal Texture Data

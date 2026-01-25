@@ -141,6 +141,7 @@ public:
 	 * @param RenderReference The Niagara system to use for rendering.
 	 * @param LevelOfDetails The map of level of details for the renderer.
 	 * @param InstanceSceneComponent The scene component to attach the renderer to.
+	 * @param WorldActor The Actor for the ISM Components
 	 * @param RenderComponents The map of render components for the renderer.
 	 * @param FromAsset The mesh asset to create the renderer from.
 	 * @param Materials The array of materials to use for the renderer.
@@ -156,6 +157,7 @@ public:
 								 const TMap<uint8, FSkinnedMeshReferenceLodElement_Lf>&
 								 LevelOfDetails,
 								 const TObjectPtr<USceneComponent> InstanceSceneComponent,
+								 const TObjectPtr<ATurboSequence_Manager_Lf> WorldActor,
 								 TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
 									  FRenderingMaterialMap_Lf>& RenderComponents,
 								 const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
@@ -440,24 +442,6 @@ public:
 	                                          FCriticalSection& CriticalSection, int32& CPUIndices,
 	                                          const FSkinnedMeshRuntime_Lf& Runtime,
 	                                          const FAnimationMetaData_Lf& Animation);
-	/**
- * Customizes a skinned mesh by applying a target mesh, target materials, and other properties.
- *
- * @param Runtime The runtime data of the skinned mesh.
- * @param TargetMesh The target mesh to apply to the skinned mesh.
- * @param TargetMaterials The target materials to apply to the skinned mesh.
- * @param NiagaraComponents A map of niagara components associated with the skinned mesh.
- * @param Library The global library of skinned meshes.
- * @param Library_RenderThread The render thread library of skinned meshes.
- * @param RootComponent The root component of the skinned mesh.
- * @param ThreadContext The thread context of the skinned mesh.
- *
- * @throws None
- */
-	// static int32 CustomizeMesh(FSkinnedMeshRuntime_Lf& Runtime, const TObjectPtr<UTurboSequence_MeshAsset_Lf> TargetMesh,
-	//                           const TArray<TObjectPtr<UMaterialInterface>>& TargetMaterials,
-	//                           const TObjectPtr<USceneComponent> RootComponent,
-	//                           const TObjectPtr<UTurboSequence_ThreadContext_Lf>& ThreadContext);
 
 	/**
      * Updates the instance transform of a skinned mesh reference based on the provided player views.
@@ -465,22 +449,28 @@ public:
      * @param Reference The skinned mesh reference to update.
      * @param Runtime The runtime data of the skinned mesh.
      * @param PlayerViews An array of camera views representing the player's perspective.
+     * @param RenderComponents Render Component to set the Meshes
      *
      * @throws None
      */
 	static void UpdateInstanceTransform_Internal(FSkinnedMeshReference_Lf& Reference,
 	                                             const FSkinnedMeshRuntime_Lf& Runtime,
-	                                             const TArray<FCameraView_Lf>& PlayerViews);
+	                                             const TArray<FCameraView_Lf>& PlayerViews,
+	                                             TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
+									  FRenderingMaterialMap_Lf>& RenderComponents);
 
 	/**
 		* @brief Updates one instance in an instanced static mesh component
 		* @param Reference The Reference to get the instance index
 		* @param Runtime The Mesh of the Instance we like to update
 		* @param WorldSpaceTransform The transform matrix we like to update
+		* @param RenderComponents Render Component to set the Meshes
 		*/
 	static void UpdateInstanceTransform_Concurrent(
 		FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime,
-		const FTransform& WorldSpaceTransform, const bool bForce);
+		const FTransform& WorldSpaceTransform, const bool bForce,
+		TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
+									  FRenderingMaterialMap_Lf>& RenderComponents);
 
 	/**
 	 * @brief Adds an instance to the given renderer with custom data
@@ -488,10 +478,13 @@ public:
 	 * @param Runtime The Runtime Data
 	 * @param CriticalSection The Critical Section for Multi Threading ability
 	 * @param WorldSpaceTransform The world location we like to add the instance
+	 * @param RenderComponents Render Component to set the Meshes
 	 */
 	static void AddRenderInstance(FSkinnedMeshReference_Lf& Reference,
 	                              const FSkinnedMeshRuntime_Lf& Runtime,
 	                              FCriticalSection& CriticalSection,
+	                              TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
+									  FRenderingMaterialMap_Lf>& RenderComponents,
 	                              const FTransform& WorldSpaceTransform = FTransform::Identity);
 	/**
 	 * Cleans the Niagara renderer for a given skinned mesh reference and runtime.
@@ -502,7 +495,7 @@ public:
 	 *
 	 * @throws None.
 	 */
-	static void CleanNiagaraRenderer(
+	static void CleanVisualRenderer(
 		TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>& NiagaraComponents,
 		FSkinnedMeshReference_Lf& Reference, const FSkinnedMeshRuntime_Lf& Runtime);
 
@@ -511,11 +504,14 @@ public:
 	 * @brief Removes an instance from the renderer
 	 * @param Reference The Reference to remove from the InstanceMap
 	 * @param Runtime The Mesh of the Instance you like to remove
+	 * @param RenderComponents Render Component to set the Meshes
 	 */
 	static void RemoveRenderInstance(FSkinnedMeshReference_Lf& Reference,
 	                                 const FSkinnedMeshRuntime_Lf& Runtime,
 	                                 FCriticalSection& CriticalSection,
-	                                 FSkinnedMeshGlobalLibrary_Lf& Library);
+	                                 FSkinnedMeshGlobalLibrary_Lf& Library,
+	                                 TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
+									  FRenderingMaterialMap_Lf>& RenderComponents);
 	/**
 	 * Updates the level of detail for a render instance concurrently.
 	 *

@@ -106,6 +106,8 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 	// Custom Data
 	TArray<float> ParticleCustomData;
+	// ISM requires a different data structure -> < Instance Index < Data Chunk > >
+	TArray<TArray<float>> ParticleCustomDataIsm;
 
 	// Bounds Checking
 	FVector MinBounds = FVector::ZeroVector;
@@ -408,6 +410,9 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialItem_Lf
 
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UNiagaraComponent> NiagaraRenderer;
+	
+	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
+	TObjectPtr<UInstancedStaticMeshComponent> IsmRenderer;
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TArray<FRenderingMaterialKeyValue_Lf> Materials;
@@ -419,7 +424,7 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialMap_Lf
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
-	TMap<uint32, FRenderingMaterialItem_Lf> NiagaraRenderer;
+	TMap<uint32, FRenderingMaterialItem_Lf> Renderer;
 };
 
 USTRUCT()

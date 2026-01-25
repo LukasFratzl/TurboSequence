@@ -11,6 +11,13 @@
 #include "TurboSequence_MeshAsset_Lf.generated.h"
 
 
+UENUM(BlueprintType)
+enum class ETurboSequence_RenderMode_Lf : uint8
+{
+	InstancedStaticMeshComponent,
+	NiagaraParticle
+};
+
 USTRUCT()
 struct TURBOSEQUENCE_LF_API FMeshData_Lf
 {
@@ -117,6 +124,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="Reference")
 	TObjectPtr<UNiagaraSystem> RendererSystem;
+	
+	UPROPERTY(EditAnywhere, Category="Rendering")
+	ETurboSequence_RenderMode_Lf RenderMode = ETurboSequence_RenderMode_Lf::NiagaraParticle;
 
 	UPROPERTY(EditAnywhere, Category="Reference")
 	TObjectPtr<USkeletalMesh> ReferenceMeshNative;

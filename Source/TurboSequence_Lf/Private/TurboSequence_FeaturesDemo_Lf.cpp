@@ -286,6 +286,27 @@ void ATurboSequence_FeaturesDemo_Lf::BeginPlay()
 		ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(NaniteDemo.MeshData[0], NaniteDemo.DemoAnimation,
 															AnimationPlaySettings);
 	}
+	
+	if (ShouldEnableFeature(EFeatureDemoEnableFeature_Lf::Renderer) && RendererDemo.bEnable &&
+		RendererDemo.Spawns.Num())
+	{
+		RendererDemo.MeshData.Add(
+			ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+				RendererDemo.Spawns[0], RendererDemo.ActionTransforms[0], GetWorld()));
+		ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(0, RendererDemo.MeshData[0]);
+		
+		FTurboSequence_AnimPlaySettings_Lf AnimationPlaySettings = FTurboSequence_AnimPlaySettings_Lf();
+		ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(RendererDemo.MeshData[0], RendererDemo.DemoAnimation,
+															AnimationPlaySettings);
+		
+		RendererDemo.MeshData.Add(
+	ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
+		RendererDemo.Spawns[1], RendererDemo.ActionTransforms[1], GetWorld()));
+		ATurboSequence_Manager_Lf::AddInstanceToUpdateGroup_Concurrent(0, RendererDemo.MeshData[1]);
+		
+		ATurboSequence_Manager_Lf::PlayAnimation_Concurrent(RendererDemo.MeshData[1], RendererDemo.DemoAnimation,
+															AnimationPlaySettings);
+	}
 }
 
 // Called every frame
