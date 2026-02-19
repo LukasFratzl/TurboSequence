@@ -82,6 +82,7 @@ In UE 5.5 Nanite Skeletal Meshes are here, before using Turbo Sequence, UEs Skel
 * Remove instances
 * Per Instance Custom Data
 * Nanite Rendering
+* Niagara or ISMC Rendering
 
 ## Limits
 
