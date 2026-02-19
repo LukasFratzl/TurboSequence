@@ -87,7 +87,7 @@ struct TURBOSEQUENCE_LF_API FTurboSequence_BoneLayer_Lf
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
-	FName BoneLayerName = FName();
+	FString BoneLayerName = FString();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TurboSequence")
 	uint8 BoneDepth = GET2_NUMBER;

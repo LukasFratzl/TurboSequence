@@ -152,34 +152,34 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			if (RenderData.Value.bChangedLodCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayUInt8(
-					NiagaraComponent, RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
+					NiagaraComponent, *RenderData.Value.GetLodName(), RenderData.Value.ParticleLevelOfDetails);
 			}
 
 			if (RenderData.Value.bChangedCustomDataCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
-					NiagaraComponent, RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
+					NiagaraComponent, *RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			}
 
 			if (RenderData.Value.bChangedPositionCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
-					NiagaraComponent, RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
+					NiagaraComponent, *RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			}
 
 			if (RenderData.Value.bChangedRotationCollectionThisFrame || RenderData.Value.
 				bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
-					NiagaraComponent, RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
+					NiagaraComponent, *RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
 			}
 
 			if (RenderData.Value.bChangedScaleCollectionThisFrame || RenderData.Value.bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(
-					NiagaraComponent, RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
+					NiagaraComponent, *RenderData.Value.GetScaleName(), RenderData.Value.ParticleScales);
 			}
 
 			RenderData.Value.bChangedLodCollectionThisFrame = false;
@@ -191,7 +191,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			RenderData.Value.bChangedCollectionSizeThisFrame = false;
 
 			const FBox RendererBounds = FBox(RenderData.Value.MinBounds, RenderData.Value.MaxBounds);
-			NiagaraComponent->SetEmitterFixedBounds(RenderData.Value.GetEmitterName(), RendererBounds);
+			NiagaraComponent->SetEmitterFixedBounds(*RenderData.Value.GetEmitterName(), RendererBounds);
 			// The solver is Assigning the new bounds every iteration, we only need to reset it here
 			// but some small objects having visibility bugs when viewed close if the bounds is too small,
 			// so we add a default camera bounds extend to it for the next frame

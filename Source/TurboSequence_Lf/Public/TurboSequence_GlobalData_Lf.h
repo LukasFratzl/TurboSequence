@@ -22,7 +22,7 @@ public:
 	UTurboSequence_GlobalData_Lf();
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraEmitter = FName("FXE_TurboSequence_Mesh_Unit_Lf");
+	FString NameNiagaraEmitter = FString("FXE_TurboSequence_Mesh_Unit_Lf");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	FString NameNiagaraMeshObject = FString("User.Mesh_{0}");
@@ -31,28 +31,28 @@ public:
 	FString NameNiagaraMaterialObject = FString("User.Material_{0}");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraParticleLocations = FName("User.Particle_Position");
+	FString NameNiagaraParticleLocations = FString("User.Particle_Position");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraParticleIDMap = FName("User.Particle_ID_To_Index");
+	FString NameNiagaraParticleIDMap = FString("User.Particle_ID_To_Index");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraParticleRotations = FName("User.Particle_Rotation");
+	FString NameNiagaraParticleRotations = FString("User.Particle_Rotation");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraParticleScales = FName("User.Particle_Scale");
+	FString NameNiagaraParticleScales = FString("User.Particle_Scale");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraLevelOfDetailIndex = FName("User.LevelOfDetail_Index");
+	FString NameNiagaraLevelOfDetailIndex = FString("User.LevelOfDetail_Index");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraParticleRemove = FName("User.Particle_Remove");
+	FString NameNiagaraParticleRemove = FString("User.Particle_Remove");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraCustomData = FName("User.CustomData");
+	FString NameNiagaraCustomData = FString("User.CustomData");
 	
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
-	FName NameNiagaraUseNanite = FName("User.TS_UseNanite");
+	FString NameNiagaraUseNanite = FString("User.TS_UseNanite");
 
 	UPROPERTY(EditAnywhere, Category="TurboSequence")
 	TObjectPtr<UTextureRenderTarget2DArray> TransformTexture_CurrentFrame;

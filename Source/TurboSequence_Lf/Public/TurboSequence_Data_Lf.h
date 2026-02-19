@@ -55,10 +55,10 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 {
 	GENERATED_BODY()
 
-	explicit FRenderData_Lf(const FName& EmitterName, const FName& ParticleIDName, const FName& PositionName, const FName& RotationName,
-	                        const FName& ScaleName, const FString& MeshName, const FString& MaterialsName,
-	                        const FName& LodName, const FName& CustomDataName, const FName& ParticleRemoveName,
-	                        const FName& UseNaniteName)
+	explicit FRenderData_Lf(const FString& EmitterName, const FString& ParticleIDName, const FString& PositionName, const FString& RotationName,
+	                        const FString& ScaleName, const FString& MeshName, const FString& MaterialsName,
+	                        const FString& LodName, const FString& CustomDataName, const FString& ParticleRemoveName,
+	                        const FString& UseNaniteName)
 		: EmitterName(EmitterName),
 		  IDName(ParticleIDName),
 		  PositionName(PositionName),
@@ -123,17 +123,17 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 
 
 private:
-	FName EmitterName;
-	FName IDName;
-	FName PositionName;
-	FName RotationName;
-	FName ScaleName;
+	FString EmitterName;
+	FString IDName;
+	FString PositionName;
+	FString RotationName;
+	FString ScaleName;
 	FString MeshName;
 	FString MaterialsName;
-	FName LodName;
-	FName CustomDataName;
-	FName ParticleRemoveName;
-	FName UseNaniteName;
+	FString LodName;
+	FString CustomDataName;
+	FString ParticleRemoveName;
+	FString UseNaniteName;
 
 	// int32 UniqueID = 0;
 
@@ -148,27 +148,27 @@ public:
 	// 	UniqueID++;
 	// }
 
-	FORCEINLINE FName& GetEmitterName()
+	FORCEINLINE FString& GetEmitterName()
 	{
 		return EmitterName;
 	}
 
-	FORCEINLINE FName& GetPositionName()
+	FORCEINLINE FString& GetPositionName()
 	{
 		return PositionName;
 	}
 
-	FORCEINLINE FName& GetParticleIDName()
+	FORCEINLINE FString& GetParticleIDName()
 	{
 		return IDName;
 	}
 
-	FORCEINLINE FName& GetRotationName()
+	FORCEINLINE FString& GetRotationName()
 	{
 		return RotationName;
 	}
 
-	FORCEINLINE FName& GetScaleName()
+	FORCEINLINE FString& GetScaleName()
 	{
 		return ScaleName;
 	}
@@ -183,21 +183,21 @@ public:
 		return MaterialsName;
 	}
 
-	FORCEINLINE FName& GetLodName()
+	FORCEINLINE FString& GetLodName()
 	{
 		return LodName;
 	}
 
-	FORCEINLINE FName& GetCustomDataName()
+	FORCEINLINE FString& GetCustomDataName()
 	{
 		return CustomDataName;
 	}
 
-	FORCEINLINE FName& GetParticleRemoveName()
+	FORCEINLINE FString& GetParticleRemoveName()
 	{
 		return ParticleRemoveName;
 	}
-	FORCEINLINE FName& GetUseNaniteName()
+	FORCEINLINE FString& GetUseNaniteName()
 	{
 		return UseNaniteName;
 	}

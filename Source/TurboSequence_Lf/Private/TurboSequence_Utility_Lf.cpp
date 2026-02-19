@@ -94,9 +94,9 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		
 		// Set Nanite State
 		RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
-						RenderData.GetUseNaniteName(), FromAsset->bUseNanite);
+						*RenderData.GetUseNaniteName(), FromAsset->bUseNanite);
 		RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
-						FTurboSequence_Helper_Lf::NameNotUseNanite, !FromAsset->bUseNanite);
+						*FTurboSequence_Helper_Lf::NameNotUseNanite, !FromAsset->bUseNanite);
 
 
 		// Add the mesh to the component we just created
@@ -109,16 +109,16 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			{
 				if (LodElement.GPUMeshIndex < FTurboSequence_Helper_Lf::NotVisibleMeshIndex)
 				{
-					const FName& WantedMeshName = FName(FString::Format(
+					const FString& WantedMeshName = FString::Format(
 						*Reference.RenderData[MaterialsHash].GetMeshName(),
-						{*FString::FormatAsNumber(LodElement.GPUMeshIndex)}));
+						{*FString::FormatAsNumber(LodElement.GPUMeshIndex)});
 
 					if (!IsValid(RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer))
 					{
 						continue;
 					}
 					RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
-						WantedMeshName, LodElement.Mesh);
+						*WantedMeshName, LodElement.Mesh);
 					
 					// if (!bNaniteMeshSet)
 					// {
@@ -136,23 +136,23 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		int32 NumMaterials = Materials.Num();
 		for (int32 MaterialIdx = GET0_NUMBER; MaterialIdx < NumMaterials; ++MaterialIdx)
 		{
-			const FName& WantedMaterialName = FName(FString::Format(
-				*Reference.RenderData[MaterialsHash].GetMaterialsName(), {*FString::FormatAsNumber(MaterialIdx)}));
+			const FString& WantedMaterialName = FString::Format(
+				*Reference.RenderData[MaterialsHash].GetMaterialsName(), {*FString::FormatAsNumber(MaterialIdx)});
 
 
 			TObjectPtr<UMaterialInstanceDynamic> MaterialInstance = UMaterialInstanceDynamic::Create(
 				Materials[MaterialIdx], nullptr);
 
 			// SkinWeight_Texture2DArray
-			MaterialInstance->SetTextureParameterValue(FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTexture,
+			MaterialInstance->SetTextureParameterValue(*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTexture,
 			                                           FromAsset->MeshDataTexture);
 
 			// SkinWeight_Tex
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeX,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeX,
 				FromAsset->MeshDataTexture->GetSizeX());
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
 				FromAsset->MeshDataTexture->GetSizeY());
 
 			float DataMode = 0.0f;
@@ -189,7 +189,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				}
 			}
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
 				DataMode);
 
 			if (!IsValid(RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer))
@@ -197,7 +197,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				continue;
 			}
 			RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableMaterial(
-				WantedMaterialName, MaterialInstance);
+				*WantedMaterialName, MaterialInstance);
 
 			// For Debugging nice...
 			RenderComponents[FromAsset].Renderer[MaterialsHash].Materials[MaterialIdx].MaterialValue =
@@ -220,7 +220,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				}
 
 				RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetEmitterFixedBounds(
-					Reference.RenderData[MaterialsHash].GetEmitterName(), Bounds);
+					*Reference.RenderData[MaterialsHash].GetEmitterName(), Bounds);
 				break;
 			}
 		}
@@ -308,15 +308,15 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				Materials[MaterialIdx], nullptr);
 
 			// SkinWeight_Texture2DArray
-			MaterialInstance->SetTextureParameterValue(FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTexture,
+			MaterialInstance->SetTextureParameterValue(*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTexture,
 			                                           FromAsset->MeshDataTexture);
 
 			// SkinWeight_Tex
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeX,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeX,
 				FromAsset->MeshDataTexture->GetSizeX());
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataTextureSizeY,
 				FromAsset->MeshDataTexture->GetSizeY());
 
 			float DataMode = 0.0f;
@@ -354,7 +354,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				}
 			}
 			MaterialInstance->SetScalarParameterValue(
-				FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
+				*FTurboSequence_Helper_Lf::NameMaterialParameterMeshDataMode,
 				DataMode);
 
 			if (!IsValid(RenderComponents[FromAsset].Renderer[MaterialsHash].IsmRenderer))
@@ -2044,7 +2044,7 @@ bool FTurboSequence_Utility_Lf::ContainsRootBoneName(const TArray<FTurboSequence
 	const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Runtime.DataAsset);
 	for (const FTurboSequence_BoneLayer_Lf& Layer : Collection)
 	{
-		if (int32 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Layer.BoneLayerName); BoneIndex ==
+		if (int32 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Layer.BoneLayerName); BoneIndex ==
 			GET0_NUMBER)
 		{
 			return true;
@@ -2081,7 +2081,7 @@ uint32 FTurboSequence_Utility_Lf::GenerateAnimationLayerMask(FAnimationMetaData_
 		bool bFoundBones = false;
 		for (const FTurboSequence_BoneLayer_Lf& Bone : Animation.Settings.BoneLayerMasks)
 		{
-			if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
+			if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Bone.BoneLayerName);
 				GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 			{
 				bFoundBones = true;
@@ -2121,7 +2121,7 @@ uint32 FTurboSequence_Utility_Lf::GenerateAnimationLayerMask(FAnimationMetaData_
 
 				for (const FTurboSequence_BoneLayer_Lf& Bone : AnimationFrame.Settings.BoneLayerMasks)
 				{
-					if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
+					if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Bone.BoneLayerName);
 						GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 					{
 						bFoundBones = true;

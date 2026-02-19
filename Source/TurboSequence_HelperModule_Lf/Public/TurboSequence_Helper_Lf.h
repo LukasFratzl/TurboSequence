@@ -354,9 +354,9 @@ public:
 	FTurboSequence_Helper_Lf() = delete;
 	~FTurboSequence_Helper_Lf() = delete;
 
-	static FORCEINLINE_DEBUGGABLE FName GetEngineVersionAsString()
+	static FORCEINLINE_DEBUGGABLE FString GetEngineVersionAsString()
 	{
-		return FName(ENGINE_VERSION_STRING);
+		return FString(ENGINE_VERSION_STRING);
 	}
 
 	static FORCEINLINE_DEBUGGABLE FString GetEditorPlatformAsString()
@@ -391,7 +391,7 @@ public:
 	inline static const FString NameNiagaraLevelOfDetailIndex = FString("User.LevelOfDetail_Index");
 	inline static const FString NameNiagaraCustomData = FString("User.CustomData");
 	inline static const FString NameUseNanite = FString("User.TS_UseNanite");
-	inline static const FName NameNotUseNanite = FName("User.TS_NotUseNanite");
+	inline static const FString NameNotUseNanite = FString("User.TS_NotUseNanite");
 
 
 	inline static const FString ReferenceTurboSequenceTransformTextureCurrentFrame = FString(
@@ -405,10 +405,10 @@ public:
 
 	static constexpr uint8 NotVisibleMeshIndex = GET13_NUMBER;
 
-	inline static const FName NameMaterialParameterMeshDataTexture = FName("SkinWeight_Texture2DArray");
-	inline static const FName NameMaterialParameterMeshDataTextureSizeX = FName("SkinWeight_TexX");
-	inline static const FName NameMaterialParameterMeshDataTextureSizeY = FName("SkinWeight_TexY");
-	inline static const FName NameMaterialParameterMeshDataMode = FName("MeshDataMode_TS");
+	inline static const FString NameMaterialParameterMeshDataTexture = FString("SkinWeight_Texture2DArray");
+	inline static const FString NameMaterialParameterMeshDataTextureSizeX = FString("SkinWeight_TexX");
+	inline static const FString NameMaterialParameterMeshDataTextureSizeY = FString("SkinWeight_TexY");
+	inline static const FString NameMaterialParameterMeshDataMode = FString("MeshDataMode_TS");
 
 
 	// -> Licence Start
@@ -1707,7 +1707,7 @@ public:
 		for (FThreadSafeObjectIterator It(InBaseClass); It; ++It)
 		{
 			const UClass* Class = It->GetClass();
-			if (Class->IsNative() && Class->ClassDefaultObject == *It)
+			if (Class->IsNative() && Class->GetDefaultObject() == *It)
 			{
 				TagsValues.AddUnique(FBlueprintTags::NativeParentClassPath,
 				                     FObjectPropertyBase::GetExportPath(Class));
@@ -1812,7 +1812,7 @@ public:
 		Args.Error = GError;
 		//Args.bForceByteSwapping = true;
 		Args.bWarnOfLongFilename = true;
-		Args.SaveFlags = SAVE_KeepGUID;
+		//Args.SaveFlags = SAVE_KeepGUID;
 
 
 		const FString PackagePath = FPackageName::LongPackageNameToFilename(
@@ -1870,7 +1870,7 @@ public:
 		Args.Error = GError;
 		//Args.bForceByteSwapping = true;
 		Args.bWarnOfLongFilename = true;
-		Args.SaveFlags = SAVE_KeepGUID;
+		//Args.SaveFlags = SAVE_KeepGUID;
 
 		const FString PackagePath = FPackageName::LongPackageNameToFilename(
 			Package->GetName() + UniqueIdentifier, FPackageName::GetAssetPackageExtension());

@@ -18,7 +18,7 @@ void FTurboSequence_Editor_LfModule::StartupModule()
 	TurboSequence_MeshAssetData_AsyncComputeSwapBack.Empty();
 
 	IAssetTools& AssetTools = FAssetToolsModule::GetModule().Get();
-	PluginAssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Turbo Sequence")),
+	PluginAssetCategory = AssetTools.RegisterAdvancedAssetCategory(*FString(TEXT("Turbo Sequence")),
 	                                                               LOCTEXT("Turbo Sequence", "Turbo Sequence"));
 
 	TurboSequence_MeshAssetTypeActions = MakeShared<FTurboSequence_MeshAssetAction_Lf>();
@@ -64,8 +64,8 @@ void FTurboSequence_Editor_LfModule::AddMenu(FMenuBarBuilder& MenuBuilder)
 		LOCTEXT("TurboSequence_Lf_Menu", "Turbo Sequence"),
 		LOCTEXT("CrodwPlugin_Lf_MenuTooltipKey", "Opens useful tools for creating assets with the Turbo Sequence"),
 		FNewMenuDelegate::CreateRaw(this, &FTurboSequence_Editor_LfModule::AddMenu_Widget),
-		FName(TEXT("Turbo Sequence")),
-		FName(TEXT("Turbo Sequence")));
+		*FString(TEXT("Turbo Sequence")),
+		*FString(TEXT("Turbo Sequence")));
 }
 
 void FTurboSequence_Editor_LfModule::AddMenu_Widget(class FMenuBuilder& MenuBuilder)
@@ -75,18 +75,18 @@ void FTurboSequence_Editor_LfModule::AddMenu_Widget(class FMenuBuilder& MenuBuil
 		LOCTEXT("CrodwPlugin_Lf_MenuEntryTooltipKey", "Opens the Control Panel for the Character Creation"),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FTurboSequence_Editor_LfModule::PluginButtonClicked)),
-		FName(TEXT("Control Panel")),
+		*FString(TEXT("Control Panel")),
 		EUserInterfaceActionType::Button,
-		FName(TEXT("Control Panel")));
+		*FString(TEXT("Control Panel")));
 	MenuBuilder.AddMenuEntry(
 		LOCTEXT("TurboSequence_Lf_MenuEntry", "Re-cache Mesh Assets"),
 		LOCTEXT("CrodwPlugin_Lf_MenuEntryTooltipKey",
 		        "Makes the asset see this editor as new Engine Version which makes it rebuild."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FTurboSequence_Editor_LfModule::OnInvalidMeshAssetCaches)),
-		FName(TEXT("Re-cache Mesh Assets")),
+		*FString(TEXT("Re-cache Mesh Assets")),
 		EUserInterfaceActionType::Button,
-		FName(TEXT("Re-cache Mesh Assets")));
+		*FString(TEXT("Re-cache Mesh Assets")));
 }
 
 void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync()
@@ -519,7 +519,7 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 			UseNaniteName = FTurboSequence_Helper_Lf::NameUseNanite;
 		}
 
-		if (GlobalData->NameNiagaraEmitter.ToString() != EmitterName)
+		if (GlobalData->NameNiagaraEmitter != EmitterName)
 		{
 			bAssetEdited = true;
 		}
@@ -535,31 +535,31 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraParticleLocations.ToString() != PositionName)
+		if (GlobalData->NameNiagaraParticleLocations != PositionName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraParticleRotations.ToString() != RotationName)
+		if (GlobalData->NameNiagaraParticleRotations != RotationName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraParticleScales.ToString() != ScaleName)
+		if (GlobalData->NameNiagaraParticleScales != ScaleName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraLevelOfDetailIndex.ToString() != LodName)
+		if (GlobalData->NameNiagaraLevelOfDetailIndex != LodName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraCustomData.ToString() != CustomDataName)
+		if (GlobalData->NameNiagaraCustomData != CustomDataName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraParticleRemove.ToString() != ParticleRemoveName)
+		if (GlobalData->NameNiagaraParticleRemove != ParticleRemoveName)
 		{
 			bAssetEdited = true;
 		}
-		if (GlobalData->NameNiagaraUseNanite.ToString() != UseNaniteName)
+		if (GlobalData->NameNiagaraUseNanite != UseNaniteName)
 		{
 			bAssetEdited = true;
 		}
@@ -571,17 +571,17 @@ void FTurboSequence_Editor_LfModule::OnFilesLoaded()
 			bAssetEdited = true;
 		}
 
-		GlobalData->NameNiagaraEmitter = FName(EmitterName);
+		GlobalData->NameNiagaraEmitter = FString(EmitterName);
 		GlobalData->NameNiagaraMeshObject = MeshName;
 		GlobalData->NameNiagaraMaterialObject = MaterialsName;
-		GlobalData->NameNiagaraParticleIDMap = FName(IDName);
-		GlobalData->NameNiagaraParticleLocations = FName(PositionName);
-		GlobalData->NameNiagaraParticleRotations = FName(RotationName);
-		GlobalData->NameNiagaraParticleScales = FName(ScaleName);
-		GlobalData->NameNiagaraLevelOfDetailIndex = FName(LodName);
-		GlobalData->NameNiagaraCustomData = FName(CustomDataName);
-		GlobalData->NameNiagaraParticleRemove = FName(ParticleRemoveName);
-		GlobalData->NameNiagaraUseNanite = FName(UseNaniteName);
+		GlobalData->NameNiagaraParticleIDMap = FString(IDName);
+		GlobalData->NameNiagaraParticleLocations = FString(PositionName);
+		GlobalData->NameNiagaraParticleRotations = FString(RotationName);
+		GlobalData->NameNiagaraParticleScales = FString(ScaleName);
+		GlobalData->NameNiagaraLevelOfDetailIndex = FString(LodName);
+		GlobalData->NameNiagaraCustomData = FString(CustomDataName);
+		GlobalData->NameNiagaraParticleRemove = FString(ParticleRemoveName);
+		GlobalData->NameNiagaraUseNanite = FString(UseNaniteName);
 
 		FString DefaultTransformTextureReferencePathCurrentFrame;
 		FTurboSequence_Helper_Lf::GetStringConfigSetting(DefaultTransformTextureReferencePathCurrentFrame,

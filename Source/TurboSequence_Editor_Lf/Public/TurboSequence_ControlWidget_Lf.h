@@ -168,12 +168,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="TurboSequence")
 	void OnAssignLodZeroMeshAsset();
 
-	static FORCEINLINE_DEBUGGABLE void PrintMainAssetMissingWarning(const FName& ItemName, const FName& ItemType)
+	static FORCEINLINE_DEBUGGABLE void PrintMainAssetMissingWarning(const FString& ItemName, const FString& ItemType)
 	{
 		UE_LOG(LogTurboSequence_Lf, Warning,
 		       TEXT(
 			       "Trying to set %s without having the Main Asset Assigned ( This one in the Reference Section ), the progress won't save, please assign the Main Asset and set the %s again..."
-		       ), *ItemName.ToString(), *ItemType.ToString());
+		       ), *ItemName, *ItemType);
 	}
 
 	static FORCEINLINE_DEBUGGABLE void SaveAssetByTimer(float TimeInSeconds)
