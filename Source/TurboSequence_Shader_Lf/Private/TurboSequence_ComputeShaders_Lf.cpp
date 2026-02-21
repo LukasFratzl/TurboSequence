@@ -77,8 +77,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		FRDGBuilder GraphBuilder(
 			RHICmdList,
 			FRDGEventName(
-				*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::GraphName,
-				                                           Params.ShaderID)), ERDGBuilderFlags::Parallel);
+				*FTurboSequence_BoneTransform_CS_Lf::GraphName, ERDGBuilderFlags::Parallel));
 
 
 		const FTurboSequence_BoneTransform_CS_Lf::FPermutationDomain PermutationVector;
@@ -103,8 +102,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 				FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 					GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX,
 					AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID),
+					*FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName,
 					PF_A32B32G32R32F);
 
 			TRefCountPtr<IPooledRenderTarget> PooledRenderTarget;
@@ -120,8 +118,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 				FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 					GraphBuilder, AnimationOutputTextureRef, AnimationOutputTextureCurrent->SizeX,
 					AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID),
+					*FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName,
 					PF_FloatRGBA);
 
 			MeshUnitPassParameters->R_BoneTransform_OutputTexture =
@@ -136,8 +133,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 				FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 					GraphBuilder, AnimationOutputTexturePeviousRef, AnimationOutputTextureCurrent->SizeX,
 					AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID + 1),
+					*FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName,
 					PF_A32B32G32R32F);
 		}
 		else
@@ -146,32 +142,28 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 				FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 					GraphBuilder, AnimationOutputTexturePeviousRef, AnimationOutputTextureCurrent->SizeX,
 					AnimationOutputTextureCurrent->SizeY, AnimationOutputTextureCurrent->Slices,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureDebugName, Params.ShaderID + 1),
+					*FTurboSequence_BoneTransform_CS_Lf::BoneTransformsPrevTextureDebugName,
 					PF_FloatRGBA);
 		}
 
 		MeshUnitPassParameters->R_AnimationLibrary_InputTexture =
 			FTurboSequence_Helper_Lf::CreateReadRenderTargetArrayTexture_Half4_Out(
-				GraphBuilder, *Params.AnimationLibraryTexture, TEXT("TS_AnimationLibrary"));
+				GraphBuilder, *Params.AnimationLibraryTexture, *FTurboSequence_BoneTransform_CS_Lf::AnimationLibraryTextureDebugName);
 
 		MeshUnitPassParameters->ReferencePose_StructuredBuffer =
 			FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(
 				GraphBuilder, Params.CPUInverseReferencePose,
-				*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::RefPoseDebugName,
-				                                           Params.ShaderID), true);
+				*FTurboSequence_BoneTransform_CS_Lf::RefPoseDebugName, true);
 		MeshUnitPassParameters->ReferenceNumCPUBones_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.ReferenceNumCPUBones_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, Params.ShaderID), PF_R16_UINT,
+				*FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, PF_R16_UINT,
 				true);
 
 		MeshUnitPassParameters->ReferencePoseIndices_StructuredBuffer =
 			FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(
 				GraphBuilder, Params.Indices,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::RefPoseCPUIndicesDebugName, Params.ShaderID), true);
+				*FTurboSequence_BoneTransform_CS_Lf::RefPoseCPUIndicesDebugName, true);
 
 		MeshUnitPassParameters->OutputTextureSizeX = AnimationOutputTextureCurrent->SizeX;
 		MeshUnitPassParameters->OutputTextureSizeY = AnimationOutputTextureCurrent->SizeY;
@@ -193,53 +185,45 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 		MeshUnitPassParameters->PerMeshCustomDataIndices_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.PerMeshCustomDataIndex_Global_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, Params.ShaderID), PF_R32_SINT,
+				*FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, PF_R32_SINT,
 				true);
 		MeshUnitPassParameters->PerMeshCustomDataLod_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.PerMeshCustomDataLod_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::CustomDataLodDebugName,
-				                                           Params.ShaderID), PF_R16_SINT, true);
+				*FTurboSequence_BoneTransform_CS_Lf::CustomDataLodDebugName, PF_R16_SINT, true);
 		MeshUnitPassParameters->PerMeshCustomDataCollectionIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.PerMeshCustomDataCollectionIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, Params.ShaderID), PF_R16_UINT,
+				*FTurboSequence_BoneTransform_CS_Lf::CustomDataIndicesDebugName, PF_R16_UINT,
 				true);
 
 
 		MeshUnitPassParameters->AnimationStartIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.AnimationStartIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::AnimationStartIndexDebugName, Params.ShaderID), PF_R32_SINT,
+				*FTurboSequence_BoneTransform_CS_Lf::AnimationStartIndexDebugName, PF_R32_SINT,
 				true);
 		MeshUnitPassParameters->AnimationEndIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.AnimationEndIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::AnimationEndIndexDebugName, Params.ShaderID), PF_R16_SINT,
+				*FTurboSequence_BoneTransform_CS_Lf::AnimationEndIndexDebugName, PF_R16_SINT,
 				true);
 
 		MeshUnitPassParameters->AnimationFramePose0_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.AnimationFramePose0_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::AnimationFramePose0DebugName, Params.ShaderID), PF_R32_SINT,
+				*FTurboSequence_BoneTransform_CS_Lf::AnimationFramePose0DebugName, PF_R32_SINT,
 				true);
 
 		MeshUnitPassParameters->AnimationWeight_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.AnimationWeights_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::AnimationWeightsDebugName, Params.ShaderID), PF_R16_SINT, true);
+				*FTurboSequence_BoneTransform_CS_Lf::AnimationWeightsDebugName, PF_R16_SINT, true);
 
 		MeshUnitPassParameters->AnimationLayerIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.AnimationLayerIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::AnimationRootIndexDebugName, Params.ShaderID), PF_R16_UINT,
+				*FTurboSequence_BoneTransform_CS_Lf::AnimationRootIndexDebugName, PF_R16_UINT,
 				true);
 
 		if (!Params.AnimationLayers_RenderThread.Num())
@@ -249,8 +233,7 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 			MeshUnitPassParameters->AnimationLayerLibrary_StructuredBuffer =
 				FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 					GraphBuilder, Layers,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::AnimationLayersDebugName, Params.ShaderID), PF_R16_SINT,
+					*FTurboSequence_BoneTransform_CS_Lf::AnimationLayersDebugName, PF_R16_SINT,
 					false);
 		}
 		else
@@ -258,47 +241,38 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 			MeshUnitPassParameters->AnimationLayerLibrary_StructuredBuffer =
 				FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 					GraphBuilder, Params.AnimationLayers_RenderThread,
-					*FTurboSequence_Helper_Lf::FormatDebugName(
-						FTurboSequence_BoneTransform_CS_Lf::AnimationLayersDebugName, Params.ShaderID), PF_R16_UINT,
+					*FTurboSequence_BoneTransform_CS_Lf::AnimationLayersDebugName, PF_R16_UINT,
 					true);
 		}
 
 		MeshUnitPassParameters->BoneSpaceAnimationInput_StructuredBuffer =
 			FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(
 				GraphBuilder, Params.BoneSpaceAnimationIKInput_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKInputDebugName, Params.ShaderID), true);
+				*FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKInputDebugName, true);
 		MeshUnitPassParameters->BoneSpaceAnimationDataInput_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.BoneSpaceAnimationIKData_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataInputDebugName, Params.ShaderID),
+				*FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataInputDebugName,
 				PF_R16_SINT, true);
 		MeshUnitPassParameters->BoneSpaceAnimationDataStartIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.BoneSpaceAnimationIKStartIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataStartIndexInputDebugName,
-					Params.ShaderID), PF_R32_SINT, true);
+				*FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataStartIndexInputDebugName, PF_R32_SINT, true);
 		MeshUnitPassParameters->BoneSpaceAnimationDataEndIndex_StructuredBuffer =
 			FTurboSequence_Helper_Lf::TCreateStructuredReadBufferFromTArray_Custom_Out(
 				GraphBuilder, Params.BoneSpaceAnimationIKEndIndex_RenderThread,
-				*FTurboSequence_Helper_Lf::FormatDebugName(
-					FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataEndIndexInputDebugName,
-					Params.ShaderID), PF_R16_SINT, true);
+				*FTurboSequence_BoneTransform_CS_Lf::BoneSpaceAnimationIKDataEndIndexInputDebugName, PF_R16_SINT, true);
 
 		FRDGBufferRef OutputDebugBufferRef;
 		MeshUnitPassParameters->DebugValue = FTurboSequence_Helper_Lf::TCreateWriteBuffer<float>(
 			GraphBuilder, DebugData.Num(),
-			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_BoneTransform_CS_Lf::DebugName, Params.ShaderID),
+			*FTurboSequence_BoneTransform_CS_Lf::DebugName,
 			PF_R32_FLOAT, OutputDebugBufferRef);
 		MeshUnitPassParameters->NumDebugBuffer = FMath::Max(Params.NumDebugData, 0);
 
 		const FRDGTextureRef RenderTargetAnimationOutputTexture = GraphBuilder.RegisterExternalTexture(
 			CreateRenderTarget(AnimationOutputTextureCurrent->GetRenderTargetResource()->GetTexture2DArrayRHI(),
-			                   *FTurboSequence_Helper_Lf::FormatDebugName(
-				                   FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName,
-				                   Params.ShaderID)));
+			                   *FTurboSequence_BoneTransform_CS_Lf::BoneTransformsTextureCopyDebugName));
 
 		const FRDGTextureRef RenderTargetAnimationOutputPreviousFrameTexture = GraphBuilder.RegisterExternalTexture(
 			CreateRenderTarget(Params.AnimationOutputTexturePrevious->GetRenderTargetResource()->GetTextureRHI(),
@@ -371,7 +345,7 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	FRDGBuilder GraphBuilder(
 		RHICmdList,
 		FRDGEventName(
-			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::GraphName, Params.ShaderID)),
+			*FTurboSequence_Settings_CS_Lf::GraphName),
 		ERDGBuilderFlags::Parallel);
 
 	const FTurboSequence_Settings_CS_Lf::FPermutationDomain PermutationVector;
@@ -389,22 +363,19 @@ void FSettingsCompute_Shader_Execute_Lf::DispatchRenderThread(
 	{
 		PassParameters->RW_Settings_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 			GraphBuilder, SettingOutputTextureRef, OutputTexture->SizeX, OutputTexture->SizeY, OutputTexture->Slices,
-			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::WriteTextureDebugName,
-			                                           Params.ShaderID), PF_A32B32G32R32F);
+			*FTurboSequence_Settings_CS_Lf::WriteTextureDebugName, PF_A32B32G32R32F);
 	}
 	else
 	{
 		PassParameters->RW_Settings_OutputTexture = FTurboSequence_Helper_Lf::CreateWriteTextureArray_Custom_Out(
 			GraphBuilder, SettingOutputTextureRef, OutputTexture->SizeX, OutputTexture->SizeY, OutputTexture->Slices,
-			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::WriteTextureDebugName,
-			                                           Params.ShaderID), PF_FloatRGBA);
+			*FTurboSequence_Settings_CS_Lf::WriteTextureDebugName, PF_FloatRGBA);
 	}
 
 	PassParameters->BoneWeights_StructuredBuffer =
 		FTurboSequence_Helper_Lf::CreateStructuredReadBufferFromTArray_Half4_Out(
 			GraphBuilder, Params.SettingsInput,
-			*FTurboSequence_Helper_Lf::FormatDebugName(FTurboSequence_Settings_CS_Lf::DataInputDebugName,
-			                                           Params.ShaderID), true);
+			*FTurboSequence_Settings_CS_Lf::DataInputDebugName, true);
 
 	PassParameters->TextureDimensionX = OutputTexture->SizeX;
 	PassParameters->TextureDimensionY = OutputTexture->SizeY;

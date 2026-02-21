@@ -165,6 +165,8 @@ public:
 	inline static const FString DebugName = TEXT("TurboSequence_MeshUnit_Debug_{0}");
 	inline static const FString BoneTransformsTextureDebugName = TEXT(
 		"TurboSequence_Write_Texture_BoneTransform_Library_{0}");
+	inline static const FString BoneTransformsPrevTextureDebugName = TEXT(
+		"TurboSequence_Write_Texture_Prev_BoneTransform_Library_{0}");
 	inline static const FString AnimationLibraryTextureDebugName = TEXT(
 		"TurboSequence_Write_Texture_Animation_Library_{0}");
 	inline static const FString DataTextureDebugName = TEXT("TurboSequence_Write_Texture_CustomData_Library_{0}");
