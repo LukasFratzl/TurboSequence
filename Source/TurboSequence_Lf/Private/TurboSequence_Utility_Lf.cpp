@@ -2043,7 +2043,7 @@ bool FTurboSequence_Utility_Lf::ContainsRootBoneName(const TArray<FTurboSequence
 	const FReferenceSkeleton& ReferenceSkeleton = GetReferenceSkeleton(Runtime.DataAsset);
 	for (const FTurboSequence_BoneLayer_Lf& Layer : Collection)
 	{
-		if (int32 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Layer.BoneLayerName); BoneIndex ==
+		if (int32 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Layer.BoneLayerName); BoneIndex ==
 			GET0_NUMBER)
 		{
 			return true;
@@ -2080,7 +2080,7 @@ uint32 FTurboSequence_Utility_Lf::GenerateAnimationLayerMask(FAnimationMetaData_
 		bool bFoundBones = false;
 		for (const FTurboSequence_BoneLayer_Lf& Bone : Animation.Settings.BoneLayerMasks)
 		{
-			if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Bone.BoneLayerName);
+			if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
 				GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 			{
 				bFoundBones = true;
@@ -2120,7 +2120,7 @@ uint32 FTurboSequence_Utility_Lf::GenerateAnimationLayerMask(FAnimationMetaData_
 
 				for (const FTurboSequence_BoneLayer_Lf& Bone : AnimationFrame.Settings.BoneLayerMasks)
 				{
-					if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, *Bone.BoneLayerName);
+					if (int16 BoneIndex = GetSkeletonBoneIndex(ReferenceSkeleton, Bone.BoneLayerName);
 						GetSkeletonIsValidIndex(ReferenceSkeleton, BoneIndex))
 					{
 						bFoundBones = true;
