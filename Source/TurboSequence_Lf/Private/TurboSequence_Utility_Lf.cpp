@@ -3330,8 +3330,12 @@ void FTurboSequence_Utility_Lf::ExtractRootMotionFromAnimations(FTransform& OutA
 				ETurboSequence_RootMotionMode_Lf::Force || (Mode ==
 					ETurboSequence_RootMotionMode_Lf::OnRootBoneAnimated && Animation.bIsRootBoneAnimation)))
 		{
-			FTransform RootMotion_Transform = Animation.Animation->ExtractRootMotion(
-				Animation.AnimationTime, DeltaTime, Animation.bIsLoop);
+		        FAnimExtractContext AnimExtract = FAnimExtractContext ( (double)Animation.AnimationTime,
+                                                                                true,
+                                                                                FDeltaTimeRecord(DeltaTime),
+                                                                                Animation.bIsLoop );
+                                              
+			FTransform RootMotion_Transform = Animation.Animation->ExtractRootMotion(AnimExtract);
 
 			float Scalar = Animation.FinalAnimationWeight * Animation.Settings.AnimationSpeed;
 

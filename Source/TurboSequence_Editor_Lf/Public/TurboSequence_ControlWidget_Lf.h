@@ -503,7 +503,7 @@ public:
 			}
 
 			//Set the Imported version before calling the build
-			StaticMesh->ImportVersion = LastVersion;
+			StaticMesh->SetImportVersion(LastVersion);
 
 			// Set light map coordinate index to match DstLightmapIndex
 			StaticMesh->SetLightMapCoordinateIndex(GET0_NUMBER);
