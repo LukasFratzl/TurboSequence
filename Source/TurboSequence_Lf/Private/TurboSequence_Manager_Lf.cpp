@@ -2306,6 +2306,17 @@ bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(
 	return false;
 }
 
+bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID, const bool bDetectBoundsCheckOnly)
+{
+		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
+		{
+			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
+			const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
+			return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference, bDetectBoundsCheckOnly);
+		}
+		return false;
+	}
+
 bool ATurboSequence_Manager_Lf::GetReferencePoseTransform_Concurrent(FTransform& OutRefPoseTransform,
                                                                      const FTurboSequence_MinimalMeshData_Lf& MeshData,
                                                                      const FName BoneName,

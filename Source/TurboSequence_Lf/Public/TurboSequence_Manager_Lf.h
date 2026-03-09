@@ -643,16 +643,7 @@ public:
  */
 	UFUNCTION(BlueprintPure, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Is Visisble", Keywords="Turbo, Sequence, TS, Get, Visible, Camera, Frustum"))
-	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID, const bool bDetectBoundsCheckOnly)
-	{
-		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
-		{
-			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
-			const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-			return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference, bDetectBoundsCheckOnly);
-		}
-		return false;
-	}
+	static bool GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID, const bool bDetectBoundsCheckOnly);
 
 	/**
 	 * Gets the Reference Pose Transform of a bone in a given space by ref

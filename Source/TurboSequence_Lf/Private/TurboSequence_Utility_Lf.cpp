@@ -7,7 +7,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "TurboSequence_ComputeShaders_Lf.h"
 #include "TurboSequence_FootprintAsset_Lf.h"
-#include "TurboSequence_Manager_Lf.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Rendering/SkeletalMeshModel.h"
@@ -19,7 +18,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
                                                  const TObjectPtr<UNiagaraSystem> RenderReference,
                                                  const TMap<uint8, FSkinnedMeshReferenceLodElement_Lf>& LevelOfDetails,
                                                  const TObjectPtr<USceneComponent> InstanceSceneComponent,
-                                                 const TObjectPtr<ATurboSequence_Manager_Lf> WorldActor,
+                                                 const TObjectPtr<AActor> WorldActor,
                                                  TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>, FRenderingMaterialMap_Lf>
                                                  & RenderComponents,
                                                  const TObjectPtr<UTurboSequence_MeshAsset_Lf> FromAsset,
