@@ -270,182 +270,193 @@ void UTurboSequence_ControlWidget_Lf::ShowPreviousSection()
 
 void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
 {
-	// TODO: Fix naming
-	if (!Main_Asset_To_Edit)
-	{
-		PrintMainAssetMissingWarning(TEXT("LOD"), TEXT("LOD Item"));
-
-		return;
-	}
-
-	if (!Main_Asset_To_Edit->ReferenceMeshNative)
-	{
-		PrintMainAssetMissingWarning(TEXT("Skeletal Mesh Lod Zero"), TEXT("SkeletalMesh"));
-
-		return;
-	}
-
-	const FString DefaultPath = FPaths::ProjectContentDir();
-	const FString Title = FString(TEXT("Directory for the LOD 0 Data"));
-	FString DirectorySelected = FString("");
-	FString WantedMeshName = FString("");
-	FString WantedMeshPath = FString("");
-
-	bool bEditedAnythingSuccessfully = false;
-
-	if (IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get())
-	{
-		if (DesktopPlatform->OpenDirectoryDialog(nullptr, Title, DefaultPath, DirectorySelected))
-		{
-			DirectorySelected = FPaths::ConvertRelativePathToFull(DirectorySelected);
-
-			WantedMeshPath = FPaths::Combine(DirectorySelected, Main_Asset_To_Edit->ReferenceMeshNative->GetName());
-			WantedMeshPath = FString::Format(
-				TEXT("{0}_TurboSequence_Instance{1}"), {*WantedMeshPath, *FPackageName::GetAssetPackageExtension()});
-			WantedMeshName = FString(FString::Format(
-				TEXT("{0}_TurboSequence_Instance"), {*Main_Asset_To_Edit->ReferenceMeshNative->GetName()}));
-
-
-			if (FPaths::FileExists(WantedMeshPath))
-			{
-				// Create a confirmation dialog with "OK" and "Cancel" buttons
-				const FText MessageText = FText::FromString(TEXT("Mesh Already Exists, do you want override it?"));
-				const FText TitleText = FText::FromString(TEXT("Confirmation"));
-				const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(
-					EAppMsgType::OkCancel, MessageText, TitleText);
-
-				if (ButtonClicked == EAppReturnType::Ok)
-				{
-					// The user clicked "OK" on the confirmation dialog
-					// Apply changes here
-					UPackageTools::LoadPackage(*WantedMeshPath);
-				}
-				else
-				{
-					// The user clicked "Cancel" on the confirmation dialog
-					// Revert changes here
-					WantedMeshPath = FString("");
-				}
-			}
-		}
-	}
-
-	if (!WantedMeshPath.IsEmpty() && Main_Asset_To_Edit && Main_Asset_To_Edit->ReferenceMeshNative)
-	{
-		if ((MaxNumberOfLODs > 0) || bUseNanite)
-		{
-			TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(Main_Asset_To_Edit->ReferenceMeshNative,
-			                                                          FName(FString::Format(
-				                                                          TEXT("{0}_Reference"), {*WantedMeshName})),
-			                                                          true);
-			if (bUseNanite)
-			{
-				MaxNumberOfLODs = GET1_NUMBER;
-			}
-			// pr #9
-			// NewMesh->NeverStream = true;
-			uint8 NumIterations = MaxNumberOfLODs;
-			for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
-			{
-				UE_LOG(LogTurboSequence_Lf, Display, TEXT("Running Mesh Reduction Iteration %d"), i);
-
-				int32 ReductionLOD = FMath::Min(i, NumIterations);
-				GenerateSkeletalMeshLevelOfDetails(NewMesh, ReductionLOD);
-			}
-
-			FString ReferencePath = FPaths::Combine(DirectorySelected,
-			                                        Main_Asset_To_Edit->ReferenceMeshNative->GetName());
-			ReferencePath = FString::Format(
-				TEXT("{0}_TurboSequence_Reference{1}"), {*ReferencePath, *FPackageName::GetAssetPackageExtension()});
-
-			FTurboSequence_Helper_Lf::SaveNewAsset(NewMesh);
-
-			Main_Asset_To_Edit->bUseNanite = bUseNanite;
-			Main_Asset_To_Edit->MaxLevelOfDetails = MaxNumberOfLODs;
-			
-			Current_SkeletalMesh_Reference = Main_Asset_To_Edit->ReferenceMeshEdited = Cast<USkeletalMesh>(
-				FTurboSequence_Helper_Lf::SetOrAdd(EditorObjects, NewMesh,
-				                                   EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
-
-			LevelOfDetails.Empty();
-			TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
-			for (int32 i = GET0_NUMBER; i < MaxNumberOfLODs; ++i)
-			{
-				TArray<int32> StaticMeshIndices;
-				if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(
-					NewMesh, i, WantedMeshPath,
-					FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})),
-					StaticMeshIndices, MeshDataMode))
-				{
-					if (bUseNanite)
-					{
-						FTurboSequence_Helper_Lf::OptimizeStaticMeshForManyMeshInstances(StaticMesh, true);
-					}
-					
-					FMeshItem_Lf Item = FMeshItem_Lf();
-					if (i > GET9_NUMBER)
-					{
-						Item.bIsAnimated = false;
-					}
-					if (!i)
-					{
-						Item.bIsFrustumCullingEnabled = false;
-					}
-					Item.StaticMesh = StaticMesh;
-					LevelOfDetails.Add(Item);
-
-
-					FMeshDataOrderView_Lf Order = FMeshDataOrderView_Lf();
-					Order.StaticMeshIndices = StaticMeshIndices;
-
-					MeshDataOrderView.Add(Order);
-				}
-			}
-			if (LevelOfDetails.Num())
-			{
-				Main_Asset_To_Edit->InstancedMeshes = LevelOfDetails;
-				Main_Asset_To_Edit->MeshDataOrderView = MeshDataOrderView;
-				Main_Asset_To_Edit->MeshDataMode = MeshDataMode;
-
-				if (GIsEditor)
-				{
-					FNotificationInfo Info(FText::FromString(FString(TEXT("Successfully Converted Meshes"))));
-					Info.ExpireDuration = 8.0f;
-					Info.bUseLargeFont = false;
-					if (TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().
-						AddNotification(Info); Notification.IsValid())
-					{
-						Notification->SetCompletionState(SNotificationItem::CS_Success);
-					}
-				}
-
-				bEditedAnythingSuccessfully = true;
-			}
-		}
-	}
-
-	const TObjectPtr<UWorld> World = GetWorld();
-	const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = Main_Asset_To_Edit;
-
-	FTurboSequence_Editor_LfModule::RepairMaxIterationCounter = GET0_NUMBER;
-	auto RunnerFunction = [Asset, World](bool bSuccess)
-	{
-		if (!bSuccess)
-		{
-			UE_LOG(LogTurboSequence_Lf, Display, TEXT("Returning with ID=5"))
-		}
-		FTurboSequence_Editor_LfModule::RepairMeshAssetAsync2(Asset, World, false);
-	};
-
-	FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(Asset, RunnerFunction, World);
-
-
-	if (bEditedAnythingSuccessfully && Main_Asset_To_Edit)
-	{
-		FTurboSequence_Helper_Lf::SaveAsset(Main_Asset_To_Edit);
-	}
+    // TODO: Fix naming
+    if (!Main_Asset_To_Edit)
+    {
+        PrintMainAssetMissingWarning(TEXT("LOD"), TEXT("LOD Item"));
+ 
+        return;
+    }
+ 
+    UTurboSequence_ControlWidget_Lf::GenerateMeshesForAsset(GetWorld(), Main_Asset_To_Edit, MaxNumberOfLODs, bUseNanite, MeshDataMode, FString(""));
 }
-
+ 
+void UTurboSequence_ControlWidget_Lf::GenerateMeshesForAsset(
+    UWorld* World, UTurboSequence_MeshAsset_Lf* MeshAsset, int32 MaxNumberOfLODs,
+    bool bUseNanite, ETurboSequence_MeshDataMode_Lf MeshDataMode, FString WantedMeshPath)
+{
+    if (!MeshAsset->ReferenceMeshNative)
+    {
+        PrintMainAssetMissingWarning(TEXT("Skeletal Mesh Lod Zero"), TEXT("SkeletalMesh"));
+        return;
+    }
+ 
+    IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+    if (DesktopPlatform && WantedMeshPath.IsEmpty())
+    {
+        const FString DefaultPath = FPaths::ProjectContentDir();
+        const FString Title = FString(TEXT("Directory for the LOD 0 Data"));
+        FString DirectorySelected = FString("");
+        if (DesktopPlatform->OpenDirectoryDialog(nullptr, Title, DefaultPath, DirectorySelected))
+        {
+            DirectorySelected = FPaths::ConvertRelativePathToFull(DirectorySelected);
+ 
+            WantedMeshPath = FPaths::Combine(DirectorySelected, MeshAsset->ReferenceMeshNative->GetName());
+            WantedMeshPath = FString::Format(
+                TEXT("{0}_TurboSequence_Instance{1}"), {*WantedMeshPath, *FPackageName::GetAssetPackageExtension()});
+ 
+            if (FPaths::FileExists(WantedMeshPath))
+            {
+                // Create a confirmation dialog with "OK" and "Cancel" buttons
+                const FText MessageText = FText::FromString(TEXT("Mesh Already Exists, do you want override it?"));
+                const FText TitleText = FText::FromString(TEXT("Confirmation"));
+                const EAppReturnType::Type ButtonClicked = FMessageDialog::Open(
+                    EAppMsgType::OkCancel, MessageText, TitleText);
+ 
+                if (ButtonClicked == EAppReturnType::Ok)
+                {
+                    // The user clicked "OK" on the confirmation dialog
+                    // Apply changes here
+                    UPackageTools::LoadPackage(*WantedMeshPath);
+                }
+                else
+                {
+                    // The user clicked "Cancel" on the confirmation dialog
+                    // Revert changes here
+                    WantedMeshPath = FString("");
+                }
+            }
+        }
+    }
+    else
+    {
+        WantedMeshPath = FPaths::Combine(WantedMeshPath, MeshAsset->ReferenceMeshNative->GetName());
+        WantedMeshPath = FString::Format(
+            TEXT("{0}_TurboSequence_Instance{1}"), {*WantedMeshPath, *FPackageName::GetAssetPackageExtension()});
+    }
+ 
+    bool bEditedAnythingSuccessfully = false;
+    FString WantedMeshName = FString(FString::Format(
+        TEXT("{0}_TurboSequence_Instance"), {*MeshAsset->ReferenceMeshNative->GetName()}));
+ 
+    if (!WantedMeshPath.IsEmpty() && MeshAsset && MeshAsset->ReferenceMeshNative)
+    {
+        if ((MaxNumberOfLODs > 0) || bUseNanite)
+        {
+            TObjectPtr<USkeletalMesh> NewMesh = DuplicateSkeletalMesh(
+                MeshAsset->ReferenceMeshNative,
+                FName(FString::Format(TEXT("{0}_Reference"), {*WantedMeshName})),
+                true);
+            if (bUseNanite)
+            {
+                MaxNumberOfLODs = GET1_NUMBER;
+            }
+            // pr #9
+            // NewMesh->NeverStream = true;
+            uint8 NumIterations = MaxNumberOfLODs;
+            for (uint8 i = GET1_NUMBER; i <= NumIterations; ++i) // Note: Starting at 1 here
+            {
+                UE_LOG(LogTurboSequence_Lf, Display, TEXT("Running Mesh Reduction Iteration %d"), i);
+ 
+                int32 ReductionLOD = FMath::Min(i, NumIterations);
+                GenerateSkeletalMeshLevelOfDetails(NewMesh, ReductionLOD);
+            }
+ 
+            FString ReferencePath = FPaths::Combine(
+                WantedMeshPath, MeshAsset->ReferenceMeshNative->GetName());
+            ReferencePath = FString::Format(
+                TEXT("{0}_TurboSequence_Reference{1}"), {*ReferencePath, *FPackageName::GetAssetPackageExtension()});
+ 
+            FTurboSequence_Helper_Lf::SaveNewAsset(NewMesh);
+ 
+            MeshAsset->bUseNanite = bUseNanite;
+            MeshAsset->MaxLevelOfDetails = MaxNumberOfLODs;
+ 
+            // Current_SkeletalMesh_Reference = MeshAsset->ReferenceMeshEdited = Cast<USkeletalMesh>(
+            //  FTurboSequence_Helper_Lf::SetOrAdd(
+            //      EditorObjects, NewMesh,
+            //      EShow_ControlPanel_Objects_Lf::Asset_SkeletalMesh_Reference));
+            MeshAsset->ReferenceMeshEdited = NewMesh;
+ 
+            TArray<FMeshItem_Lf> LevelOfDetails;
+            LevelOfDetails.Reserve(MaxNumberOfLODs);
+            TArray<FMeshDataOrderView_Lf> MeshDataOrderView;
+            for (int32 i = GET0_NUMBER; i < MaxNumberOfLODs; ++i)
+            {
+                TArray<int32> StaticMeshIndices;
+                if (TObjectPtr<UStaticMesh> StaticMesh = GenerateStaticMeshFromSkeletalMesh(
+                    NewMesh, i, WantedMeshPath,
+                    FString(FString::Format(TEXT("{0}_Lod_{1}"), {*WantedMeshName, *FString::FormatAsNumber(i)})),
+                    StaticMeshIndices, MeshDataMode))
+                {
+                    if (bUseNanite)
+                    {
+                        FTurboSequence_Helper_Lf::OptimizeStaticMeshForManyMeshInstances(StaticMesh, true);
+                    }
+ 
+                    FMeshItem_Lf Item = FMeshItem_Lf();
+                    if (i > GET9_NUMBER)
+                    {
+                        Item.bIsAnimated = false;
+                    }
+                    if (!i)
+                    {
+                        Item.bIsFrustumCullingEnabled = false;
+                    }
+                    Item.StaticMesh = StaticMesh;
+                    LevelOfDetails.Add(Item);
+ 
+ 
+                    FMeshDataOrderView_Lf Order = FMeshDataOrderView_Lf();
+                    Order.StaticMeshIndices = StaticMeshIndices;
+ 
+                    MeshDataOrderView.Add(Order);
+                }
+            }
+            if (LevelOfDetails.Num())
+            {
+                MeshAsset->InstancedMeshes = LevelOfDetails;
+                MeshAsset->MeshDataOrderView = MeshDataOrderView;
+                MeshAsset->MeshDataMode = MeshDataMode;
+ 
+                if (GIsEditor)
+                {
+                    FNotificationInfo Info(FText::FromString(FString::Printf(
+                        TEXT("Successfully Converted %s"), *MeshAsset->ReferenceMeshNative->GetName())));
+                    Info.ExpireDuration = 8.0f;
+                    Info.bUseLargeFont = false;
+                    if (TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().
+                        AddNotification(Info); Notification.IsValid())
+                    {
+                        Notification->SetCompletionState(SNotificationItem::CS_Success);
+                    }
+                }
+ 
+                bEditedAnythingSuccessfully = true;
+            }
+        }
+    }
+ 
+    const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset = MeshAsset;
+ 
+    FTurboSequence_Editor_LfModule::RepairMaxIterationCounter = GET0_NUMBER;
+    auto RunnerFunction = [Asset, World](bool bSuccess)
+    {
+        if (!bSuccess)
+        {
+            UE_LOG(LogTurboSequence_Lf, Display, TEXT("Returning with ID=5"))
+        }
+        FTurboSequence_Editor_LfModule::RepairMeshAssetAsync2(Asset, World, false);
+    };
+ 
+    FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(Asset, RunnerFunction, World);
+ 
+ 
+    if (bEditedAnythingSuccessfully && MeshAsset)
+    {
+        FTurboSequence_Helper_Lf::SaveAsset(MeshAsset);
+    }
+}
 void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 {
 	bool bEditedData = false;
