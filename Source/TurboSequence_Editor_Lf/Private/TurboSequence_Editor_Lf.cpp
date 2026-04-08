@@ -328,6 +328,12 @@ void FTurboSequence_Editor_LfModule::RepairMeshAssetAsync2(const TObjectPtr<UTur
 					World->GetTimerManager().SetTimerForNextTick(SwapBackCallback);
 				}
 			}
+			
+			// Calling the Delegate
+			if (GlobalData->OnTSMeshGenerated.IsBound())
+			{
+				GlobalData->OnTSMeshGenerated.Broadcast();
+			}
 		}
 	});
 	World->GetTimerManager().SetTimerForNextTick(WaitTimerCallback);

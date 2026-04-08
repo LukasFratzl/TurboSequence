@@ -277,8 +277,17 @@ void UTurboSequence_ControlWidget_Lf::OnGenerateButtonPressed()
  
         return;
     }
- 
+	
+	Main_Asset_To_Edit->GlobalData->OnTSMeshGenerated.AddUniqueDynamic(this, &UTurboSequence_ControlWidget_Lf::TestCall);
+	
     UTurboSequence_ControlWidget_Lf::GenerateMeshesForAsset(GetWorld(), Main_Asset_To_Edit, MaxNumberOfLODs, bUseNanite, MeshDataMode, FString(""));
+}
+
+void UTurboSequence_ControlWidget_Lf::TestCall()
+{
+	UE_LOG(LogTurboSequence_Lf, Display, TEXT("Delegate Example Call"));
+	
+	Main_Asset_To_Edit->GlobalData->OnTSMeshGenerated.RemoveDynamic(this, &UTurboSequence_ControlWidget_Lf::TestCall);
 }
  
 void UTurboSequence_ControlWidget_Lf::GenerateMeshesForAsset(
@@ -457,6 +466,7 @@ void UTurboSequence_ControlWidget_Lf::GenerateMeshesForAsset(
         FTurboSequence_Helper_Lf::SaveAsset(MeshAsset);
     }
 }
+
 void UTurboSequence_ControlWidget_Lf::OnTweakingGlobalTextures()
 {
 	bool bEditedData = false;

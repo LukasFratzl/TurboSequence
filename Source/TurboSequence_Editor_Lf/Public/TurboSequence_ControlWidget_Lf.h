@@ -225,6 +225,9 @@ public:
 	static void GenerateMeshesForAsset(
 	UWorld* World, UTurboSequence_MeshAsset_Lf* MeshAsset, int32 MaxNumberOfLODs,
 	bool bUseNanite, ETurboSequence_MeshDataMode_Lf MeshDataMode, FString WantedMeshPath);
+	
+	UFUNCTION()
+	void TestCall();
 
 
 	FORCEINLINE_DEBUGGABLE void AddSection(const TObjectPtr<UScrollBox> Section,

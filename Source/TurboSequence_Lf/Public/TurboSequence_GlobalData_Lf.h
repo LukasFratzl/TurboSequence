@@ -10,6 +10,8 @@
 #include "Engine/TextureRenderTarget2DArray.h"
 #include "TurboSequence_GlobalData_Lf.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTSEditorMeshGeneratedSignature);
+
 /**
  * 
  */
@@ -70,4 +72,8 @@ public:
 	bool bUseHighPrecisionAnimationMode = true;
 
 	FSettingsComputeShader_Params_Lf CachedMeshDataCreationSettingsParams;
+	
+	// Reserved for Delegates
+	UPROPERTY(BlueprintAssignable)
+	FOnTSEditorMeshGeneratedSignature OnTSMeshGenerated;
 };
