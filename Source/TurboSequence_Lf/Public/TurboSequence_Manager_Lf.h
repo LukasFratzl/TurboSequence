@@ -142,7 +142,7 @@ protected:
 		                                               TArray<TObjectPtr<UMaterialInterface>>(),
 	                                               const TObjectPtr<UTurboSequence_FootprintAsset_Lf>& FootprintAsset =
 		                                               nullptr,
-		                                               const int32 OverrideMeshID = INDEX_NONE);
+	                                               const int32 OverrideMeshID = INDEX_NONE);
 
 	static bool RemoveSkinnedMeshInstance_GameThread(int32 MeshID, const TObjectPtr<UWorld> InWorld);
 
@@ -430,6 +430,20 @@ public:
 	                                                                        AnimSettings
 	);
 
+	/**
+	 * Set the AnimationTime of an animation in a Mesh's AnimationMetaData, 
+	 * so you can control the time by yourself.
+	 * 
+	 * The AnimSettings.bAnimationTimeSelfManaged should be
+	 * set to true when initially starting the animation with PlayAnimation_Concurrent.
+	 * 
+	 * @param MeshData The Mesh ID
+	 * @param AnimSequence The Animation which is self managed
+	 * @param NewTime The new Time in seconds to set in the Animation
+	 */
+	UFUNCTION(BlueprintCallable, Category="Turbo Sequence")
+	static void SetSelfManagedAnimSequenceTime(
+		const FTurboSequence_MinimalMeshData_Lf& MeshData, UAnimSequence* AnimSequence, float NewTime);
 
 	/**
 	 * Playing an Blend Space
@@ -457,10 +471,10 @@ public:
 
 
 	// /**
- // * Gets all Animations Playing right now on the character as an animation collection array
- // * @param OutAnimations The animation collection array output
- // * @param MeshData The Mesh ID
- // */
+	// * Gets all Animations Playing right now on the character as an animation collection array
+	// * @param OutAnimations The animation collection array output
+	// * @param MeshData The Mesh ID
+	// */
 	// UFUNCTION(BlueprintPure, Category="Turbo Sequence",
 	// 	meta=(ReturnDisplayName="Animation Sequence", Keywords="Turbo, Sequence, TS, Get, Animation, Play, Priority"))
 	// static void GetAllAnimationsFromMeshData_Concurrent(
@@ -687,8 +701,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Turbo Sequence",
 		meta=(ReturnDisplayName="Success", Keywords="Turbo, Sequence, TS, Set, Customize, Change, Mesh, Material"))
 	static int32 CustomizeMesh_RawID_GameThread(int32 MeshID,
-	                                           UTurboSequence_MeshAsset_Lf* TargetMesh,
-	                                           const TArray<UMaterialInterface*>& TargetMaterials);
+	                                            UTurboSequence_MeshAsset_Lf* TargetMesh,
+	                                            const TArray<UMaterialInterface*>& TargetMaterials);
 
 	/**
 	 * Customizes the Mesh with a Target Spawn data
@@ -767,6 +781,15 @@ public:
 	static bool SetCustomDataToInstance_Concurrent(const FTurboSequence_MinimalMeshData_Lf& MeshData,
 	                                               const uint8 CustomDataFractionIndex, const float CustomDataValue);
 
+	/**
+	 * Looks up the MetaData of the given AnimSeq for the given MeshID.
+	 * @param MeshID The Mesh ID
+	 * @param AnimSeq The Animation Sequence which is playing on the Mesh
+	 * @param OutMetaData The Output MetaData
+	 * @return True if Successful
+	 */
+	static bool GetMetaDataForAnimSeq(
+		int32 MeshID, UAnimSequence* AnimSeq, FAnimationMetaData_Lf& OutMetaData);
 
 	/**
 	 * Sets the Turbo Sequence Mesh to an equallent UE Mesh using the Ts IK system, make sure the UE Mesh has the same skeleton

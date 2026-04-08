@@ -85,24 +85,24 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			{
 				continue;
 			}
-			
+
 			if (IsValid(IsmComponent))
 			{
 				for (TTuple<int32, int32>& InstanceID : RenderData.Value.InstanceMap)
 				{
 					// Real Index
 					const uint32 InstanceIndex = InstanceID.Value;
-					
+
 					// Locations
-					const FQuat Quat = FQuat(RenderData.Value.ParticleRotations[InstanceIndex].X, 
-						RenderData.Value.ParticleRotations[InstanceIndex].Y, 
-						RenderData.Value.ParticleRotations[InstanceIndex].Z, 
-						RenderData.Value.ParticleRotations[InstanceIndex].W);
-					const FTransform& Transform = FTransform(Quat, 
-						FVector(RenderData.Value.ParticlePositions[InstanceIndex]),
-						FVector(RenderData.Value.ParticleScales[InstanceIndex]));
+					const FQuat Quat = FQuat(RenderData.Value.ParticleRotations[InstanceIndex].X,
+					                         RenderData.Value.ParticleRotations[InstanceIndex].Y,
+					                         RenderData.Value.ParticleRotations[InstanceIndex].Z,
+					                         RenderData.Value.ParticleRotations[InstanceIndex].W);
+					const FTransform& Transform = FTransform(Quat,
+					                                         FVector(RenderData.Value.ParticlePositions[InstanceIndex]),
+					                                         FVector(RenderData.Value.ParticleScales[InstanceIndex]));
 					IsmComponent->UpdateInstanceTransform(InstanceIndex, Transform, true, true, false);
-					
+
 					// Custom Data
 					if (RenderData.Value.ParticleCustomDataIsm.IsValidIndex(InstanceIndex))
 					{
@@ -111,8 +111,9 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 							for (int32 i = GET0_NUMBER; i < FTurboSequence_Helper_Lf::NumInstanceCustomData; i++)
 							{
 								const int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
-							
-								RenderData.Value.ParticleCustomDataIsm[InstanceIndex][i] = RenderData.Value.ParticleCustomData[CustomDataIndex];
+
+								RenderData.Value.ParticleCustomDataIsm[InstanceIndex][i] = RenderData.Value.ParticleCustomData[
+									CustomDataIndex];
 							}
 							IsmComponent->SetCustomData(InstanceIndex, RenderData.Value.ParticleCustomDataIsm[InstanceIndex], true);
 						}
@@ -121,7 +122,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				IsmComponent->MarkRenderInstancesDirty();
 				IsmComponent->MarkRenderStateDirty();
 				IsmComponent->MarkRenderDynamicDataDirty();
-				
+
 				RenderData.Value.bChangedLodCollectionThisFrame = false;
 				RenderData.Value.bChangedCustomDataCollectionThisFrame = false;
 				RenderData.Value.bChangedPositionCollectionThisFrame = false;
@@ -129,7 +130,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 				RenderData.Value.bChangedScaleCollectionThisFrame = false;
 
 				RenderData.Value.bChangedCollectionSizeThisFrame = false;
-				
+
 				continue;
 			}
 
@@ -143,7 +144,7 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			                                  bChangedCollectionSizePreviousFrame);
 
 			if (RenderData.Value.bChangedCollectionSizePreviousFrame && !RenderData.Value.
-				bChangedCollectionSizeThisFrame)
+			                                                                        bChangedCollectionSizeThisFrame)
 			{
 				RenderData.Value.bChangedCollectionSizePreviousFrame = false;
 			}
@@ -156,21 +157,21 @@ void ATurboSequence_Manager_Lf::Tick(float DeltaTime)
 			}
 
 			if (RenderData.Value.bChangedCustomDataCollectionThisFrame || RenderData.Value.
-				bChangedCollectionSizeThisFrame)
+			                                                                         bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayFloat(
 					NiagaraComponent, *RenderData.Value.GetCustomDataName(), RenderData.Value.ParticleCustomData);
 			}
 
 			if (RenderData.Value.bChangedPositionCollectionThisFrame || RenderData.Value.
-				bChangedCollectionSizeThisFrame)
+			                                                                       bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayPosition(
 					NiagaraComponent, *RenderData.Value.GetPositionName(), RenderData.Value.ParticlePositions);
 			}
 
 			if (RenderData.Value.bChangedRotationCollectionThisFrame || RenderData.Value.
-				bChangedCollectionSizeThisFrame)
+			                                                                       bChangedCollectionSizeThisFrame)
 			{
 				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(
 					NiagaraComponent, *RenderData.Value.GetRotationName(), RenderData.Value.ParticleRotations);
@@ -527,9 +528,9 @@ int32 ATurboSequence_Manager_Lf::AddSkinnedMeshInstance_GameThread(
 			}
 		}
 		const FTransform& InstanceTransform = Runtime.WorldSpaceTransform;
-		
+
 		FTurboSequence_Utility_Lf::AddRenderInstance(Reference, Runtime, ThreadContext->CriticalSection,
-		                                              Instance->RenderComponents, InstanceTransform);
+		                                             Instance->RenderComponents, InstanceTransform);
 
 
 		Runtime.LodIndex = INDEX_NONE;
@@ -623,7 +624,8 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 	                                                     Library_RenderThread);
 
 	FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection, GlobalLibrary, Instance->RenderComponents);
+	FTurboSequence_Utility_Lf::RemoveRenderInstance(Reference, Runtime, ThreadContext->CriticalSection, GlobalLibrary,
+	                                                Instance->RenderComponents);
 
 	if (const FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash]; !RenderData.InstanceMap.Num())
 	{
@@ -1340,7 +1342,7 @@ void ATurboSequence_Manager_Lf::SolveMeshes_RenderThread(FRHICommandListImmediat
 								MeshParams.BoneSpaceAnimationIKData_RenderThread[CurrentIKDataIndex] = BoneIdx.Value;
 
 								const FMatrix& BoneMatrix = Runtime.IKData[BoneIdx.Key].IKWriteTransform.
-									ToMatrixWithScale();
+								                                                        ToMatrixWithScale();
 
 								for (int32 M = GET0_NUMBER; M < GET3_NUMBER; ++M)
 								{
@@ -1898,6 +1900,28 @@ FTurboSequence_AnimMinimalData_Lf ATurboSequence_Manager_Lf::PlayAnimation_RawID
 	return MinimalAnimation;
 }
 
+void ATurboSequence_Manager_Lf::SetSelfManagedAnimSequenceTime(
+	const FTurboSequence_MinimalMeshData_Lf& MeshData,
+	UAnimSequence* AnimSequence, float NewTime)
+{
+	auto SetMetaDataAnimTimeForMeshID = [AnimSequence, NewTime](int32 MeshID)
+	{
+		if (auto Runtime = GlobalLibrary.RuntimeSkinnedMeshes.Find(MeshID))
+		{
+			if (int32* Idx = Runtime->AnimSeqToMetaData.Find(AnimSequence))
+			{
+				Runtime->AnimationMetaData[*Idx].AnimationTime = NewTime;
+			}
+		}
+	};
+
+	SetMetaDataAnimTimeForMeshID(MeshData.RootMotionMeshID);
+	for (const int32 CustomMeshID : MeshData.CustomizableMeshIDs)
+	{
+		SetMetaDataAnimTimeForMeshID(CustomMeshID);
+	}
+}
+
 FTurboSequence_AnimMinimalBlendSpaceCollection_Lf ATurboSequence_Manager_Lf::PlayBlendSpace_Concurrent(
 	const FTurboSequence_MinimalMeshData_Lf& MeshData, UBlendSpace* BlendSpace,
 	const FTurboSequence_AnimPlaySettings_Lf AnimSettings)
@@ -2306,16 +2330,17 @@ bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_Concurrent(
 	return false;
 }
 
-bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(int32 MeshID, const bool bDetectBoundsCheckOnly)
+bool ATurboSequence_Manager_Lf::GetIsMeshVisibleInCameraFrustum_RawID_Concurrent(
+	int32 MeshID, const bool bDetectBoundsCheckOnly)
 {
-		if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
-		{
-			const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
-			const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
-			return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference, bDetectBoundsCheckOnly);
-		}
-		return false;
+	if (GlobalLibrary.RuntimeSkinnedMeshes.Contains(MeshID))
+	{
+		const FSkinnedMeshRuntime_Lf& Runtime = GlobalLibrary.RuntimeSkinnedMeshes[MeshID];
+		const FSkinnedMeshReference_Lf& Reference = GlobalLibrary.PerReferenceData[Runtime.DataAsset];
+		return FTurboSequence_Utility_Lf::GetIsMeshVisible(Runtime, Reference, bDetectBoundsCheckOnly);
 	}
+	return false;
+}
 
 bool ATurboSequence_Manager_Lf::GetReferencePoseTransform_Concurrent(FTransform& OutRefPoseTransform,
                                                                      const FTurboSequence_MinimalMeshData_Lf& MeshData,
@@ -2631,6 +2656,20 @@ bool ATurboSequence_Manager_Lf::SetCustomDataToInstance_Concurrent(const FTurboS
 	}
 
 	return bSuccess;
+}
+
+bool ATurboSequence_Manager_Lf::GetMetaDataForAnimSeq(
+	int32 MeshID, UAnimSequence* AnimSeq, FAnimationMetaData_Lf& OutMetaData)
+{
+	if (auto Runtime = GlobalLibrary.RuntimeSkinnedMeshes.Find(MeshID))
+	{
+		if (int32* Idx = Runtime->AnimSeqToMetaData.Find(AnimSeq))
+		{
+			OutMetaData = Runtime->AnimationMetaData[*Idx];
+			return true;
+		}
+	}
+	return false;
 }
 
 bool ATurboSequence_Manager_Lf::SetTransitionTsMeshToUEMesh_Concurrent(const int32 TsMeshID,

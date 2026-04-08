@@ -90,12 +90,12 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			Item.Materials = ConvertedMaterial;
 			RenderComponents[FromAsset].Renderer.Add(MaterialsHash, Item);
 		}
-		
+
 		// Set Nanite State
 		RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
-						*RenderData.GetUseNaniteName(), FromAsset->bUseNanite);
+			*RenderData.GetUseNaniteName(), FromAsset->bUseNanite);
 		RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableBool(
-						*FTurboSequence_Helper_Lf::NameNotUseNanite, !FromAsset->bUseNanite);
+			*FTurboSequence_Helper_Lf::NameNotUseNanite, !FromAsset->bUseNanite);
 
 
 		// Add the mesh to the component we just created
@@ -118,7 +118,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 					}
 					RenderComponents[FromAsset].Renderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
 						*WantedMeshName, LodElement.Mesh);
-					
+
 					// if (!bNaniteMeshSet)
 					// {
 					// 	RenderComponents[FromAsset].NiagaraRenderer[MaterialsHash].NiagaraRenderer->SetVariableStaticMesh(
@@ -173,7 +173,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				{
 					if (FromAsset->RenderMode == ETurboSequence_RenderMode_Lf::InstancedStaticMeshComponent)
 					{
-						UE_LOG(LogTurboSequence_Lf, Error, TEXT("Render mode InstancedStaticMeshComponent is not supported without Nanite ... please use Nanite, or switch to Render Mode NiagaraParticles in the mesh asset, Effected Asset is ->  %s"), *FromAsset->GetPathName())
+						UE_LOG(LogTurboSequence_Lf, Error,
+						       TEXT(
+							       "Render mode InstancedStaticMeshComponent is not supported without Nanite ... please use Nanite, or switch to Render Mode NiagaraParticles in the mesh asset, Effected Asset is ->  %s"
+						       ), *FromAsset->GetPathName())
 					}
 				}
 			}
@@ -184,7 +187,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				{
 					// Color Nanite
 					//DataMode = 3.0f;
-					UE_LOG(LogTurboSequence_Lf, Error, TEXT("Vertex Color mode is not supported with Nanite Rendering ... please use the UV Mode, Effected Asset is ->  %s"), *FromAsset->GetPathName())
+					UE_LOG(LogTurboSequence_Lf, Error,
+					       TEXT(
+						       "Vertex Color mode is not supported with Nanite Rendering ... please use the UV Mode, Effected Asset is ->  %s"
+					       ), *FromAsset->GetPathName())
 				}
 			}
 			MaterialInstance->SetScalarParameterValue(
@@ -224,14 +230,13 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			}
 		}
 
-		return MaterialsHash;	
+		return MaterialsHash;
 	}
 	else
 	{
-
 		UInstancedStaticMeshComponent* Renderer = Cast<UInstancedStaticMeshComponent>(
 			WorldActor->AddComponentByClass(UInstancedStaticMeshComponent::StaticClass(), false, FTransform::Identity,
-											false));
+			                                false));
 		Renderer->RegisterComponent();
 		Renderer->SetupAttachment(InstanceSceneComponent);
 		WorldActor->AddInstanceComponent(Renderer);
@@ -250,7 +255,8 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			Renderer->SetHasPerInstancePrevTransforms(false);
 			Renderer->SetWorldTransform(FTransform::Identity);
 			// Renderer->SetStaticMesh(MeshData->GetStaticMesh());
-			Renderer->NumCustomDataFloats = FTurboSequence_Helper_Lf::NumInstanceCustomData; // Change it but keep in mind TS Needs the first 4
+			Renderer->NumCustomDataFloats = FTurboSequence_Helper_Lf::NumInstanceCustomData;
+			// Change it but keep in mind TS Needs the first 4
 			Renderer->SetVisibleInRayTracing(true);
 		}
 
@@ -285,7 +291,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 		for (const TTuple<uint8, FSkinnedMeshReferenceLodElement_Lf>& Lod : LevelOfDetails)
 		{
 			const FSkinnedMeshReferenceLodElement_Lf& LodElement = Lod.Value;
-			
+
 			if (LodElement.bIsRenderStateValid)
 			{
 				if (LodElement.GPUMeshIndex < FTurboSequence_Helper_Lf::NotVisibleMeshIndex)
@@ -298,7 +304,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				}
 			}
 		}
-		
+
 		// Set the Materials
 		int32 NumMaterials = Materials.Num();
 		for (int32 MaterialIdx = GET0_NUMBER; MaterialIdx < NumMaterials; ++MaterialIdx)
@@ -332,13 +338,15 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 					{
 						DataMode = 1.0f;
 					}
-					
 				}
 				else
 				{
 					if (FromAsset->RenderMode == ETurboSequence_RenderMode_Lf::InstancedStaticMeshComponent)
 					{
-						UE_LOG(LogTurboSequence_Lf, Error, TEXT("Render mode InstancedStaticMeshComponent is not supported without Nanite ... please use Nanite, or switch to Render Mode NiagaraParticles in the mesh asset, Effected Asset is ->  %s"), *FromAsset->GetPathName())
+						UE_LOG(LogTurboSequence_Lf, Error,
+						       TEXT(
+							       "Render mode InstancedStaticMeshComponent is not supported without Nanite ... please use Nanite, or switch to Render Mode NiagaraParticles in the mesh asset, Effected Asset is ->  %s"
+						       ), *FromAsset->GetPathName())
 					}
 				}
 			}
@@ -349,7 +357,10 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				{
 					// Color Nanite
 					//DataMode = 3.0f;
-					UE_LOG(LogTurboSequence_Lf, Error, TEXT("Vertex Color mode is not supported with Nanite Rendering ... please use the UV Mode, Effected Asset is ->  %s"), *FromAsset->GetPathName())
+					UE_LOG(LogTurboSequence_Lf, Error,
+					       TEXT(
+						       "Vertex Color mode is not supported with Nanite Rendering ... please use the UV Mode, Effected Asset is ->  %s"
+					       ), *FromAsset->GetPathName())
 				}
 			}
 			MaterialInstance->SetScalarParameterValue(
@@ -368,7 +379,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 				MaterialInstance;
 		}
 
-		return MaterialsHash;	
+		return MaterialsHash;
 	}
 }
 
@@ -752,7 +763,7 @@ void FTurboSequence_Utility_Lf::CreateLevelOfDetails(FSkinnedMeshReference_Lf& R
 				if (FromAsset->bUseNanite)
 				{
 					NumVerticesInstancedMesh = FromAsset->InstancedMeshes[i].StaticMesh->GetNumNaniteVertices();
-					
+
 					MeshData.NumNaniteVertices = NumVerticesInstancedMesh;
 				}
 				else
@@ -1227,9 +1238,10 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 	});
 
 	const int32 Slice = FMath::Max(FMath::Min(
-		FMath::CeilToInt(
-			static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.SettingsInput.Num()) /
-			static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023), 1);
+		                               FMath::CeilToInt(
+			                               static_cast<float>(FromAsset->GlobalData->CachedMeshDataCreationSettingsParams.
+			                                                             SettingsInput.Num()) /
+			                               static_cast<float>(GET128_NUMBER * GET128_NUMBER)), 1023), 1);
 
 	FromAsset->GlobalData->SkinWeightTexture->Init(GET128_NUMBER, GET128_NUMBER, Slice, PF_FloatRGBA);
 	FromAsset->GlobalData->SkinWeightTexture->UpdateResourceImmediate(true);
@@ -1617,7 +1629,7 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Internal(FSkinnedMeshRef
                                                                  const FSkinnedMeshRuntime_Lf& Runtime,
                                                                  const TArray<FCameraView_Lf>& PlayerViews,
                                                                  TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
-																	FRenderingMaterialMap_Lf>& RenderComponents)
+                                                                      FRenderingMaterialMap_Lf>& RenderComponents)
 {
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
 
@@ -1639,7 +1651,7 @@ void FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent(FSkinnedMeshR
                                                                    const FTransform& WorldSpaceTransform,
                                                                    const bool bForce,
                                                                    TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
-																	FRenderingMaterialMap_Lf>& RenderComponents)
+                                                                        FRenderingMaterialMap_Lf>& RenderComponents)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateInstanceTransform_Concurrent);
 	if (bForce || Runtime.EIsVisibleOverride !=
@@ -1677,7 +1689,7 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
                                                   const FSkinnedMeshRuntime_Lf& Runtime,
                                                   FCriticalSection& CriticalSection,
                                                   TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
-													FRenderingMaterialMap_Lf>& RenderComponents,
+                                                       FRenderingMaterialMap_Lf>& RenderComponents,
                                                   const FTransform& WorldSpaceTransform)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::AddRenderInstance);
@@ -1705,13 +1717,14 @@ void FTurboSequence_Utility_Lf::AddRenderInstance(FSkinnedMeshReference_Lf& Refe
 
 	//RenderData.IncrementUniqueID(); // Use the same ID as Niagara
 	//RenderData.ParticlesToRemove.Add(false);
-	
+
 	if (IsValid(RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer))
 	{
 		TArray<float> CustomData;
 		CustomData.SetNum(FTurboSequence_Helper_Lf::NumInstanceCustomData);
 		RenderData.ParticleCustomDataIsm.Add(CustomData);
-		RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer->AddInstance(WorldSpaceTransform, true);
+		RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer->AddInstance(
+			WorldSpaceTransform, true);
 	}
 
 
@@ -1743,17 +1756,17 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
                                                      FCriticalSection& CriticalSection,
                                                      FSkinnedMeshGlobalLibrary_Lf& Library,
                                                      TMap<TObjectPtr<UTurboSequence_MeshAsset_Lf>,
-														FRenderingMaterialMap_Lf>& RenderComponents)
+                                                          FRenderingMaterialMap_Lf>& RenderComponents)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::RemoveRenderInstance);
 	FScopeLock Lock(&CriticalSection);
 
 	FRenderData_Lf& RenderData = Reference.RenderData[Runtime.MaterialsHash];
-	
+
 	Library.BlackListedMeshIDs.Add(Runtime.GetMeshID(), false);
 
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
-	
+
 	if (IsValid(RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer))
 	{
 		RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer->RemoveInstance(InstanceIndex);
@@ -2495,7 +2508,8 @@ void FTurboSequence_Utility_Lf::AddAnimation(FSkinnedMeshRuntime_Lf& Runtime, co
 		{
 			Runtime.AnimationGroups[Animation.AnimationGroupLayerHash].NumAnimationsInGroup++;
 		}
-		Runtime.AnimationMetaData.Add(Animation);
+		int32 MetaDataIdx = Runtime.AnimationMetaData.Add(Animation);
+		Runtime.AnimSeqToMetaData.Add(Animation.Animation, MetaDataIdx);
 		Runtime.AnimationMetaData_RenderThread.Add(Animation_RenderThread);
 		Runtime.AnimationIDs.Add(Animation.AnimationID, GET0_NUMBER);
 
@@ -2565,6 +2579,14 @@ void FTurboSequence_Utility_Lf::RemoveAnimation(FSkinnedMeshRuntime_Lf& Runtime,
 		if (Runtime.AnimationIDs.Contains(AnimationID))
 		{
 			Runtime.AnimationIDs.Remove(AnimationID);
+		}
+		Runtime.AnimSeqToMetaData.Remove(Animation.Animation);
+		for (auto& [AnimSeq, Idx] : Runtime.AnimSeqToMetaData)
+		{
+			if (Idx > Index)
+			{
+				Idx--;
+			}
 		}
 		Runtime.AnimationMetaData.RemoveAt(Index);
 		Runtime.AnimationMetaData_RenderThread.RemoveAt(Index);
@@ -3330,11 +3352,11 @@ void FTurboSequence_Utility_Lf::ExtractRootMotionFromAnimations(FTransform& OutA
 				ETurboSequence_RootMotionMode_Lf::Force || (Mode ==
 					ETurboSequence_RootMotionMode_Lf::OnRootBoneAnimated && Animation.bIsRootBoneAnimation)))
 		{
-		        FAnimExtractContext AnimExtract = FAnimExtractContext ( (double)Animation.AnimationTime,
-                                                                                true,
-                                                                                FDeltaTimeRecord(DeltaTime),
-                                                                                Animation.bIsLoop );
-                                              
+			FAnimExtractContext AnimExtract = FAnimExtractContext(static_cast<double>(Animation.AnimationTime),
+			                                                      true,
+			                                                      FDeltaTimeRecord(DeltaTime),
+			                                                      Animation.bIsLoop);
+
 			FTransform RootMotion_Transform = Animation.Animation->ExtractRootMotion(AnimExtract);
 
 			float Scalar = Animation.FinalAnimationWeight * Animation.Settings.AnimationSpeed;

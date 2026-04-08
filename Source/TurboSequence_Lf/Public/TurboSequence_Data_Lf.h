@@ -55,7 +55,8 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 {
 	GENERATED_BODY()
 
-	explicit FRenderData_Lf(const FString& EmitterName, const FString& ParticleIDName, const FString& PositionName, const FString& RotationName,
+	explicit FRenderData_Lf(const FString& EmitterName, const FString& ParticleIDName, const FString& PositionName,
+	                        const FString& RotationName,
 	                        const FString& ScaleName, const FString& MeshName, const FString& MaterialsName,
 	                        const FString& LodName, const FString& CustomDataName, const FString& ParticleRemoveName,
 	                        const FString& UseNaniteName)
@@ -120,7 +121,6 @@ struct TURBOSEQUENCE_LF_API FRenderData_Lf
 	bool bChangedScaleCollectionThisFrame = false;
 	bool bChangedLodCollectionThisFrame = false;
 	bool bChangedCustomDataCollectionThisFrame = false;
-
 
 private:
 	FString EmitterName;
@@ -197,6 +197,7 @@ public:
 	{
 		return ParticleRemoveName;
 	}
+
 	FORCEINLINE FString& GetUseNaniteName()
 	{
 		return UseNaniteName;
@@ -410,7 +411,7 @@ struct TURBOSEQUENCE_LF_API FRenderingMaterialItem_Lf
 
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UNiagaraComponent> NiagaraRenderer;
-	
+
 	UPROPERTY(VisibleAnywhere, Category="TurboSequence")
 	TObjectPtr<UInstancedStaticMeshComponent> IsmRenderer;
 
@@ -625,7 +626,8 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	                                const TObjectPtr<UTurboSequence_MeshAsset_Lf> Asset,
 	                                const int32 OverrideMeshID = INDEX_NONE)
 	{
-		if (OverrideMeshID > INDEX_NONE && !InputCollection.Contains(OverrideMeshID) && !BlacklistedMeshIDs.Contains(OverrideMeshID))
+		if (OverrideMeshID > INDEX_NONE && !InputCollection.Contains(OverrideMeshID) && !BlacklistedMeshIDs.Contains(
+			OverrideMeshID))
 		{
 			MeshID = OverrideMeshID;
 		}
@@ -633,7 +635,8 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 		{
 			MeshID = FMath::RandRange(0, INT32_MAX - 1);
 			MeshID++;
-			while ((InputCollection.Contains(MeshID) || BlacklistedMeshIDs.Contains(MeshID)) || ((!InputCollection.Contains(MeshID) && !BlacklistedMeshIDs.Contains(MeshID)) && MeshID < GET0_NUMBER))
+			while ((InputCollection.Contains(MeshID) || BlacklistedMeshIDs.Contains(MeshID)) || ((!InputCollection.
+				Contains(MeshID) && !BlacklistedMeshIDs.Contains(MeshID)) && MeshID < GET0_NUMBER))
 			{
 				MeshID = FMath::RandRange(0, INT32_MAX - 1);
 				MeshID++;
@@ -664,6 +667,7 @@ struct TURBOSEQUENCE_LF_API FSkinnedMeshRuntime_Lf : public FSkinnedMeshRuntime_
 	FTransform WorldSpaceTransform = FTransform::Identity;
 
 	TArray<FAnimationMetaData_Lf> AnimationMetaData;
+	TMap<TObjectPtr<UAnimSequence>, int32> AnimSeqToMetaData;
 	// < Animation ID | Animation Index >
 	TMap<uint32, int32> AnimationIDs;
 
