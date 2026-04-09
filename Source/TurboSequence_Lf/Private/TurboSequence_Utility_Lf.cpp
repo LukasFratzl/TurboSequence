@@ -1882,6 +1882,11 @@ void FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail(FSkinnedMeshRuntim
                                                               FSkinnedMeshGlobalLibrary_Lf& Library)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FTurboSequence_Utility_Lf::UpdateCullingAndLevelOfDetail);
+	if (Reference.DataAsset->bUseNanite)
+	{
+		Runtime.LodIndex = GET0_NUMBER;
+		return;
+	}
 	float ClosestCameraDistance = GET_INFINITY;
 	const FVector& ComponentLocation = Runtime.WorldSpaceTransform.GetLocation();
 	for (const FCameraView_Lf& CameraView : CameraViews)

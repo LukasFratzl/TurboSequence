@@ -629,36 +629,34 @@ bool ATurboSequence_Manager_Lf::RemoveSkinnedMeshInstance_GameThread(int32 MeshI
 	{
 		FTurboSequence_Utility_Lf::CleanVisualRenderer(Instance->RenderComponents, Reference, Runtime);
 	}
+	
+	const int32 GlobalIndex = GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()];
 	GlobalLibrary.RuntimeSkinnedMeshes.Remove(Runtime.GetMeshID());
-	GlobalLibrary.RuntimeSkinnedMeshesHashMap.Remove(Runtime.GetMeshID());
+
+	int32 SwappedMeshID = GlobalLibrary.RuntimeSkinnedMeshesHashMap.Last();
+	GlobalLibrary.RuntimeSkinnedMeshesHashMap.RemoveAtSwap(GlobalIndex);
+
+	GlobalLibrary.MeshIDToGlobalIndex.Remove(Runtime.GetMeshID());
 	GlobalLibrary.MeshIDToMinimalData.Remove(Runtime.GetMeshID());
 
-	const int32 GlobalIndex = GlobalLibrary.MeshIDToGlobalIndex[Runtime.GetMeshID()];
-	GlobalLibrary.MeshIDToGlobalIndex.Remove(Runtime.GetMeshID());
-	for (TTuple<int32, int32>& Index : GlobalLibrary.MeshIDToGlobalIndex)
-	{
-		if (Index.Value > GlobalIndex)
-		{
-			Index.Value--;
-		}
-	}
+	// No update needed if we are removing the last one
+	if (SwappedMeshID != Runtime.GetMeshID())
+		GlobalLibrary.MeshIDToGlobalIndex[SwappedMeshID] = GlobalIndex;
 
 	const int32 MeshID_RenderThread = Runtime.GetMeshID();
 	ENQUEUE_RENDER_COMMAND(TurboSequence_RemoveRenderInstance_Lf)(
 		[&Library_RenderThread, MeshID_RenderThread](FRHICommandListImmediate& RHICmdList)
 		{
 			const int32 GlobalIndex = Library_RenderThread.MeshIDToGlobalIndex[MeshID_RenderThread];
-			Library_RenderThread.MeshIDToGlobalIndex.Remove(MeshID_RenderThread);
-			for (TTuple<int32, int32>& Index : Library_RenderThread.MeshIDToGlobalIndex)
-			{
-				if (Index.Value > GlobalIndex)
-				{
-					Index.Value--;
-				}
-			}
 
 			Library_RenderThread.RuntimeSkinnedMeshes.Remove(MeshID_RenderThread);
-			Library_RenderThread.RuntimeSkinnedMeshesHashMap.Remove(MeshID_RenderThread);
+			int32 SwappedMeshID = Library_RenderThread.RuntimeSkinnedMeshesHashMap.Last();
+			Library_RenderThread.RuntimeSkinnedMeshesHashMap.RemoveAtSwap(GlobalIndex);
+
+			Library_RenderThread.MeshIDToGlobalIndex.Remove(MeshID_RenderThread);
+			// No update needed if we are removing the last one
+			if (SwappedMeshID != MeshID_RenderThread)
+				Library_RenderThread.MeshIDToGlobalIndex[SwappedMeshID] = GlobalIndex;
 		});
 
 
