@@ -1754,29 +1754,37 @@ void FTurboSequence_Utility_Lf::RemoveRenderInstance(FSkinnedMeshReference_Lf& R
 
 	const int32 InstanceIndex = RenderData.InstanceMap[Runtime.GetMeshID()];
 	
+	
 	if (IsValid(RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer))
 	{
 		RenderComponents[Runtime.DataAsset].Renderer[Runtime.MaterialsHash].IsmRenderer->RemoveInstance(InstanceIndex);
-		RenderData.ParticleCustomDataIsm.RemoveAt(InstanceIndex);
+		RenderData.ParticleCustomDataIsm.RemoveAtSwap(InstanceIndex);
 	}
 
+	int32 SwappedIdx = RenderData.ParticlePositions.Num() - 1;
+	RenderData.ParticlePositions.RemoveAtSwap(InstanceIndex);
+	RenderData.ParticleRotations.RemoveAtSwap(InstanceIndex);
+	RenderData.ParticleScales.RemoveAtSwap(InstanceIndex);
+	RenderData.ParticleLevelOfDetails.RemoveAtSwap(InstanceIndex);
+	
 	RenderData.InstanceMap.Remove(Runtime.GetMeshID());
-	for (TTuple<int32, int32>& Item : RenderData.InstanceMap)
+	// No need to swap if we removed the last idx
+	if (InstanceIndex != SwappedIdx)
 	{
-		if (Item.Value > InstanceIndex)
+		for (TTuple<int32, int32>& Item : RenderData.InstanceMap)
 		{
-			Item.Value--;
+			if (Item.Value == SwappedIdx)
+			{
+				Item.Value = InstanceIndex;
+				break;
+			}
 		}
 	}
-	RenderData.ParticlePositions.RemoveAt(InstanceIndex);
-	RenderData.ParticleRotations.RemoveAt(InstanceIndex);
-	RenderData.ParticleScales.RemoveAt(InstanceIndex);
-	RenderData.ParticleLevelOfDetails.RemoveAt(InstanceIndex);
 
 	for (int16 i = FTurboSequence_Helper_Lf::NumInstanceCustomData - GET1_NUMBER; i >= GET0_NUMBER; --i)
 	{
 		int32 CustomDataIndex = InstanceIndex * FTurboSequence_Helper_Lf::NumInstanceCustomData + i;
-		RenderData.ParticleCustomData.RemoveAt(CustomDataIndex);
+		RenderData.ParticleCustomData.RemoveAtSwap(CustomDataIndex);
 	}
 
 	RenderData.bChangedCollectionSizeThisFrame = true;
