@@ -252,6 +252,7 @@ uint32 FTurboSequence_Utility_Lf::CreateRenderer(FSkinnedMeshReference_Lf& Refer
 			// Renderer->SetStaticMesh(MeshData->GetStaticMesh());
 			Renderer->NumCustomDataFloats = FTurboSequence_Helper_Lf::NumInstanceCustomData; // Change it but keep in mind TS Needs the first 4
 			Renderer->SetVisibleInRayTracing(true);
+			Renderer->SetRemoveSwap();
 		}
 
 		TArray<FRenderingMaterialKeyValue_Lf> ConvertedMaterial;
