@@ -1247,7 +1247,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 			return;
 		}
 
-		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !FromAsset->GlobalData->
+		if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming() && !FromAsset->GlobalData->
 			SkinWeightTexture->HasPendingRenderResourceInitialization())
 		{
 			bool bValidPixels = true;
@@ -1278,7 +1278,7 @@ void FTurboSequence_Utility_Lf::CreateRawSkinWeightTextureBuffer(
 									return;
 								}
 
-								if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming(true) && !
+								if (!FromAsset->GlobalData->SkinWeightTexture->HasPendingInitOrStreaming() && !
 									FromAsset->GlobalData->SkinWeightTexture->HasPendingRenderResourceInitialization())
 								{
 									FromAsset->GlobalData->CachedMeshDataCreationSettingsParams =

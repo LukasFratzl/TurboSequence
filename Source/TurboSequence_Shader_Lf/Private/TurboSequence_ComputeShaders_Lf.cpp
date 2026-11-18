@@ -24,9 +24,9 @@ void FMeshUnit_Compute_Shader_Execute_Lf::DispatchRenderThread(
 	TFunction<void(TArray<float>& DebugValues)> AsyncCallback
 )
 {
-	SCOPED_DRAW_EVENT(RHICmdList, TurboSequence_Animation_ComputeShader);
-	SCOPED_GPU_STAT(RHICmdList, TurboSequence_Animation_ComputeShader);
 	{
+		RHI_BREADCRUMB_EVENT_STAT(RHICmdList, TurboSequence_Animation_ComputeShader, "TurboSequence GPU Unit CS");
+		
 		PreCall(RHICmdList);
 
 		if (!Params.NumMeshes)
